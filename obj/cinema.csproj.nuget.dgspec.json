@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/janwillem/School/HBO/Semester 2/cinema/cinema.csproj": {}
+    "C:\\School\\Project B\\cinema\\cinema.csproj": {}
   },
   "projects": {
-    "/Users/janwillem/School/HBO/Semester 2/cinema/cinema.csproj": {
+    "C:\\School\\Project B\\cinema\\cinema.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/janwillem/School/HBO/Semester 2/cinema/cinema.csproj",
+        "projectUniqueName": "C:\\School\\Project B\\cinema\\cinema.csproj",
         "projectName": "cinema",
-        "projectPath": "/Users/janwillem/School/HBO/Semester 2/cinema/cinema.csproj",
-        "packagesPath": "/Users/janwillem/.nuget/packages/",
-        "outputPath": "/Users/janwillem/School/HBO/Semester 2/cinema/obj/",
+        "projectPath": "C:\\School\\Project B\\cinema\\cinema.csproj",
+        "packagesPath": "C:\\Users\\janwi\\.nuget\\packages\\",
+        "outputPath": "C:\\School\\Project B\\cinema\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/janwillem/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\janwi\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
@@ -53,7 +53,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.405/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.405\\RuntimeIdentifierGraph.json"
         }
       }
     }
