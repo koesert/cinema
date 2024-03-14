@@ -1,0 +1,83 @@
+[
+  {
+      "Title": "Crip Camp",
+      "Description": "Down the road from Woodstock, a revolution blossomed at a ramshackle summer camp for teenagers with disabilities, transforming their lives and igniting a landmark movement.",
+      "Duration": 106,
+      "Year": 2020,
+      "Genres": ["documentary"],
+      "Cast": [
+          "Larry Allison",
+          "Dennis Billups",
+          "William Bronston",
+          "George Bush",
+          "Joseph A. Califano",
+          "Jimmy Carter",
+          "Kitty Cone",
+          "Ann Cupolo Freeman",
+          "Nanci D'Angelo",
+          "HolLynn D'Lil",
+          "Judith Heumann",
+          "Steve Hofmann",
+          "Denise Sherer Jacobson",
+          "Neil Jacobson",
+          "Lionel Je'Woodyard",
+          "Ted Kennedy",
+          "Sheldon Koy",
+          "James Lebrecht",
+          "Al Levy",
+          "George Moscone",
+          "Richard Nixon",
+          "Joseph O'Conor",
+          "Corbett O'Toole",
+          "Ronald Reagan",
+          "Nancy Rosenblum",
+          "Evan White",
+          "Ed Bradley",
+          "John Chancellor"
+      ]
+  },
+  {
+      "Title": "Da 5 Bloods",
+      "Description": "Four African American vets battle the forces of man and nature when they return to Vietnam seeking the remains of their fallen squad leader and the gold fortune he helped them hide.",
+      "Duration": 154,
+      "Year": 2020,
+      "Genres": ["Adventure", "Drama", "War"],
+      "Cast": [
+          "Delroy Lindo",
+          "Jonathan Majors",
+          "Clarke Peters",
+          "Johnny Trí Nguyễn",
+          "Norm Lewis",
+          "Isiah Whitlock Jr.",
+          "Mélanie Thierry",
+          "Paul Walter Hauser",
+          "Jasper Pääkkönen",
+          "Jean Reno",
+          "Chadwick Boseman"
+      ]
+  },
+  {
+      "Title": "Tenet",
+      "Description": "Armed with only one word, Tenet, and fighting for the survival of the entire world, a Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.",
+      "Duration": 150,
+      "Year": 2020,
+      "Genres": ["action", "thriller", "sci-fi"],
+      "Cast": [
+          "John David Washington",
+          "Robert Pattinson",
+          "Elizabeth Debicki"
+      ]
+  },
+  {
+    "Title": "fdslkflsdjflsdjfosdjlkfdjsf",
+    "Description": "Armed with only one word, Tenet, and fighting for the survival of the entire world, a Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.",
+    "Duration": 150,
+    "Year": 2020,
+    "Genres": ["action", "thriller", "sci-fi"],
+    "Cast": [
+        "John David Washington",
+        "Robert Pattinson",
+        "Elizabeth Debicki"
+    ]
+}
+]
