@@ -9,21 +9,34 @@ public class DatabaseHelper
 
     public DatabaseHelper(string databasePath)
     {
-        _databasePath = databasePath;
 
+        // _databasePath = databasePath;
+        _databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, databasePath);
+
+        string dbFolderPath = Path.GetDirectoryName(_databasePath);
         // Controleer of het databasebestand bestaat
-        if (!Directory.Exists("../../../db"))
+        if (dbFolderPath != null)
         {
-            Directory.CreateDirectory("../../../db");
-        }
+            if (!Directory.Exists(dbFolderPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(dbFolderPath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating directory: {ex.Message}");
+                }
+            }
+            }
 
-        if (!File.Exists(databasePath))
-        {
-            SQLiteConnection.CreateFile(databasePath);
-        }
-
+            else
+            {
+                Console.WriteLine("Error: Database folder path is null.");
+            }
+                
         // Maak een nieuwe SQLite-verbinding met het opgegeven databasepad
-        _connection = new SQLiteConnection($"Data Source={databasePath}");
+        _connection = new SQLiteConnection($"Data Source={_databasePath}");
     }
 
     // Methode om de verbinding met de database te openen
