@@ -29,7 +29,7 @@ public class Login
         return regex.IsMatch(email); // Check if the email matches the pattern
     }
 
-    public static string GetPasswordFeedback(string password) // Static method to provide feedback on password strength
+    private static string GetPasswordFeedback(string password) // Static method to provide feedback on password strength
     {
         if (password.Length < 8) // Check if password length is less than 8 characters
         {
