@@ -7,6 +7,7 @@ public class PresentLogin
 
         while (userChoice.ToLower() != "quit") // Loop until user quits
         {
+            // Prompt user for action
             Console.WriteLine("Do you wish to login or continue as guest? '+' to create new superuser. 'quit' to quit.");
             userChoice = Console.ReadLine(); // Get user's choice
 
@@ -15,8 +16,9 @@ public class PresentLogin
                 bool validEmail = false; // Flag to indicate valid email
                 bool validPassword = false; // Flag to indicate valid password
 
-                while (!validEmail || !validPassword) // Loop until both email and password are valid
+                while (!validEmail) // Loop until both email and password are valid
                 {
+                    // Prompt user for email
                     Console.WriteLine("Enter your email:");
                     string email = Console.ReadLine() ?? ""; // Get email (null check for potential empty input)
 
@@ -24,37 +26,41 @@ public class PresentLogin
 
                     if (validEmail) // If email is valid
                     {
-                        Console.WriteLine("Enter your password:");
-                        string password = Console.ReadLine() ?? ""; // Get password (null check)
-
-                        validPassword = Login.IsValidPassword(password); // Validate password complexity
-
-                        if (validPassword) // If password is valid
+                        while (!validPassword)
                         {
-                            try // Try block for potential exceptions during login
-                            {
-                                loginSuccessful = Login.TryLogin(email, password);
+                            // Prompt user for password
+                            Console.WriteLine("Enter your password:");
+                            string password = Console.ReadLine() ?? ""; // Get password (null check)
 
-                                if (loginSuccessful) // Login successful
+                            validPassword = Login.IsValidPassword(password); // Validate password complexity
+                            if (!validPassword) // If password is valid
+                            {
+                                try // Try block for potential exceptions during login
                                 {
-                                    Console.WriteLine("Login successful!");
-                                    // PresentMovies.Start(); // Call to present movies (implementation not shown)
-                                    break; // Exit the loop
+                                    loginSuccessful = Login.TryLogin(email, password);
+
+                                    if (loginSuccessful) // Login successful
+                                    {
+                                        Console.WriteLine("Login successful!");
+                                        // PresentMovies.Start(); // Call to present movies (implementation not shown)
+                                        break; // Exit the loop
+                                    }
+                                    else // Login failed
+                                    {
+                                        Console.WriteLine("Invalid email or password. Or your account does not exist.");
+                                    }
                                 }
-                                else // Login failed
+                                catch (Exception ex) // Catch general exceptions for login errors
                                 {
-                                    Console.WriteLine("Invalid email or password. Or your account does not exist.");
+                                    Console.WriteLine("Error during login: {0}", ex.Message);
                                 }
                             }
-                            catch (Exception ex) // Catch general exceptions for login errors
+                            else // Password invalid
                             {
-                                Console.WriteLine("Error during login: {0}", ex.Message);
+                                Console.WriteLine("Invalid password. Please check password complexity requirements.");
                             }
                         }
-                        else // Password invalid
-                        {
-                            Console.WriteLine("Invalid password. Please check password complexity requirements.");
-                        }
+                        
                     }
                     else // Email invalid
                     {
@@ -67,8 +73,9 @@ public class PresentLogin
                 bool validEmail = false;
                 bool validPassword = false;
 
-                while (!validEmail || !validPassword) // Loop until both email and password are valid
+                while (!validEmail) // Loop until both email and password are valid
                 {
+                    // Prompt user for email
                     Console.WriteLine("Enter your email:");
                     string email = Console.ReadLine() ?? ""; // Get email (null check)
 
@@ -76,26 +83,31 @@ public class PresentLogin
 
                     if (validEmail) // If email is valid
                     {
-                        Console.WriteLine("Enter your password:");
-                        string password = Console.ReadLine() ?? ""; // Get password (null check)
-
-                        validPassword = Login.IsValidPassword(password); // Validate password complexity
-
-                        if (validPassword) // If password is valid
+                        while(!validPassword)
                         {
-                            try // Try block for potential exceptions during superuser creation
+                            // Prompt user for password
+                            Console.WriteLine("Enter your password:");
+                            string password = Console.ReadLine() ?? ""; // Get password (null check)
+
+                            validPassword = Login.IsValidPassword(password); // Validate password complexity
+
+                            if (!validPassword) // If password is valid
                             {
-                                Superuser.CreateSuperuser(email, password); // Create superuser
-                                Console.WriteLine("Superuser created successfully!");
+                                try // Try block for potential exceptions during superuser creation
+                                {
+                                    Superuser.CreateSuperuser(email, password); // Create superuser
+                                    Console.WriteLine("Superuser created successfully!");
+                                    break;
+                                }
+                                catch (Exception ex) // Catch general exceptions for superuser creation errors
+                                {
+                                    Console.WriteLine("Error creating superuser: {0}", ex.Message);
+                                }
                             }
-                            catch (Exception ex) // Catch general exceptions for superuser creation errors
+                            else // Password invalid
                             {
-                                Console.WriteLine("Error creating superuser: {0}", ex.Message);
+                                Console.WriteLine("Invalid password. Please check password complexity requirements.");
                             }
-                        }
-                        else // Password invalid
-                        {
-                            Console.WriteLine("Invalid password. Please check password complexity requirements.");
                         }
                     }
                     else // Email invalid
