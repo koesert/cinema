@@ -1,0 +1,35 @@
+[
+    {
+      "Title": "Inception 2: The Dream Continues",
+      "Description": "In this highly anticipated sequel, Cobb returns to the dream world for one last job, but this time the stakes are higher and the dreams are more dangerous.",
+      "Duration": 160,
+      "Year": 2022,
+      "Genres": ["Science Fiction", "Thriller", "Action"],
+      "Cast": ["Leonardo DiCaprio", "Ellen Page", "Joseph Gordon-Levitt", "Tom Hardy", "Marion Cotillard"]
+    },
+    {
+      "Title": "The Last Samurai: Resurgence",
+      "Description": "Set in modern-day Japan, a disgraced former samurai is forced to confront his past when he is recruited to train a group of young warriors to defend their village against a ruthless warlord.",
+      "Duration": 142,
+      "Year": 2023,
+      "Genres": ["Action", "Drama", "Historical"],
+      "Cast": ["Tom Cruise", "Ken Watanabe", "Keanu Reeves", "Rinko Kikuchi", "Tadanobu Asano"]
+    },
+    {
+      "Title": "Space Odyssey: Beyond the Stars",
+      "Description": "A team of astronauts embarks on a perilous journey to explore a distant galaxy, but they soon discover that they are not alone and must fight for survival against extraterrestrial threats.",
+      "Duration": 175,
+      "Year": 2024,
+      "Genres": ["Science Fiction", "Adventure", "Thriller"],
+      "Cast": ["Chris Pratt", "Zoe Saldana", "Oscar Isaac", "Tessa Thompson", "Michael B. Jordan"]
+    },
+    {
+      "Title": "The Chronicles of Atlantis: Rise of the Lost Kingdom",
+      "Description": "When an ancient artifact resurfaces, a young archaeologist must unravel the mysteries of Atlantis and prevent its secrets from falling into the wrong hands before it's too late.",
+      "Duration": 130,
+      "Year": 2025,
+      "Genres": ["Fantasy", "Adventure", "Mystery"],
+      "Cast": ["Emma Watson", "Harry Styles", "Millie Bobby Brown", "Tom Holland", "Liam Neeson"]
+    }
+  ]
+  

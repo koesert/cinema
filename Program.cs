@@ -5,16 +5,10 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Maak een nieuwe instantie van de DatabaseHelper klasse
-        DatabaseHelper databaseHelper = new DatabaseHelper("../../../db/cinema.db");
-
-        // Open de verbinding met de database
-        databaseHelper.OpenConnection();
-
-        // maakt tables
-        databaseHelper.CreateTables();
-
-        // Sluit de verbinding met de database
-        databaseHelper.CloseConnection();
+        // Create a new instance of the DatabaseHelper class
+        DatabaseHelper databaseHelper = new DatabaseHelper();
+        
+        // Initialize database with tables and movies from specified folder
+        databaseHelper.InitializeDatabase();
     }
 }
