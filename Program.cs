@@ -5,7 +5,7 @@ using Sharprompt;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Create a new instance of the DatabaseHelper class
         DatabaseHelper databaseHelper = new DatabaseHelper();

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 public class Login
@@ -68,5 +69,24 @@ public class Login
     {
         string feedback = GetPasswordFeedback(password); // Get feedback on password strength
         return feedback == "Strong password"; // Password is valid if feedback indicates strong password
+    }
+
+    public static bool CheckSuperuserCredentials(string email, string password)
+    {
+        List<Superuser> superusers = Superuser.Superusers;
+
+        foreach (Superuser superuser in superusers)
+        {
+            if (superuser.Email == email && superuser.Password == password)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 }
