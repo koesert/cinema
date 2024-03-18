@@ -5,9 +5,9 @@ public class PresentOptions
         string userInput = "";
         while (userInput.ToLower() != "quit")
         {
-            Console.WriteLine("\nWelcome to the Admin options. Make your choice. 'quit' to quit.");
+            Console.WriteLine("\nWelcome to the Admin options. Make your choice. 'back' to go back.");
             Console.WriteLine("1. Manage Vouchers");
-            Console.WriteLine("2. Manage Mailing list");
+            Console.WriteLine("2. View Mailing list");
             Console.WriteLine("3. View Statistics");
 
             userInput = Console.ReadLine() ?? "";
@@ -27,9 +27,8 @@ public class PresentOptions
                 Console.WriteLine("This feature has not been made yet.");
                 break;
             }
-            else if (userInput == "quit")
+            else if (userInput == "back")
             {
-                Console.WriteLine("Sad to see you go, have a nice day!");
                 break;
             }
             else
