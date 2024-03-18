@@ -9,8 +9,8 @@ class Program
     {
         // Create a new instance of the DatabaseHelper class
         DatabaseHelper databaseHelper = new DatabaseHelper();
-
-        // Initialize database with tables and movies from specified folder
+        PresentLogin admin = new PresentLogin();
+        // Initialize database with tables and movies from specified folde
         databaseHelper.InitializeDatabase();
 
         ChoiceMethods choiceMethods = new ChoiceMethods();
@@ -26,6 +26,9 @@ class Program
             {
                 case Choice.ListMovies:
                     choiceMethods.ListMovies();
+                    break;
+                case Choice.Login:
+                    PresentLogin.Start();
                     break;
                 default:
                     break;
