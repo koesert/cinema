@@ -32,7 +32,8 @@ public class Login
     public static bool IsValidEmail(string email)
     {
         // Regex pattern for email format
-        string pattern = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}))$";
+        string pattern =
+            @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}))$";
         Regex regex = new Regex(pattern); // Create a Regex object with the pattern
         return regex.IsMatch(email); // Check if the email matches the pattern
     }
@@ -52,7 +53,8 @@ public class Login
         string feedback = ""; // Initialize empty string for feedback
         if (!hasUpper || !hasLower || !hasDigit)
         {
-            feedback = "Password should include an uppercase letter, a lowercase letter, and a number.";
+            feedback =
+                "Password should include an uppercase letter, a lowercase letter, and a number.";
         }
         else
         {

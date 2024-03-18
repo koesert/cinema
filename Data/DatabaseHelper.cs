@@ -1,7 +1,7 @@
-using System.Data.SQLite;
-using Newtonsoft.Json;
 using System.Data;
+using System.Data.SQLite;
 using System.IO;
+using Newtonsoft.Json;
 
 public class DatabaseHelper
 {
@@ -11,9 +11,11 @@ public class DatabaseHelper
 
     public DatabaseHelper()
     {
-
         // _databasePath = databasePath;
-        _databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../db/cinema.db");
+        _databasePath = Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "../../../db/cinema.db"
+        );
 
         string dbFolderPath = Path.GetDirectoryName(_databasePath);
         // Check if the database file exists
@@ -38,7 +40,6 @@ public class DatabaseHelper
 
         // Create a new SQLite connection with the specified database path
         _connection = new SQLiteConnection($"Data Source={_databasePath}");
-
     }
 
     // Method to open the connection to the database
@@ -88,7 +89,8 @@ public class DatabaseHelper
     // Execute a SQL query to create tables
     public void CreateTables()
     {
-        string createTableQuery = @"
+        string createTableQuery =
+            @"
             CREATE TABLE IF NOT EXISTS Movies (
                 MovieId INTEGER PRIMARY KEY AUTOINCREMENT,
                 Title TEXT NOT NULL,
@@ -131,12 +133,15 @@ public class DatabaseHelper
         try
         {
             // Check if the movie already exists in the database based on title
-            DataTable existingMovie = ExecuteQuery($"SELECT * FROM Movies WHERE Title = '{movie.Title}'");
+            DataTable existingMovie = ExecuteQuery(
+                $"SELECT * FROM Movies WHERE Title = '{movie.Title}'"
+            );
 
             if (existingMovie.Rows.Count == 0)
             {
                 // Build the SQL INSERT statement
-                string insertQuery = @"
+                string insertQuery =
+                    @"
                 INSERT INTO Movies (Title, Description, Duration, Year, Genres, Cast)
                 VALUES (@Title, @Description, @Duration, @Year, @Genres, @Cast);";
 
@@ -174,7 +179,6 @@ public class DatabaseHelper
 
     // Method to add movies from JSON files in the movie folder
     public void AddMoviesFromFolder()
-        
     {
         try
         {
@@ -192,6 +196,7 @@ public class DatabaseHelper
             Console.WriteLine($"Error adding movies from folder: {ex.Message}");
         }
     }
+
     public void InitializeDatabase()
     {
         try
@@ -205,7 +210,7 @@ public class DatabaseHelper
             // Add movies from the specified folder
             AddMoviesFromFolder();
 
-            Console.WriteLine("Database initialized successfully.");
+            // Console.WriteLine("Database initialized successfully.");
         }
         catch (Exception ex)
         {
