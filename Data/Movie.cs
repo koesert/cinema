@@ -8,6 +8,8 @@ public class Movie
 
     public int Year { get; set; }
 
+    public List<string> Directors { get; set; }
+
     public List<string> Genres { get; set; }
 
     public List<string> Cast { get; set; }
