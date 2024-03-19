@@ -2,12 +2,12 @@ using Sharprompt;
 
 public class PresentReservation
 {
-    public static void PromptNewsletter(Customer customer)
+    // Add method Start() to confirm reservation and to prompt user for email to put in reservation and after, call PromptNewsletter
+    private static void PromptNewsletter(Customer customer)
     {
-        string userInput = "";
         while (true)
         {
-            userInput = Prompt.Select("Would you like to subscribe to our Newletter?", new[] { "Yes", "No" });
+            string userInput = Prompt.Select("Would you like to subscribe to our Newletter?", new[] { "Yes", "No" });
 
             if (userInput == "No")
             {
