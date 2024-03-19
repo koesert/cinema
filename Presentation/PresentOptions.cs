@@ -1,39 +1,30 @@
+using Sharprompt;
+
 public class PresentOptions
 {
     public static void Start()
     {
-        string userInput = "";
-        while (userInput.ToLower() != "quit")
+        ChoiceMethods choiceMethods = new ChoiceMethods();
+
+        AdminChoice currentChoice = AdminChoice.Exit;
+
+        while (currentChoice != AdminChoice.Exit)
         {
-            Console.WriteLine("\nWelcome to the Admin options. Make your choice. 'back' to go back.");
-            Console.WriteLine("1. Manage Vouchers");
-            Console.WriteLine("2. View Mailing list");
-            Console.WriteLine("3. View Statistics");
+            currentChoice = Prompt.Select<AdminChoice>("What would you like to do?");
 
-            userInput = Console.ReadLine() ?? "";
-
-            if (userInput == "1")
+            switch (currentChoice)
             {
-                Console.WriteLine("This feature has not been made yet.");
-                break;
-            }
-            else if (userInput == "2")
-            {
-                Console.WriteLine("This feature has not been made yet.");
-                break;
-            }
-            else if (userInput == "3")
-            {
-                Console.WriteLine("This feature has not been made yet.");
-                break;
-            }
-            else if (userInput == "back")
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Not a valid option. Try again.");
+                case AdminChoice.ManageVouchers:
+                    Console.WriteLine("This feature has not been made yet.");
+                    break;
+                case AdminChoice.MailingList:
+                    Console.WriteLine("This feature has not been made yet.");
+                    break;
+                case AdminChoice.Statistics:
+                    Console.WriteLine("This feature has not been made yet.");
+                    break;
+                case AdminChoice.Exit:
+                    return;
             }
         }
     }

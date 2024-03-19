@@ -10,7 +10,7 @@ class Program
         // Create a new instance of the DatabaseHelper class
         DatabaseHelper databaseHelper = new DatabaseHelper();
         PresentLogin admin = new PresentLogin();
-        // Initialize database with tables and movies from specified folde
+        // Initialize database with tables and movies from specified folder
         databaseHelper.InitializeDatabase();
 
         ChoiceMethods choiceMethods = new ChoiceMethods();
