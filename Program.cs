@@ -1,38 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Sharprompt;
-
-class Program
+﻿public class Program
 {
     static void Main()
     {
-        // Create a new instance of the DatabaseHelper class
-        DatabaseHelper databaseHelper = new DatabaseHelper();
-        PresentLogin admin = new PresentLogin();
-        // Initialize database with tables and movies from specified folder
-        databaseHelper.InitializeDatabase();
-
-        ChoiceMethods choiceMethods = new ChoiceMethods();
-        choiceMethods.GetMovies();
-
-        Choice currentChoice = Choice.Login;
-
-        while (currentChoice != Choice.Exit)
-        {
-            currentChoice = Prompt.Select<Choice>("What would you like to do?");
-
-            switch (currentChoice)
-            {
-                case Choice.ListMovies:
-                    choiceMethods.ListMovies();
-                    break;
-                case Choice.Login:
-                    PresentLogin.Start();
-                    break;
-                default:
-                    break;
-            }
-        }
+        Customer customer1 = new Customer("email@google.com");
+        Customer customer2 = new Customer("email@google.com");
+        PresentReservation.PromptNewsletter(customer1);
+        Console.WriteLine(customer1.ID);
     }
 }

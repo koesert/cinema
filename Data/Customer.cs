@@ -1,12 +1,12 @@
 public class Customer
 {
-    public static int CustomerId { get; set; }
+    public int ID;
     public string Email { get; set; }
     public bool IsSubscribed;
 
     public Customer(string email)
     {
-        CustomerId++;
+        ID++;
         Email = email;
         IsSubscribed = false;
     }
