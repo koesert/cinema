@@ -1,5 +1,7 @@
 public enum FilterOption
 {
   Genres,
-  Cast
+  Cast,
+
+  Directors
 }

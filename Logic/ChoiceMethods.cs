@@ -63,30 +63,40 @@ public static class ChoiceMethods
 
                 if (!selectedActors.Contains("All"))
                 {
-                    filteredMovies = movies.Where(movie => movie.Cast.Contains(selectedActor)).ToList();
+                    filteredMovies = movies.Where(movie => movie.Cast.Any(selectedActors.Contains)).ToList();
                 }
             }
+            else if (filterOption == FilterOption.Directors) // Corrected placement of this condition
+            {
+                var availableDirectors = new List<string> { "All" }.Concat(movies.SelectMany(movie => movie.Directors).Distinct()).ToList();
+                var selectedDirectors = Prompt.MultiSelect("Select directors to filter movies", availableDirectors);
+
+                if (!selectedDirectors.Contains("All"))
+                {
+                    filteredMovies = movies.Where(movie => movie.Directors.Any(selectedDirectors.Contains)).ToList();
+                }
+            }
+
+            List<string> filteredMovieTitles = filteredMovies.Select(movie => movie.Title).ToList();
+
+            if (filteredMovieTitles.Count == 0)
+            {
+                Console.WriteLine("No movies found based on the selected filters.");
+                return;
+            }
+
+            var selectedMovieTitle = Prompt.Select("Select a movie", filteredMovieTitles);
+            var selectedMovie = filteredMovies.Find(movie => movie.Title == selectedMovieTitle);
+
+            Console.WriteLine($"Title: {selectedMovie.Title}");
+            Console.WriteLine($"Description: {selectedMovie.Description}");
+            Console.WriteLine($"Duration: {selectedMovie.Duration} minutes");
+            Console.WriteLine($"Year: {selectedMovie.Year}");
+            Console.WriteLine($"Genres: {string.Join(", ", selectedMovie.Genres)}");
+            Console.WriteLine($"Cast: {string.Join(", ", selectedMovie.Cast)}");
+            Console.WriteLine($"Director(s): {string.Join(", ", selectedMovie.Directors)}");
+            Console.WriteLine($"Age: {(selectedMovie.IsRated16Plus ? "16+" : "G-rated")}");
         }
-
-        List<string> filteredMovieTitles = filteredMovies.Select(movie => movie.Title).ToList();
-
-        if (filteredMovieTitles.Count == 0)
-        {
-            Console.WriteLine("No movies found based on the selected filters.");
-            return;
-        }
-
-        var selectedMovieTitle = Prompt.Select("Select a movie", filteredMovieTitles);
-        var selectedMovie = filteredMovies.Find(movie => movie.Title == selectedMovieTitle);
-
-        Console.WriteLine($"Title: {selectedMovie.Title}");
-        Console.WriteLine($"Description: {selectedMovie.Description}");
-        Console.WriteLine($"Duration: {selectedMovie.Duration} minutes");
-        Console.WriteLine($"Year: {selectedMovie.Year}");
-        Console.WriteLine($"Genres: {string.Join(", ", selectedMovie.Genres)}");
-        Console.WriteLine($"Cast: {string.Join(", ", selectedMovie.Cast)}");
-        Console.WriteLine($"Director(s): {string.Join(", ", selectedMovie.Directors)}");
-        Console.WriteLine($"Age: {(selectedMovie.IsRated16Plus ? "16+" : "G-rated")}");
-
     }
+
 }
