@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using Sharprompt;
 
-public class ChoiceMethods
+public static class ChoiceMethods
 {
-    public List<Movie> GetMovies()
+    public static List<Movie> GetMovies()
     {
         DatabaseHelper databaseHelper = new DatabaseHelper();
         string query = "SELECT * FROM movies";
@@ -15,7 +15,6 @@ public class ChoiceMethods
         foreach (DataRow item in movieTables.Rows)
         {
             Movie movie = new Movie();
-            // movieTitles.Add(item["Title"].ToString());
             movie.Title = item["Title"].ToString();
             movie.Description = item["Description"].ToString();
             movie.Duration = Convert.ToInt32(item["Duration"]);
@@ -31,34 +30,34 @@ public class ChoiceMethods
         return allMovies;
     }
 
-    public void ListMovies()
+    public static void ListMovies()
     {
         var movies = GetMovies();
         var filteredMovies = movies;
 
-        // Prompt user if they want to apply filters
         var applyFilters = Prompt.Confirm("Would you like to apply filters before browsing movies?");
         if (applyFilters)
         {
-            // If user wants to apply filters show filter options
             var filterOption = Prompt.Select<FilterOption>("Select an option to filter movies");
 
             if (filterOption == FilterOption.Genres)
             {
-                // Prompt user to select a genre to filter movies
-                var selectedGenre = Prompt.Select("Select a genre to filter movies", new List<string> { "All" }.Concat(movies.SelectMany(movie => movie.Genres).Distinct()).ToList());
-                if (selectedGenre != "All")
+                var availableGenres = new List<string> { "All" }.Concat(movies.SelectMany(movie => movie.Genres).Distinct()).ToList();
+                var selectedGenres = Prompt.MultiSelect("Select genres to filter movies", availableGenres);
+
+                if (!selectedGenres.Contains("All"))
                 {
-                    filteredMovies = movies.Where(movie => movie.Genres.Contains(selectedGenre)).ToList();
+                    filteredMovies = movies.Where(movie => movie.Genres.Any(selectedGenres.Contains)).ToList();
                 }
             }
             else if (filterOption == FilterOption.Cast)
             {
-                // Prompt user to select an actor from the cast
-                var selectedActor = Prompt.Select("Select an actor to filter movies", new List<string> { "All" }.Concat(movies.SelectMany(movie => movie.Cast).Distinct()).ToList());
-                if (selectedActor != "All")
+                var availableActors = new List<string> { "All" }.Concat(movies.SelectMany(movie => movie.Cast).Distinct()).ToList();
+                var selectedActors = Prompt.MultiSelect("Select actors to filter movies", availableActors);
+
+                if (!selectedActors.Contains("All"))
                 {
-                    filteredMovies = movies.Where(movie => movie.Cast.Contains(selectedActor)).ToList();
+                    filteredMovies = movies.Where(movie => movie.Cast.Any(selectedActors.Contains)).ToList();
                 }
             }
         }

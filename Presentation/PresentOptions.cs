@@ -1,14 +1,12 @@
 using Sharprompt;
 
-public class PresentOptions
+public static class PresentOptions
 {
     public static void Start()
     {
-        ChoiceMethods choiceMethods = new ChoiceMethods();
-
         AdminChoice currentChoice = AdminChoice.Exit;
 
-        while (currentChoice != AdminChoice.Exit)
+        while (true)
         {
             currentChoice = Prompt.Select<AdminChoice>("What would you like to do?");
 
@@ -28,4 +26,6 @@ public class PresentOptions
             }
         }
     }
+
+
 }

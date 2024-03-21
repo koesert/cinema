@@ -13,21 +13,20 @@ class Program
         // Initialize database with tables and movies from specified folder
         databaseHelper.InitializeDatabase();
 
-        ChoiceMethods choiceMethods = new ChoiceMethods();
-        choiceMethods.GetMovies();
+        ChoiceMethods.GetMovies();
 
-        Choice currentChoice = Choice.Login;
+        ProgramChoice currentChoice = ProgramChoice.Login;
 
-        while (currentChoice != Choice.Exit)
+        while (currentChoice != ProgramChoice.Exit)
         {
-            currentChoice = Prompt.Select<Choice>("What would you like to do?");
+            currentChoice = Prompt.Select<ProgramChoice>("What would you like to do?");
 
             switch (currentChoice)
             {
-                case Choice.ListMovies:
-                    choiceMethods.ListMovies();
+                case ProgramChoice.ListMovies:
+                    ChoiceMethods.ListMovies();
                     break;
-                case Choice.Login:
+                case ProgramChoice.Login:
                     PresentLogin.Start();
                     break;
                 default:

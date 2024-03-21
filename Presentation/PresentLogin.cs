@@ -1,74 +1,63 @@
+using Sharprompt;
+
 public class PresentLogin
 {
     public static void Start()
     {
-        string userInput = "";
-        while (userInput.ToLower() != "quit")
-        {
-            Console.WriteLine("\nDo you wish to login or continue as guest? 'quit' to quit.");
-            userInput = Console.ReadLine() ?? "";
+        LoginChoice currentChoice = LoginChoice.GuestLogin;
 
-            switch (userInput.ToLower())
+        while (true) // Loop until explicitly broken out
+        {
+            var userInput = Prompt.Select<LoginChoice>("Select an option");
+
+            switch (userInput)
             {
-                case "login":
-                    PromptLogin();
-                    break;
-                case "guest":
+                case LoginChoice.GuestLogin:
                     PromptGuest();
                     break;
-                case "quit":
-                    PromptQuit();
+                case LoginChoice.AdminLogin:
+                    AdminLogin();
                     break;
+                case LoginChoice.Exit:
+                    return; // Exit the method and the loop
                 default:
                     Console.WriteLine("Not a valid option. Try again.");
                     break;
             }
         }
     }
-    public static void PromptLogin()
-    {
-        bool loginSuccessful;
-        string email = "";
 
-        while (email == "")
+    public static void AdminLogin()
+    {
+        bool loginSuccessful = false;
+
+        while (!loginSuccessful)
         {
-            Console.WriteLine("Enter your email:");
-            email = Console.ReadLine() ?? "";
-            if (email == "")
+            var email = Prompt.Input<string>("Enter your email");
+            var password = Prompt.Password("Enter your password");
+
+            loginSuccessful = Login.CheckSuperuserCredentials(email, password);
+
+            if (!loginSuccessful)
             {
-                Console.WriteLine("Invalid email. Try again");
-                continue;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Your credentials do not exist in our database. Try again.");
+                Console.ResetColor();
             }
-            string password = "";
-            while (password == "")
+            else
             {
-                Console.WriteLine("Enter your password:");
-                password = Console.ReadLine() ?? "";
-                if (password == "")
-                {
-                    Console.WriteLine("Invalid password. Try again");
-                    continue;
-                }
-                loginSuccessful = Login.CheckSuperuserCredentials(email, password);
-                if (!loginSuccessful)
-                {
-                    Console.WriteLine("Your credentials do not exist in our database. Try again.");
-                    continue;
-                }
-                Console.WriteLine("Login succesful!");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Login successful!");
+                Console.ResetColor();
                 PresentOptions.Start();
+                break;
             }
         }
     }
     public static void PromptGuest()
     {
-        Console.WriteLine("Continuing as a guest.");
+        Console.WriteLine("Functionaliteit moet nog komen voor dit met generated code + email");
         // PresentMovies.Start(); // Call to present movies (implementation not shown)
-        return;
-    }
-    public static void PromptQuit()
-    {
-        Console.WriteLine("Sad to see you go, have a nice day!");
         return;
     }
 }
