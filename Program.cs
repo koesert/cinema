@@ -7,11 +7,9 @@ class Program
 {
     static void Main()
     {
-        // Create a new instance of the DatabaseHelper class
-        DatabaseHelper databaseHelper = new DatabaseHelper();
         PresentLogin admin = new PresentLogin();
         // Initialize database with tables and movies from specified folder
-        databaseHelper.InitializeDatabase();
+        DatabaseHelper.InitializeDatabase();
 
         ChoiceMethods choiceMethods = new ChoiceMethods();
         choiceMethods.GetMovies();

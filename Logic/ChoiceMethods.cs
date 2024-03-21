@@ -7,15 +7,13 @@ public class ChoiceMethods
 {
     public List<Movie> GetMovies()
     {
-        DatabaseHelper databaseHelper = new DatabaseHelper();
         string query = "SELECT * FROM movies";
-        var movieTables = databaseHelper.ExecuteQuery(query);
+        var movieTables = DatabaseHelper.ExecuteQuery(query);
         List<Movie> allMovies = new List<Movie>();
 
         foreach (DataRow item in movieTables.Rows)
         {
             Movie movie = new Movie();
-            // movieTitles.Add(item["Title"].ToString());
             movie.Title = item["Title"].ToString();
             movie.Description = item["Description"].ToString();
             movie.Duration = Convert.ToInt32(item["Duration"]);
@@ -26,6 +24,13 @@ public class ChoiceMethods
 
             string[] castArray = item["Cast"].ToString().Split(',');
             movie.Cast = new List<string>(castArray);
+
+            string[] directorsArray = item["Directors"].ToString().Split(',');
+            movie.Directors = new List<string>(directorsArray);
+
+            int isRated16Plus = Convert.ToInt32(item["IsRated16Plus"]);
+            movie.IsRated16Plus = isRated16Plus == 1 ? true : false;
+
             allMovies.Add(movie);
         }
         return allMovies;
@@ -59,7 +64,7 @@ public class ChoiceMethods
                 if (selectedActor != "All")
                 {
                     filteredMovies = movies.Where(movie => movie.Cast.Contains(selectedActor)).ToList();
-                }
+}
             }
         }
 
@@ -80,5 +85,8 @@ public class ChoiceMethods
         Console.WriteLine($"Year: {selectedMovie.Year}");
         Console.WriteLine($"Genres: {string.Join(", ", selectedMovie.Genres)}");
         Console.WriteLine($"Cast: {string.Join(", ", selectedMovie.Cast)}");
+        Console.WriteLine($"Director(s): {string.Join(", ", selectedMovie.Directors)}");
+        Console.WriteLine($"Age: {(selectedMovie.IsRated16Plus ? "16+" : "G-rated")}");
+
     }
 }
