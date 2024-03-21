@@ -1,41 +1,37 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using Newtonsoft.Json;
 
-public class DatabaseHelper
+public static class DatabaseHelper
 {
-    private SQLiteConnection _connection;
-    private string _databasePath;
-    private string _moviesFolderPath = "../../../movies/";
+    private static SQLiteConnection _connection;
+    private static string _databasePath;
+    private static string _moviesFolderPath = "../../../movies/";
 
-    public DatabaseHelper()
+    // Constructor to set up database path and connection
+    static DatabaseHelper()
     {
-        // _databasePath = databasePath;
+        // Set the path for the SQLite database file
         _databasePath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "../../../db/cinema.db"
         );
 
+        // Check if the folder containing the database file exists, if not, create it
         string dbFolderPath = Path.GetDirectoryName(_databasePath);
-        // Check if the database file exists
-        if (dbFolderPath != null)
+        if (dbFolderPath != null && !Directory.Exists(dbFolderPath))
         {
-            if (!Directory.Exists(dbFolderPath))
+            try
             {
-                try
-                {
-                    Directory.CreateDirectory(dbFolderPath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error creating directory: {ex.Message}");
-                }
+                Directory.CreateDirectory(dbFolderPath);
             }
-        }
-        else
-        {
-            Console.WriteLine("Error: Database folder path is null.");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating directory: {ex.Message}");
+            }
         }
 
         // Create a new SQLite connection with the specified database path
@@ -43,36 +39,43 @@ public class DatabaseHelper
     }
 
     // Method to open the connection to the database
-    public void OpenConnection()
+    private static void OpenConnection()
     {
-        if (_connection.State != System.Data.ConnectionState.Open)
+        if (_connection.State != ConnectionState.Open)
         {
             _connection.Open();
         }
     }
 
     // Method to close the connection to the database
-    public void CloseConnection()
+    private static void CloseConnection()
     {
-        if (_connection.State != System.Data.ConnectionState.Closed)
+        if (_connection.State != ConnectionState.Closed)
         {
             _connection.Close();
         }
     }
 
     // Method to execute a SQL query and return the result as a DataTable
-    public DataTable ExecuteQuery(string query)
+    public static DataTable ExecuteQuery(string query)
     {
         try
         {
             // Open the connection to the database
             OpenConnection();
 
-            SQLiteCommand command = new SQLiteCommand(query, _connection);
-            SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
-            DataTable dataTable = new DataTable();
-            adapter.Fill(dataTable);
-            return dataTable;
+            // Create a SQLiteCommand object with the query and connection
+            using (SQLiteCommand command = new SQLiteCommand(query, _connection))
+            {
+                // Create a SQLiteDataAdapter to fill the DataTable with query results
+                using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(command))
+                {
+                    DataTable dataTable = new DataTable();
+                    // Fill the DataTable with query results
+                    adapter.Fill(dataTable);
+                    return dataTable;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -86,9 +89,10 @@ public class DatabaseHelper
         }
     }
 
-    // Execute a SQL query to create tables
-    public void CreateTables()
+    // Method to create necessary tables in the database
+    private static void CreateTables()
     {
+        // SQL query to create Movies table if it doesn't exist
         string createTableQuery =
             @"
             CREATE TABLE IF NOT EXISTS Movies (
@@ -98,13 +102,16 @@ public class DatabaseHelper
                 Duration INTEGER,
                 Year INTEGER,
                 Genres TEXT,
-                Cast TEXT
+                Cast TEXT,
+                Directors TEXT,
+                IsRated16Plus INTEGER
             );";
+        // Execute the create table query
         ExecuteQuery(createTableQuery);
     }
 
-    // Method to read JSON file and add data to the database
-    public void AddMoviesFromJson(string jsonFilePath)
+    // Method to read JSON file and add movie data to the database
+    private static void AddMoviesFromJson(string jsonFilePath)
     {
         try
         {
@@ -119,8 +126,6 @@ public class DatabaseHelper
             {
                 AddMovieToDatabase(movie);
             }
-
-            // Console.WriteLine("Movies added to the database.");
         }
         catch (Exception ex)
         {
@@ -128,7 +133,8 @@ public class DatabaseHelper
         }
     }
 
-    private void AddMovieToDatabase(Movie movie)
+    // Helper method to add a movie to the database
+    private static void AddMovieToDatabase(Movie movie)
     {
         try
         {
@@ -137,39 +143,38 @@ public class DatabaseHelper
                 $"SELECT * FROM Movies WHERE Title = '{movie.Title}'"
             );
 
+            // If movie doesn't exist in the database, add it
             if (existingMovie.Rows.Count == 0)
             {
-                // Build the SQL INSERT statement
+                // SQL query to insert a movie into the Movies table
                 string insertQuery =
                     @"
-                INSERT INTO Movies (Title, Description, Duration, Year, Genres, Cast)
-                VALUES (@Title, @Description, @Duration, @Year, @Genres, @Cast);";
+                INSERT INTO Movies (Title, Description, Duration, Year, Genres, Cast, Directors, IsRated16Plus)
+                VALUES (@Title, @Description, @Duration, @Year, @Genres, @Cast, @Directors, @IsRated16Plus);";
 
-                // Create a SQLiteCommand object
+                // Create a SQLiteCommand object with the insert query and connection
                 using (SQLiteCommand command = new SQLiteCommand(insertQuery, _connection))
                 {
-                    // Add parameters to the command
+                    // Add parameters to the command for the movie data
                     command.Parameters.AddWithValue("@Title", movie.Title);
                     command.Parameters.AddWithValue("@Description", movie.Description);
                     command.Parameters.AddWithValue("@Duration", movie.Duration);
                     command.Parameters.AddWithValue("@Year", movie.Year);
                     command.Parameters.AddWithValue("@Genres", string.Join(",", movie.Genres));
                     command.Parameters.AddWithValue("@Cast", string.Join(",", movie.Cast));
+                    command.Parameters.AddWithValue("@Directors", string.Join(",", movie.Directors));
+                    command.Parameters.AddWithValue("@IsRated16Plus", movie.IsRated16Plus ? 1 : 0);
 
                     // Open the database connection
                     OpenConnection();
 
-                    // Execute the command
+                    // Execute the command to insert the movie into the database
                     command.ExecuteNonQuery();
 
                     // Close the database connection
                     CloseConnection();
                 }
             }
-            // else
-            // {
-            //     Console.WriteLine($"Movie '{movie.Title}' already exists in the database. Skipping insertion.");
-            // }
         }
         catch (Exception ex)
         {
@@ -178,7 +183,7 @@ public class DatabaseHelper
     }
 
     // Method to add movies from JSON files in the movie folder
-    public void AddMoviesFromFolder()
+    public static void AddMoviesFromFolder()
     {
         try
         {
@@ -197,20 +202,19 @@ public class DatabaseHelper
         }
     }
 
-    public void InitializeDatabase()
+    // Method to initialize the database by creating tables and adding movies
+    public static void InitializeDatabase()
     {
         try
         {
             // Open the connection to the database
             OpenConnection();
 
-            // Create tables if they don't exist
+            // Create necessary tables in the database
             CreateTables();
 
             // Add movies from the specified folder
             AddMoviesFromFolder();
-
-            // Console.WriteLine("Database initialized successfully.");
         }
         catch (Exception ex)
         {

@@ -2,6 +2,9 @@ using Sharprompt;
 
 public class PresentLogin
 {
+    /// <summary>
+    /// This function starts the login process.
+    /// </summary>
     public static void Start()
     {
         LoginChoice currentChoice = LoginChoice.GuestLogin;
@@ -54,6 +57,9 @@ public class PresentLogin
             }
         }
     }
+    /// <summary>
+    /// This function informs the user that they are continuing as a guest.
+    /// </summary>
     public static void PromptGuest()
     {
         Console.WriteLine("Functionaliteit moet nog komen voor dit met generated code + email");
