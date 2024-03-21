@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-public enum Choice
+public enum ProgramChoice
 {
     [Display(Name = "Browse movies & showtimes")]
     ListMovies,

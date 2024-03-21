@@ -1,3 +1,5 @@
+using Sharprompt;
+
 public class PresentLogin
 {
     /// <summary>
@@ -5,80 +7,53 @@ public class PresentLogin
     /// </summary>
     public static void Start()
     {
-        string userInput = "";
+        LoginChoice currentChoice = LoginChoice.GuestLogin;
 
-        while (userInput.ToLower() != "quit")
+        while (true) // Loop until explicitly broken out
         {
-            Console.WriteLine("\nDo you wish to login or continue as guest? 'quit' to quit.");
-            userInput = Console.ReadLine() ?? "";
+            var userInput = Prompt.Select<LoginChoice>("Select an option");
 
-            switch (userInput.ToLower())
+            switch (userInput)
             {
-                case "login":
-                    PromptLogin();
-                    break;
-                case "guest":
+                case LoginChoice.GuestLogin:
                     PromptGuest();
                     break;
-                case "quit":
-                    PromptQuit();
+                case LoginChoice.AdminLogin:
+                    AdminLogin();
                     break;
+                case LoginChoice.Exit:
+                    return; // Exit the method and the loop
                 default:
                     Console.WriteLine("Not a valid option. Try again.");
                     break;
             }
         }
     }
-    /// <summary>
-    /// This function prompts the user for login credentials and validates them.
-    /// If successful, it calls the PresentOptions.Start() function.
-    /// </summary>
-    public static void PromptLogin()
+
+    public static void AdminLogin()
     {
-        bool loginSuccessful;
-        string email = "";
+        bool loginSuccessful = false;
 
-        while (email == "")
+        while (!loginSuccessful)
         {
-            Console.WriteLine("Enter your email:");
-            email = Console.ReadLine() ?? "";
+            var email = Prompt.Input<string>("Enter your email");
+            var password = Prompt.Password("Enter your password");
 
-            bool validEmail;
-            validEmail = Login.IsValidEmail(email);
+            loginSuccessful = Login.CheckSuperuserCredentials(email, password);
 
-            if (email == "")
+            if (!loginSuccessful)
             {
-                Console.WriteLine("Email must not be empty. Try again");
-                continue;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Your credentials do not exist in our database. Try again.");
+                Console.ResetColor();
             }
-            if (!validEmail)
+            else
             {
-                Console.WriteLine("Invalid email. Try again");
-                email = "";
-                continue;
-            }
-
-            string password = "";
-            while (password == "")
-            {
-                Console.WriteLine("Enter your password:");
-                password = Console.ReadLine() ?? "";
-
-                if (password == "")
-                {
-                    Console.WriteLine("Password must not be empty. Try again");
-                    continue;
-                }
-
-                loginSuccessful = Login.CheckSuperuserCredentials(email, password);
-                if (!loginSuccessful)
-                {
-                    Console.WriteLine("Your credentials do not exist in our database. Try again.");
-                    continue;
-                }
-
-                Console.WriteLine("Login succesful!");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Login successful!");
+                Console.ResetColor();
                 PresentOptions.Start();
+                break;
             }
         }
     }
@@ -87,16 +62,8 @@ public class PresentLogin
     /// </summary>
     public static void PromptGuest()
     {
-        Console.WriteLine("Continuing as a guest.");
-        // PresentMovies.Start(); // This line is commented out, because the function PresentMovies.Start() is not implemented yet.
-        return;
-    }
-    /// <summary>
-    /// This function informs the user that the program is quitting.
-    /// </summary>
-    public static void PromptQuit()
-    {
-        Console.WriteLine("Sad to see you go, have a nice day!");
+        Console.WriteLine("Functionaliteit moet nog komen voor dit met generated code + email");
+        // PresentMovies.Start(); // Call to present movies (implementation not shown)
         return;
     }
 }
