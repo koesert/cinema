@@ -13,63 +13,51 @@ public class Superuser // This class represents a superuser account with limited
         Password = password;
     }
 
-    private static void AddAdminToDB(string email, string password)
-    {   
-        DatabaseHelper databaseHelper = new DatabaseHelper();
-        string createAdminTableQuery =
-            @"
-                CREATE TABLE IF NOT EXISTS Superusers (
+    private static void CreateAdminTable()
+    {
+        string createAdminTableQuery = @"
+            CREATE TABLE IF NOT EXISTS Superusers (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Email TEXT NOT NULL,
-                Password TEXT NOT NULL,
+                Password TEXT NOT NULL
             );";
-        
-        databaseHelper.ExecuteQuery(createAdminTableQuery);
-
-        string createAdminQuery = @"INSERT INTO Superusers (Email, Password) VALUES ({email}, @password)";
-
-        using (SQLiteCommand command = new SQLiteCommand(insertQuery, databaseHelper._connection))
-                {
-                    // Add parameters to the command
-                    command.Parameters.AddWithValue("@Title", movie.Title);
-                    command.Parameters.AddWithValue("@Description", movie.Description);
-                    command.Parameters.AddWithValue("@Duration", movie.Duration);
-                    command.Parameters.AddWithValue("@Year", movie.Year);
-                    command.Parameters.AddWithValue("@Genres", string.Join(",", movie.Genres));
-                    command.Parameters.AddWithValue("@Cast", string.Join(",", movie.Cast));
-
-                    // Open the database connection
-                    OpenConnection();
-
-                    // Execute the command
-                    command.ExecuteNonQuery();
-
-                    // Close the database connection
-                    CloseConnection();
-                }
-        databaseHelper.ExecuteQuery(createAdminQuery);
+        Database.OpenConnection();
+        Database.ExecuteQuery(createAdminTableQuery);
+        Database.CloseConnection();
     }
 
-    private static void AddAdminList()
-    {   
-        DatabaseHelper databaseHelper = new DatabaseHelper();
-        string createAdminTableQuery = @"SELECT * FROM Superusers LIMIT 1";
-        DataTable admins = databaseHelper.ExecuteQuery(createAdminTableQuery);
-
-        foreach (DataRow item in admins.Rows)
+    private static void AddAdminToDB()
+    {
+        try
         {
-            string ?email = item["Email"].ToString();
-            string ?password = item["Password"].ToString();
-            Superusers.Add(new Superuser(email, password));
+            string checkForAdmin = @"SELECT 1 FROM Superusers LIMIT 1";
+            Database.OpenConnection();
+            DataTable existingAdmin = Database.ExecuteQuery(checkForAdmin);
+            Database.CloseConnection();
+
+            if (existingAdmin.Rows.Count == 0)
+            {
+                string createAdminQuery = @"INSERT INTO Superusers (Email, Password) VALUES ('marcel@bioscoop.nl', 'admin123')";
+                Database.OpenConnection();
+                Database.ExecuteQuery(createAdminQuery);
+                Database.CloseConnection();
+            }
+        }
+        catch (SQLiteException ex)
+        {
+            Console.WriteLine("Error encountered while adding admin to database: " + ex.Message);
         }
     }
 
-    public static List<Superuser> GetSuperusers()
+    private static void AddAdminToList()
     {
-        AddAdminToDB("marcel@bioscoop.nl", "admin123");
+        Superusers.Add(new Superuser("marcel@bioscoop.nl", "admin123"));
+    }
 
-        AddAdminList();
-
-        return Superusers;
+    public static void InitializeSuperuser()
+    {
+        CreateAdminTable();
+        AddAdminToDB();
+        AddAdminToList();
     }
 }

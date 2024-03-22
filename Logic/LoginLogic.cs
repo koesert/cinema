@@ -73,9 +73,8 @@ public class Login
 
     public static bool CheckSuperuserCredentials(string email, string password)
     {
-        List<Superuser> superusers = Superuser.Superusers;
-
-        foreach (Superuser superuser in superusers)
+        Superuser.InitializeSuperuser();
+        foreach (Superuser superuser in Superuser.Superusers)
         {
             if (superuser.Email == email && superuser.Password == password)
             {
