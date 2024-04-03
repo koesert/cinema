@@ -1,7 +1,15 @@
-public class Showtime
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Cinema.Data
 {
-    public int ShowtimeId { get; set; }
-    public DateTime StartTime { get; set; }
-    public Movie Movie { get; set; }
-    public CinemaHall Hall { get; set; }
+    public class Showtime
+    {
+        public int Id { get; set; }
+        public string RoomId { get; set; }
+        public DateTimeOffset StartTime { get; set; }
+        public Movie Movie { get; set; }
+
+        [Column(TypeName = "jsonb")]
+        public List<Seat> Prices { get; set; }
+    }
 }
