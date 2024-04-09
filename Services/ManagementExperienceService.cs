@@ -331,7 +331,7 @@ namespace Cinema.Services
         public void ShowCinemaHall(CinemaContext db, string cinemahall)
         {
             CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(cinemahall);
-            CinemaReservationSystem.DrawPlan(cinemaSystem);
+            cinemaSystem.DrawPlan();
 
             Console.WriteLine("\n\n");
 
@@ -382,18 +382,28 @@ namespace Cinema.Services
                     selectedSeats.Add(cinemaSystem.FindSeat(selectedRow, selectedSeatNumber));
                 }
 
-
+                Console.Clear();
                 bool allSeatsAvailable = true;
                 foreach (CinemaSeat selectedSeat in selectedSeats)
                 {
-                    if (selectedSeat.IsReserved)
+                    if (selectedSeat == null)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Op tenminste één van de geselecteerde plaatsen zit geen stoel.");
+                        Console.ResetColor();
+                        allSeatsAvailable = false;
+                        break;
+                    }
+                    else if (selectedSeat.IsReserved)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} is al gereserveerd.");
+                        Console.ResetColor();
                         allSeatsAvailable = false;
                         break;
                     }
                 }
-                Console.Clear();
+                // Console.Clear();
                 if (allSeatsAvailable)
                 {
                     bool allSeatsReserved = true;
@@ -422,7 +432,7 @@ namespace Cinema.Services
                     }
                 }
 
-                CinemaReservationSystem.DrawPlan(cinemaSystem);
+                cinemaSystem.DrawPlan();
 
                 Console.WriteLine("Wil je meer stoelen reserveren? (Y/N)");
                 string continueReserving = Console.ReadLine();
