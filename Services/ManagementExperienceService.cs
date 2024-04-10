@@ -4,6 +4,7 @@ using Cinema.Models.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Sharprompt;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -16,6 +17,21 @@ namespace Cinema.Services
 {
     public class ManagementExperienceService
     {
+        // Mapping of enum values to their display names
+
+        private static readonly Dictionary<CinemaManagementAddMovieChoice, string> AddMovieChoiceDescriptions = new Dictionary<CinemaManagementAddMovieChoice, string>
+    {
+        { CinemaManagementAddMovieChoice.AddMovieManually, "Voeg film handmatig toe" },
+        { CinemaManagementAddMovieChoice.AddMovieJSON, "Voeg film(s) toe door JSON-bestand te laden" },
+        { CinemaManagementAddMovieChoice.Exit, "Terug" }
+    };
+        private static readonly Dictionary<CinemaManagementChoice, string> ManagementChoiceDescriptions = new Dictionary<CinemaManagementChoice, string>
+    {
+        { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
+        { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
+        { CinemaManagementChoice.Exit, "Terug" }
+    };
+
         public void ManageCinema(Administrator admin, CinemaContext db, IConfiguration configuration)
         {
             CinemaManagementChoice currentManagerChoice = CinemaManagementChoice.ListMovies;
@@ -23,7 +39,15 @@ namespace Cinema.Services
             {
                 Console.Clear();
 
-                currentManagerChoice = Prompt.Select<CinemaManagementChoice>($"Welkom, {admin.Username}, wat wil je doen?");
+                var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Welkom, {admin.Username}, wat wil je doen?")
+                        .PageSize(10)
+                        .AddChoices(ManagementChoiceDescriptions.Select(kv => kv.Value))
+                );
+
+                // Retrieve the enum value based on the selected description
+                currentManagerChoice = ManagementChoiceDescriptions.FirstOrDefault(kv => kv.Value == choice).Key;
 
                 switch (currentManagerChoice)
                 {
@@ -39,27 +63,33 @@ namespace Cinema.Services
             }
         }
 
-        private void ListMovies(CinemaContext db)
+        public void ListMovies(CinemaContext db)
         {
             Console.Clear();
 
             var movies = db.Movies.ToList();
-            var selectedMovie = Prompt.Select("Selecteer een film", movies, textSelector: movie => movie.Title);
+            var selectedMovie = AnsiConsole.Prompt(
+                new SelectionPrompt<Movie>()
+                    .Title("Selecteer een film")
+                    .PageSize(10)
+                    .AddChoices(movies)
+                    .UseConverter(movie => movie.Title)
+            );
 
             HandleSelectedMovie(db, selectedMovie);
         }
-        private int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
+        public int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
         {
-            var movieOptions = new[]
-            {
-        CinemaManagementMovieChoice.ListShowtimes,
-        CinemaManagementMovieChoice.DeleteMovie,
-        CinemaManagementMovieChoice.AddShowtime,
-        CinemaManagementMovieChoice.Exit
-    };
+            var movieOptions = Enum.GetValues(typeof(CinemaManagementMovieChoice)).Cast<CinemaManagementMovieChoice>();
 
-            CinemaManagementMovieChoice currentChoice = Prompt.Select<CinemaManagementMovieChoice>("Wat wil je doen met de film?", movieOptions);
-            switch (currentChoice)
+            var index = AnsiConsole.Prompt(
+                new SelectionPrompt<CinemaManagementMovieChoice>()
+                    .Title("Wat wil je doen met de film?")
+                    .PageSize(10)
+                    .AddChoices(movieOptions)
+            );
+
+            switch (index)
             {
                 case CinemaManagementMovieChoice.ListShowtimes:
                     ListShowtimes(db, selectedMovie);
@@ -146,17 +176,18 @@ namespace Cinema.Services
 
         private int AddMovieChoice(CinemaContext db)
         {
-            var AddMovieOptions = new[]
-            {
-        CinemaManagementAddMovieChoice.AddMovieManually,
-        CinemaManagementAddMovieChoice.AddMovieJSON,
-        CinemaManagementAddMovieChoice.Exit
-            };
+            var addMovieOptions = AddMovieChoiceDescriptions.Keys.ToList();
 
+            var currentChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Hoe wil je de film toevoegen?")
+                    .PageSize(10)
+                    .AddChoices(AddMovieChoiceDescriptions.Select(kv => kv.Value))
+            );
 
-            CinemaManagementAddMovieChoice currentChoice = Prompt.Select<CinemaManagementAddMovieChoice>("Hoe wil je de film toevoegen?", AddMovieOptions);
+            var choiceEnum = AddMovieChoiceDescriptions.FirstOrDefault(kv => kv.Value == currentChoice).Key;
 
-            switch (currentChoice)
+            switch (choiceEnum)
             {
                 case CinemaManagementAddMovieChoice.AddMovieManually:
                     AddMovies(db);
@@ -224,22 +255,22 @@ namespace Cinema.Services
         {
             Console.Clear();
 
-            var confirmDelete = Prompt.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt verwijderen?");
-
+            var confirmDelete = AnsiConsole.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt verwijderen?");
 
             if (confirmDelete)
             {
-
                 db.Movies.Remove(selectedMovie);
                 db.SaveChanges();
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\"{selectedMovie.Title}\" is succesvol verwijderd.");
-                Console.ResetColor();
-
+                AnsiConsole.MarkupLine($"[green]\"{selectedMovie.Title}\" is succesvol verwijderd.[/]");
             }
-            Console.WriteLine("Druk op een toets om terug te gaan....");
-            Console.ReadKey();
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Verwijdering geannuleerd.[/]");
+            }
+
+            AnsiConsole.MarkupLine("Druk op een toets om terug te gaan....");
+            Console.ReadKey(true);
         }
 
         public void AddMoviesFromJsonToDatabase(CinemaContext db)
@@ -254,7 +285,7 @@ namespace Cinema.Services
         {
             Console.Clear();
 
-            var moviesQuery = db.Movies.Include(m => m.Showtimes); // Include Showtimes here
+            var moviesQuery = db.Movies.Include(m => m.Showtimes);
             DateTime today = DateTime.UtcNow.Date;
             int currentWeek = 0;
 
@@ -267,15 +298,20 @@ namespace Cinema.Services
                     .Where(m => m.Showtimes != null && m.Showtimes.Any(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek))
                     .ToList();
 
-                List<string> options = new List<string> { "Filter door films" }; // Clear options list here
+                var options = new List<string> { "Filter door films" };
 
                 options.AddRange(moviesWithShowtimes.Select(m => m.Title));
-                System.Console.WriteLine();
+                AnsiConsole.MarkupLine("");
                 if (currentWeek < 3) options.Add("Volgende week");
                 if (currentWeek > 0) options.Add("Vorige week");
                 options.Add("Terug");
 
-                var selectedOption = Prompt.Select($"Week van {startOfWeek:dd-MM} tot {endOfWeek.AddDays(-1):dd-MM}", options);
+                var selectedOption = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Week van {startOfWeek:dd-MM} tot {endOfWeek.AddDays(-1):dd-MM}")
+                        .AddChoices(options)
+                        .PageSize(10)
+                );
 
                 if (selectedOption == "Volgende week")
                 {
@@ -295,37 +331,38 @@ namespace Cinema.Services
                 }
                 else if (selectedOption == "Filter door films")
                 {
-                    var filteredMovies = ApplyFilters(db).Include(m => m.Showtimes); // Apply filters
-                    moviesQuery = filteredMovies; // Update moviesQuery
+                    var filteredMovies = ApplyFilters(db).Include(m => m.Showtimes);
+                    moviesQuery = filteredMovies;
                     Console.Clear();
                     continue;
                 }
 
                 var selectedMovie = moviesWithShowtimes.First(m => m.Title == selectedOption);
-                Console.WriteLine($"Je hebt \"{selectedMovie.Title}\" geselecteerd.");
-
+                AnsiConsole.MarkupLine($"Je hebt \"{selectedMovie.Title}\" geselecteerd.");
 
                 DisplayMovieDetails(selectedMovie);
-
-                Console.WriteLine();
+                AnsiConsole.MarkupLine("");
 
                 var showtimesThisWeek = selectedMovie.Showtimes
                     .Where(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek)
-                    .ToList().OrderBy(s=> s.StartTime);
+                    .OrderBy(s => s.StartTime)
+                    .ToList();
 
-                var selectedShowtime = Prompt.Select("Selecteer een voorstellingstijd", showtimesThisWeek,
-
-                textSelector: showtime => showtime.StartTime.ToString("ddd, MMMM d hh:mm tt"));
-
-                // Console.WriteLine($"You selected the showtime: {selectedShowtime.StartTime}");
+                var selectedShowtime = AnsiConsole.Prompt(
+                    new SelectionPrompt<Showtime>()
+                        .Title("Selecteer een voorstellingstijd")
+                        .AddChoices(showtimesThisWeek)
+                        .UseConverter(showtime => showtime.StartTime.ToString("ddd, MMMM d hh:mm tt"))
+                        .PageSize(10)
+                );
 
                 var cinemahall = selectedShowtime.RoomId;
                 Console.Clear();
                 ShowCinemaHall(db, cinemahall);
                 break;
-
             }
         }
+
 
 
         public void ShowCinemaHall(CinemaContext db, string cinemahall)
@@ -436,25 +473,36 @@ namespace Cinema.Services
             Console.ReadLine();
         }
 
-
-
-
         private IQueryable<Movie> ApplyFilters(CinemaContext db)
         {
             var allMovies = db.Movies.ToList();
             var moviesQuery = allMovies.AsQueryable();
 
-            var filterOption = Prompt.Select<CinemaFilterChoice>("Selecteer een optie om films te filteren",
-                new[] { CinemaFilterChoice.Genres, CinemaFilterChoice.Directors, CinemaFilterChoice.Cast });
+            var filterOption = AnsiConsole.Prompt(
+                new SelectionPrompt<CinemaFilterChoice>()
+                    .Title("Selecteer een optie om films te filteren")
+                    .PageSize(3)
+                    .AddChoices(new[]
+                    {
+                CinemaFilterChoice.Genres,
+                CinemaFilterChoice.Directors,
+                CinemaFilterChoice.Cast
+                    })
+            );
 
             switch (filterOption)
             {
                 case CinemaFilterChoice.Genres:
                     var allGenres = allMovies.SelectMany(movie => movie.Genres ?? Enumerable.Empty<string>())
-                                             .Where(genre => genre != null)
-                                             .Distinct()
-                                             .ToList();
-                    var selectedGenres = Prompt.MultiSelect("Selecteer genres om films te filteren", allGenres);
+                                            .Where(genre => genre != null)
+                                            .Distinct()
+                                            .ToList();
+                    var selectedGenres = AnsiConsole.Prompt(
+                        new MultiSelectionPrompt<string>()
+                            .Title("Selecteer genres om films te filteren")
+                            .PageSize(10)
+                            .AddChoices(allGenres)
+                    );
                     // Filter films op basis van geselecteerde genres
                     moviesQuery = allMovies.Where(movie => movie.Genres != null &&
                         movie.Genres.Intersect(selectedGenres ?? Enumerable.Empty<string>()).Any())
@@ -463,10 +511,15 @@ namespace Cinema.Services
 
                 case CinemaFilterChoice.Cast:
                     var allActors = allMovies.SelectMany(movie => movie.Cast ?? Enumerable.Empty<string>())
-                                             .Where(actor => actor != null)
-                                             .Distinct()
-                                             .ToList();
-                    var selectedActors = Prompt.MultiSelect("Selecteer acteurs om films te filteren", allActors);
+                                            .Where(actor => actor != null)
+                                            .Distinct()
+                                            .ToList();
+                    var selectedActors = AnsiConsole.Prompt(
+                        new MultiSelectionPrompt<string>()
+                            .Title("Selecteer acteurs om films te filteren")
+                            .PageSize(10)
+                            .AddChoices(allActors)
+                    );
                     // Filter films op basis van geselecteerde acteurs
                     moviesQuery = allMovies.Where(movie => movie.Cast != null &&
                         movie.Cast.Intersect(selectedActors ?? Enumerable.Empty<string>()).Any())
@@ -478,7 +531,12 @@ namespace Cinema.Services
                                                 .Where(director => director != null)
                                                 .Distinct()
                                                 .ToList();
-                    var selectedDirectors = Prompt.MultiSelect("Selecteer regisseurs om films te filteren", allDirectors);
+                    var selectedDirectors = AnsiConsole.Prompt(
+                        new MultiSelectionPrompt<string>()
+                            .Title("Selecteer regisseurs om films te filteren")
+                            .PageSize(10)
+                            .AddChoices(allDirectors)
+                    );
                     // Filter films op basis van geselecteerde regisseurs
                     moviesQuery = allMovies.Where(movie => movie.Directors != null &&
                         movie.Directors.Intersect(selectedDirectors ?? Enumerable.Empty<string>()).Any())
@@ -491,7 +549,6 @@ namespace Cinema.Services
 
             return moviesQuery;
         }
-
         private void DisplayMovieDetails(Movie movie)
         {
             Console.WriteLine($"Details voor \"{movie.Title}\":");
