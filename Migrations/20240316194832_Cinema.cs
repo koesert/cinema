@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Cinema.Data;
+﻿using Cinema.Data;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
