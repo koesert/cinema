@@ -51,21 +51,32 @@ namespace Cinema
                         service.ListMoviesWithShowtimes(db);
                         break;
                     case InitialStateChoice.Login:
-                        string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                        string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                        Administrator admin = db.Administrators
-                            .FirstOrDefault(admin =>
-                                admin.Username == username && admin.Password == password
-                            );
-
-                        if (admin == null)
+                        while (true)
                         {
-                            AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                            break;
+                            string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam:"));
+                            string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord:").Secret());
+
+                            Administrator admin = db.Administrators
+                                .FirstOrDefault(admin =>
+                                    admin.Username == username && admin.Password == password
+                                );
+
+                            if (admin != null)
+                            {
+                                Console.Clear();
+                                service.ManageCinema(admin, db, configuration);
+                                break;
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                AnsiConsole.Write(new FigletText("Your Eyes").Centered().Color(Color.Blue));
+                                AnsiConsole.Write(new FigletText("---------------").Centered().Color(Color.Blue));
+                                AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
+                                continue; // Prompt for credentials again
+                            }
                         }
-                        service.ManageCinema(admin, db, configuration);
-                        break;
+                        break; // Add this break statement
                 }
             }
         }

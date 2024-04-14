@@ -1317,10 +1317,10 @@ public class CinemaReservationSystem
             {
                 Console.Write($" {i}");
             }
-            else
-            {
-                Console.Write($" {i}");
-            }
+            // else
+            // {
+            //     Console.Write($" {i}");
+            // }
         }
         Console.WriteLine();
         char rowchar = 'A';
