@@ -18,6 +18,7 @@ namespace Cinema
             { InitialStateChoice.Login, "Inloggen" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
+
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -26,7 +27,6 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
-
             ManagementExperienceService service = new ManagementExperienceService();
 
             Console.Clear();
@@ -34,9 +34,11 @@ namespace Cinema
 
             while (currentChoice != InitialStateChoice.Exit)
             {
+                AnsiConsole.Write(new FigletText("Your Eyes").Centered().Color(Color.Blue));
+                AnsiConsole.Write(new FigletText("---------------").Centered().Color(Color.Blue));
+
                 var choice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                        .Title("Wat wil je doen?")
                         .PageSize(10)
                         .AddChoices(ChoiceDescriptions.Select(kv => kv.Value))
                 );

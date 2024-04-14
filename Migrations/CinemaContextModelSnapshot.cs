@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Cinema.Migrations
+namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
     partial class CinemaContextModelSnapshot : ModelSnapshot
@@ -84,8 +84,8 @@ namespace Cinema.Migrations
                     b.Property<List<string>>("Directors")
                         .HasColumnType("jsonb");
 
-                    b.Property<string>("Duration")
-                        .HasColumnType("text");
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
 
                     b.Property<List<string>>("Genres")
                         .HasColumnType("jsonb");
@@ -174,6 +174,42 @@ namespace Cinema.Migrations
                     b.ToTable("Tickets");
                 });
 
+            modelBuilder.Entity("CinemaSeat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsReserved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Layout")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
+                    b.Property<char>("Row")
+                        .HasColumnType("character(1)");
+
+                    b.Property<int>("SeatNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ShowtimeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShowtimeId");
+
+                    b.ToTable("CinemaSeats");
+                });
+
             modelBuilder.Entity("Cinema.Data.Showtime", b =>
                 {
                     b.HasOne("Cinema.Data.Movie", "Movie")
@@ -192,9 +228,23 @@ namespace Cinema.Migrations
                     b.Navigation("Showtime");
                 });
 
+            modelBuilder.Entity("CinemaSeat", b =>
+                {
+                    b.HasOne("Cinema.Data.Showtime", "Showtime")
+                        .WithMany("CinemaSeats")
+                        .HasForeignKey("ShowtimeId");
+
+                    b.Navigation("Showtime");
+                });
+
             modelBuilder.Entity("Cinema.Data.Movie", b =>
                 {
                     b.Navigation("Showtimes");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Showtime", b =>
+                {
+                    b.Navigation("CinemaSeats");
                 });
 #pragma warning restore 612, 618
         }
