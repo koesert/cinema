@@ -6,10 +6,12 @@ public class CinemaReservationSystem
     public string Name { get; set; }
     public int TotalSeatNum { get; set; }
     public List<List<CinemaSeat>> Seats;
-    public CinemaReservationSystem(string name, int totalseatnum, CinemaContext db)
+    private Showtime Showtime;
+    public CinemaReservationSystem(string name, int totalseatnum, Showtime showtime, CinemaContext db)
     {
         Name = name;
         TotalSeatNum = totalseatnum;
+        Showtime = showtime;
         if (totalseatnum == 150)
         {
             Configure150(db);
@@ -1312,17 +1314,27 @@ public class CinemaReservationSystem
         {
             foreach (var seat in row)
             {
-                if (seat != null)
+                if (seat is null)
+                {
+                    var cinemaSeat = new CinemaSeat(Showtime);
+                    db.CinemaSeats.Add(cinemaSeat);
+
+                }
+                else
                 {
                     var Row = seat.Row;
                     var SeatNumber = seat.SeatNumber;
                     var Color = seat.Color;
-                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color);
+                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
+                    db.CinemaSeats.Add(cinemaSeat);
+
 
                 }
+                // var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, showtime);
+                // db.CinemaSeats.Add(cinemaSeat);
             }
         }
-        // db.SaveChanges(); // Opslaan van zitplaatsen in de database
+        db.SaveChanges(); // Opslaan van zitplaatsen in de database
     }
 
 
@@ -1331,63 +1343,67 @@ public class CinemaReservationSystem
 
 
 
-    public void DrawPlan()
+    public static void DrawPlan(CinemaContext db, Showtime Showtime)
     {
         Console.Write(" ");
-        var counts = Seats.Select(innerList => innerList.Count(seat => seat != null)).ToList();
-        int len = counts.Max();
-        for (int i = 1; i <= len; i++)
+        var highestSeatNumber = db.CinemaSeats
+            .Where(s => s.Showtime.Id == Showtime.Id)
+            .Max(s => s.SeatNumber);
+
+        for (int i = 1; i <= highestSeatNumber; i++)
         {
-            if (i < 11)
+            Console.Write($" {(i < 10 ? i.ToString() + " " : i.ToString())}");
+        }
+        Console.WriteLine();
+
+        char rowchar = 'A';
+        Console.Write(rowchar);
+        var showtimes = db.CinemaSeats
+            .Where(s => s.Showtime.Id == Showtime.Id)
+            .OrderBy(s => s.Row)
+            .ThenBy(s => s.SeatNumber)
+            .ToList();
+
+        foreach (var seat in showtimes)
+        {
+            if (seat.Row > rowchar)
             {
-                Console.Write($" {i}");
+                Console.WriteLine();
+                rowchar++;
+                Console.Write(rowchar);
+            }
+
+            if (seat.Row == '0')
+            {
+                Console.Write("  ");
+            }
+            else if (seat.IsReserved)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(seat.Layout);
+                Console.ResetColor();
+            }
+            else if (seat.Color == "orange")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write(seat.Layout);
+                Console.ResetColor();
+            }
+            else if (seat.Color == "red")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write(seat.Layout);
+                Console.ResetColor();
             }
             else
             {
-                Console.Write($" {i}");
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write(seat.Layout);
+                Console.ResetColor();
             }
         }
+
         Console.WriteLine();
-        char rowchar = 'A';
-        foreach (List<CinemaSeat> row in Seats)
-        {
-            Console.Write(rowchar);
-            rowchar++;
-            foreach (CinemaSeat seat in row)
-            {
-                if (seat is null)
-                {
-                    Console.Write("  ");
-                }
-                else if (seat.IsReserved)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(seat.Layout);
-                    Console.ResetColor();
-                }
-                else if (seat.Color == "orange")
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write(seat.Layout);
-                    Console.ResetColor();
-                }
-                else if (seat.Color == "red")
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write(seat.Layout);
-                    Console.ResetColor();
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.Write(seat.Layout);
-                    Console.ResetColor();
-                }
-            }
-            Console.WriteLine();
-        }
-        Console.WriteLine(Name);
-        MovieScreenPrint();
     }
     private void MovieScreenPrint()
     {
@@ -1410,16 +1426,16 @@ public class CinemaReservationSystem
         Console.WriteLine(line);
     }
 
-    public static CinemaReservationSystem GetCinemaReservationSystem(string choice, CinemaContext db)
+    public static CinemaReservationSystem GetCinemaReservationSystem(Showtime showtime, CinemaContext db)
     {
-        switch (choice)
+        switch (showtime.RoomId)
         {
             case "1":
-                return new CinemaReservationSystem("Zaal 1", 150, db);
+                return new CinemaReservationSystem("Zaal 1", 150, showtime, db);
             case "2":
-                return new CinemaReservationSystem("Zaal 2", 300, db);
+                return new CinemaReservationSystem("Zaal 2", 300, showtime, db);
             case "3":
-                return new CinemaReservationSystem("Zaal 3", 500, db);
+                return new CinemaReservationSystem("Zaal 3", 500, showtime, db);
             default:
 
                 Console.WriteLine("Ongeldige keuze. Programma afsluiten.");
@@ -1428,29 +1444,29 @@ public class CinemaReservationSystem
         }
     }
 
-    public CinemaSeat FindSeat(char row, int seatNumber)
+    public static CinemaSeat FindSeat(char row, int seatNumber)
     {
-        int rowIndex = row - 'A';
-        if (rowIndex < 0 || rowIndex >= Seats.Count)
-        {
-            return null;
-        }
+        // int rowIndex = row - 'A';
+        // if (rowIndex < 0 || rowIndex >= Seats.Count)
+        // {
+        //     return null;
+        // }
 
-        List<CinemaSeat> rowSeats = Seats[rowIndex];
-        foreach (CinemaSeat seat in rowSeats)
-        {
-            if (seat != null)
-            {
-                if (seat.Row == row && seat.SeatNumber == seatNumber)
-                {
-                    return seat;
-                }
-            }
-        }
+        // List<CinemaSeat> rowSeats = Seats[rowIndex];
+        // foreach (CinemaSeat seat in rowSeats)
+        // {
+        //     if (seat != null)
+        //     {
+        //         if (seat.Row == row && seat.SeatNumber == seatNumber)
+        //         {
+        //             return seat;
+        //         }
+        //     }
+        // }
         return null;
     }
 
-    public bool ReserveSeat(char row, int seatNumber)
+    public static bool ReserveSeat(char row, int seatNumber)
     {
         CinemaSeat seatToReserve = FindSeat(row, seatNumber);
 
