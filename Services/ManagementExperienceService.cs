@@ -416,6 +416,27 @@ namespace Cinema.Services
                         }
                     }
 
+                    CinemaSeat selectedSeat = cinemaSystem.FindSeat(selectedRow, selectedSeatNumber);
+                    if (selectedSeat == null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Stoel {selectedRow}{selectedSeatNumber} bestaat niet");
+                        Console.ResetColor();
+                        i--;
+                        continue;
+                    }
+                    else if (selectedSeat.IsReserved)
+                    {
+                        Console.Clear();
+                        cinemaSystem.DrawPlan();
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Stoel {selectedRow}{selectedSeatNumber} is al gereserveerd.");
+                        Console.ResetColor();
+                        i--;
+                        continue;
+                    }
+
+
                     selectedSeats.Add(cinemaSystem.FindSeat(selectedRow, selectedSeatNumber));
                 }
 
@@ -433,6 +454,8 @@ namespace Cinema.Services
                     }
                     else if (selectedSeat.IsReserved)
                     {
+                        Console.Clear();
+                        cinemaSystem.DrawPlan();
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} is al gereserveerd.");
                         Console.ResetColor();
@@ -472,15 +495,12 @@ namespace Cinema.Services
                 cinemaSystem.DrawPlan();
 
                 Console.WriteLine("Wil je meer stoelen reserveren? (Y/N)");
-                string continueReserving = Console.ReadLine();
-                if (continueReserving.ToUpper() != "Y")
+                string continueReserving = Console.ReadLine().ToLower();
+                if (continueReserving != "y")
                 {
                     break;
                 }
             }
-
-
-            Console.ReadLine();
         }
 
         private IQueryable<Movie> ApplyFilters(CinemaContext db)

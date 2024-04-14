@@ -1313,10 +1313,12 @@ public class CinemaReservationSystem
         int len = counts.Max();
         for (int i = 1; i <= len; i++)
         {
-            if (i < 11) {
+            if (i < 11)
+            {
                 Console.Write($" {i}");
             }
-            else {
+            else
+            {
                 Console.Write($" {i}");
             }
         }
@@ -1326,7 +1328,7 @@ public class CinemaReservationSystem
         {
             Console.Write(rowchar);
             rowchar++;
-            foreach(CinemaSeat seat in row)
+            foreach (CinemaSeat seat in row)
             {
                 if (seat is null)
                 {
@@ -1346,7 +1348,7 @@ public class CinemaReservationSystem
                 }
                 else if (seat.Color == "red")
                 {
-                    Console.ForegroundColor = ConsoleColor.Red  ;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write(seat.Layout);
                     Console.ResetColor();
                 }
