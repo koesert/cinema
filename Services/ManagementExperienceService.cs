@@ -160,14 +160,20 @@ namespace Cinema.Services
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\"{createShowtime.StartTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
             }
+            else
+            {
+                showTime.StartTime = StartTime;
+                db.Showtimes.Add(showTime);
+                CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(createShowtime.RoomId, db);
 
-            showTime.StartTime = StartTime;
-            db.Showtimes.Add(showTime);
-            db.SaveChanges();
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                db.SaveChanges();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Film succesvol toegevoegd aan de database!");
+                Console.ResetColor();
+            }
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Film succesvol toegevoegd aan de database!");
-            Console.ResetColor();
+
 
             Console.WriteLine("Druk op een toets om terug te gaan....");
             Console.ReadKey();
@@ -367,7 +373,7 @@ namespace Cinema.Services
 
         public void ShowCinemaHall(CinemaContext db, string cinemahall)
         {
-            CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(cinemahall);
+            CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(cinemahall, db);
             cinemaSystem.DrawPlan();
 
             Console.WriteLine("\n\n");

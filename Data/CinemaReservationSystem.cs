@@ -1,16 +1,18 @@
 using System.Text;
+using Cinema.Data;
+
 public class CinemaReservationSystem
 {
     public string Name { get; set; }
     public int TotalSeatNum { get; set; }
     public List<List<CinemaSeat>> Seats;
-    public CinemaReservationSystem(string name, int totalseatnum)
+    public CinemaReservationSystem(string name, int totalseatnum, CinemaContext db)
     {
         Name = name;
         TotalSeatNum = totalseatnum;
         if (totalseatnum == 150)
         {
-            Configure150();
+            Configure150(db);
         }
         else if (totalseatnum == 300)
         {
@@ -1090,7 +1092,7 @@ public class CinemaReservationSystem
             }
         };
     }
-    private void Configure150()
+    private void Configure150(CinemaContext db)
     {
         Seats = new List<List<CinemaSeat>>
         {
@@ -1305,7 +1307,30 @@ public class CinemaReservationSystem
                 null
             }
         };
+
+        foreach (var row in Seats)
+        {
+            foreach (var seat in row)
+            {
+                if (seat != null)
+                {
+                    var Row = seat.Row;
+                    var SeatNumber = seat.SeatNumber;
+                    var Color = seat.Color;
+                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color);
+
+                }
+            }
+        }
+        // db.SaveChanges(); // Opslaan van zitplaatsen in de database
     }
+
+
+
+
+
+
+
     public void DrawPlan()
     {
         Console.Write(" ");
@@ -1385,16 +1410,16 @@ public class CinemaReservationSystem
         Console.WriteLine(line);
     }
 
-    public static CinemaReservationSystem GetCinemaReservationSystem(string choice)
+    public static CinemaReservationSystem GetCinemaReservationSystem(string choice, CinemaContext db)
     {
         switch (choice)
         {
             case "1":
-                return new CinemaReservationSystem("Zaal 1", 150);
+                return new CinemaReservationSystem("Zaal 1", 150, db);
             case "2":
-                return new CinemaReservationSystem("Zaal 2", 300);
+                return new CinemaReservationSystem("Zaal 2", 300, db);
             case "3":
-                return new CinemaReservationSystem("Zaal 3", 500);
+                return new CinemaReservationSystem("Zaal 3", 500, db);
             default:
 
                 Console.WriteLine("Ongeldige keuze. Programma afsluiten.");
