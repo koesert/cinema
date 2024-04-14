@@ -1,13 +1,19 @@
+using Cinema.Data;
+
 public class CinemaSeat
 {
-    public string Layout = " X";
-    public char Row;
-    public int SeatNumber;
-    public string Color;
-    public bool IsReserved = false;
-    public int Price;
+    public int Id { get; set; }
+    public string Layout { get; set; }
+    public char Row { get; set; }
+    public int SeatNumber { get; set; }
+    public string Color { get; set; }
+    public bool IsReserved { get; set; } = false;
+    public int Price { get; set; }
+    public Showtime Showtime { get; set; }
+    public CinemaSeat() { }
     public CinemaSeat(char row, int seatnumber, string color)
     {
+        Layout = " X";
         Row = row;
         SeatNumber = seatnumber;
         Color = color;

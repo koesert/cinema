@@ -143,35 +143,43 @@ namespace Cinema.Services
             if (createShowtime.Ready.HasValue && !createShowtime.Ready.Value)
                 return;
 
-            var showTime = new Showtime()
+            while (true)
             {
-                Movie = selectedMovie,
-                RoomId = createShowtime.RoomId,
-            };
-
-            if (!DateTimeOffset.TryParseExact(
+                if (!DateTimeOffset.TryParseExact(
                 createShowtime.StartTime,
                 "dd-MM-yyyy HH:mm",
                 CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal,
+                DateTimeStyles.AssumeUniversal,
                 out DateTimeOffset StartTime
                 ))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\"{createShowtime.StartTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\"{createShowtime.StartTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                    Console.ResetColor();
+                    Console.WriteLine("Probeer Opnieuw:");
+                    createShowtime = Prompt.Bind<CreateShowtimeForm>();
+                    continue;
+                }
+
+                var showTime = new Showtime()
+                {
+                    Movie = selectedMovie,
+                    RoomId = createShowtime.RoomId,
+                    StartTime = StartTime,
+                };
+
+                db.Showtimes.Add(showTime);
+                db.SaveChanges();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Film succesvol toegevoegd aan de database!");
+                Console.ResetColor();
+
+                Console.WriteLine("Druk op een toets om terug te gaan....");
+                Console.ReadKey();
+                break;
             }
-
-            showTime.StartTime = StartTime;
-            db.Showtimes.Add(showTime);
-            db.SaveChanges();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Film succesvol toegevoegd aan de database!");
-            Console.ResetColor();
-
-            Console.WriteLine("Druk op een toets om terug te gaan....");
-            Console.ReadKey();
-
         }
 
         private int AddMovieChoice(CinemaContext db)
@@ -344,7 +352,7 @@ namespace Cinema.Services
                 AnsiConsole.MarkupLine("");
 
                 var showtimesThisWeek = selectedMovie.Showtimes
-                    .Where(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek)
+                    .Where(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2))
                     .OrderBy(s => s.StartTime)
                     .ToList();
 
@@ -356,14 +364,31 @@ namespace Cinema.Services
                         .PageSize(10)
                 );
 
-                var cinemahall = selectedShowtime.RoomId;
-                Console.Clear();
-                ShowCinemaHall(db, cinemahall);
+                if (selectedMovie.MinAgeRating >= 16)
+                {
+                    AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
+                    AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
+
+                    var confirmation = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .AddChoices("Ja", "Nee")
+                    );
+
+                    if (confirmation.ToLower() == "ja")
+                    {
+                        var cinemahall = selectedShowtime.RoomId;
+                        Console.Clear();
+                        ShowCinemaHall(db, cinemahall);
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        ListMoviesWithShowtimes(db);
+                    }
+                }
                 break;
             }
         }
-
-
 
         public void ShowCinemaHall(CinemaContext db, string cinemahall)
         {

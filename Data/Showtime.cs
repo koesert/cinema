@@ -11,5 +11,6 @@ namespace Cinema.Data
 
         [Column(TypeName = "jsonb")]
         public List<Seat> Prices { get; set; }
+        public virtual ICollection<CinemaSeat> CinemaSeats { get; set; }
     }
 }
