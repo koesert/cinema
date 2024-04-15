@@ -1330,10 +1330,9 @@ public class CinemaReservationSystem
 
 
                 }
-                // var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, showtime);
-                // db.CinemaSeats.Add(cinemaSeat);
+
             }
-            
+
         }
         db.SaveChanges();
     }
@@ -1349,7 +1348,7 @@ public class CinemaReservationSystem
         Console.Write("  ");
         var highestSeatNumber = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
-            .Max(s => s.SeatNumber);
+            .Max(s => s.SeatNumber) - 1;
 
         for (int i = 1; i <= highestSeatNumber; i++)
         {
@@ -1411,6 +1410,7 @@ public class CinemaReservationSystem
         Console.Write("     Geel: 25,-");
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write("     Rood: 30,-");
+        Console.WriteLine();
         Console.ResetColor();
     }
     private void MovieScreenPrint()
@@ -1452,44 +1452,50 @@ public class CinemaReservationSystem
         }
     }
 
-    public static CinemaSeat FindSeat(char row, int seatNumber)
+    public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
     {
-        // int rowIndex = row - 'A';
-        // if (rowIndex < 0 || rowIndex >= Seats.Count)
-        // {
-        //     return null;
-        // }
+        var highestRowChar = db.CinemaSeats
+        .Where(s => s.Showtime.Id == showtime.Id)
+        .Max(s => s.Row);
 
-        // List<CinemaSeat> rowSeats = Seats[rowIndex];
-        // foreach (CinemaSeat seat in rowSeats)
-        // {
-        //     if (seat != null)
-        //     {
-        //         if (seat.Row == row && seat.SeatNumber == seatNumber)
-        //         {
-        //             return seat;
-        //         }
-        //     }
-        // }
-        return null;
+        int highestRow = highestRowChar - 'A' + 1;
+        int rowIndex = row - 'A';
+        if (rowIndex < 0 || rowIndex >= highestRow)
+        {
+            return null;
+        }
+
+        var seatCheck = db.CinemaSeats
+        .Where(s => s.Showtime.Id == showtime.Id && s.Row == row && s.SeatNumber == seatNumber)
+        .ToList();
+
+        if (seatCheck.Any() && seatCheck.First().SeatNumber > 0)
+        {
+
+            return seatCheck.First();
+        }
+        else
+        {
+            return null;
+        }
     }
 
-    public static bool ReserveSeat(char row, int seatNumber)
+    public static bool ReserveSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
     {
-        CinemaSeat seatToReserve = FindSeat(row, seatNumber);
+        CinemaSeat seatToReserve = FindSeat(row, seatNumber, showtime, db);
 
         if (seatToReserve == null)
         {
-            return false; // Seat not found
+            return false;
         }
 
         if (seatToReserve.IsReserved)
         {
             Console.WriteLine($"Stoel {row}{seatNumber} is al gereserveerd.");
-            return false; // Seat already reserved
+            return false;
         }
 
         seatToReserve.IsReserved = true;
-        return true; // Reservation successful
+        return true;
     }
 }

@@ -173,7 +173,6 @@ namespace Cinema.Services
                 db.SaveChanges();
 
                 CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(showTime, db);
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Film succesvol toegevoegd aan de database!");
                 Console.ResetColor();
@@ -378,7 +377,6 @@ namespace Cinema.Services
 
                     if (confirmation.ToLower() == "ja")
                     {
-                        // var cinemahall = selectedShowtime.RoomId;
                         Console.Clear();
                         ShowCinemaHall(db, selectedShowtime);
                     }
@@ -394,10 +392,9 @@ namespace Cinema.Services
             }
         }
 
-        public void ShowCinemaHall(CinemaContext db, Showtime cinemahall)
+        public void ShowCinemaHall(CinemaContext db, Showtime showtime)
         {
-            // CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(cinemahall, db);
-            CinemaReservationSystem.DrawPlan(db, cinemahall);
+            CinemaReservationSystem.DrawPlan(db, showtime);
 
             Console.WriteLine("\n\n");
 
@@ -418,8 +415,8 @@ namespace Cinema.Services
                 {
                     char selectedRow;
                     char endRow = 'T';
-                    if (cinemahall.RoomId == "1") endRow = 'N';
-                    if (cinemahall.RoomId == "2") endRow = 'S';
+                    if (showtime.RoomId == "1") endRow = 'N';
+                    if (showtime.RoomId == "2") endRow = 'S';
 
                     Console.WriteLine($"Voer de rij in (A-{endRow}) voor stoel {i + 1}:");
                     while (!char.TryParse(Console.ReadLine().ToUpper(), out selectedRow) || selectedRow < 'A' || selectedRow > endRow)
@@ -430,22 +427,25 @@ namespace Cinema.Services
                     }
 
                     int selectedSeatNumber;
+                    var highestSeatNumber = db.CinemaSeats
+                    .Where(s => s.Showtime.Id == showtime.Id)
+                    .Max(s => s.SeatNumber) - 1;
                     while (true)
                     {
-                        // Console.WriteLine($"Voer het stoelnummer in voor stoel {i + 1} (1-{cinemaSystem.Seats[0].Count}):");
-                        // if (int.TryParse(Console.ReadLine(), out selectedSeatNumber) && selectedSeatNumber >= 1 && selectedSeatNumber <= cinemaSystem.Seats[0].Count)
-                        // {
-                        //     break;
-                        // }
-                        // else
-                        // {
-                        //     Console.ForegroundColor = ConsoleColor.Red;
-                        //     // Console.WriteLine($"Ongeldig stoelnummer. Voer een nummer in tussen 1 en {cinemaSystem.Seats[0].Count}.");
-                        //     Console.ResetColor();
-                        // }
+                        Console.WriteLine($"Voer het stoelnummer in voor stoel {i + 1} (1-{highestSeatNumber}):");
+                        if (int.TryParse(Console.ReadLine(), out selectedSeatNumber) && selectedSeatNumber >= 1 && selectedSeatNumber <= highestSeatNumber)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"Ongeldig stoelnummer. Voer een nummer in tussen 1 en {highestSeatNumber}.");
+                            Console.ResetColor();
+                        }
                     }
 
-                    CinemaSeat selectedSeat = CinemaReservationSystem.FindSeat(selectedRow, selectedSeatNumber);
+                    CinemaSeat selectedSeat = CinemaReservationSystem.FindSeat(selectedRow, selectedSeatNumber, showtime, db);
                     if (selectedSeat == null)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
@@ -457,7 +457,7 @@ namespace Cinema.Services
                     else if (selectedSeat.IsReserved)
                     {
                         Console.Clear();
-                        CinemaReservationSystem.DrawPlan(db, cinemahall);
+                        CinemaReservationSystem.DrawPlan(db, showtime);
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Stoel {selectedRow}{selectedSeatNumber} is al gereserveerd.");
                         Console.ResetColor();
@@ -466,62 +466,44 @@ namespace Cinema.Services
                     }
 
 
-                    selectedSeats.Add(CinemaReservationSystem.FindSeat(selectedRow, selectedSeatNumber));
+                    selectedSeats.Add(CinemaReservationSystem.FindSeat(selectedRow, selectedSeatNumber, showtime, db));
                 }
 
                 Console.Clear();
-                bool allSeatsAvailable = true;
+                bool allSeatsReserved = true;
                 foreach (CinemaSeat selectedSeat in selectedSeats)
                 {
-                    if (selectedSeat == null)
+                    if (!CinemaReservationSystem.ReserveSeat(selectedSeat.Row, selectedSeat.SeatNumber, showtime, db))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Op tenminste één van de geselecteerde plaatsen zit geen stoel.");
-                        Console.ResetColor();
-                        allSeatsAvailable = false;
-                        break;
-                    }
-                    else if (selectedSeat.IsReserved)
-                    {
-                        Console.Clear();
-                        CinemaReservationSystem.DrawPlan(db, cinemahall);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} is al gereserveerd.");
-                        Console.ResetColor();
-                        allSeatsAvailable = false;
+                        allSeatsReserved = false;
                         break;
                     }
                 }
-                // Console.Clear();
-                if (allSeatsAvailable)
+                if (allSeatsReserved)
                 {
-                    bool allSeatsReserved = true;
                     foreach (CinemaSeat selectedSeat in selectedSeats)
                     {
-                        if (!CinemaReservationSystem.ReserveSeat(selectedSeat.Row, selectedSeat.SeatNumber))
+                        var seatToUpdate = db.CinemaSeats
+                        .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == selectedSeat.Row && s.SeatNumber == selectedSeat.SeatNumber);
+                        if (seatToUpdate != null)
                         {
-                            allSeatsReserved = false;
-                            break;
-                        }
-                    }
-                    if (allSeatsReserved)
-                    {
-                        foreach (CinemaSeat selectedSeat in selectedSeats)
-                        {
+                            seatToUpdate.IsReserved = true;
+
+                            db.SaveChanges();
+
                             Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} succesvol gereserveerd!");
+                            Console.WriteLine($"Stoel  {selectedSeat.Row}{selectedSeat.SeatNumber} succesvol gereserveerd!");
                             Console.ResetColor();
                         }
                     }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Reservering mislukt. Sommige van de geselecteerde stoelen zijn al gereserveerd.");
-                        Console.ResetColor();
-                    }
                 }
-
-                CinemaReservationSystem.DrawPlan(db, cinemahall);
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Reservering mislukt. Sommige van de geselecteerde stoelen zijn al gereserveerd.");
+                    Console.ResetColor();
+                }
+                CinemaReservationSystem.DrawPlan(db, showtime);
 
                 Console.WriteLine("Wil je meer stoelen reserveren? (Y/N)");
                 string continueReserving = Console.ReadLine().ToLower();
