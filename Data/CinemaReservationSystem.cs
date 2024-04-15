@@ -1100,8 +1100,8 @@ public class CinemaReservationSystem
         {
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
                 new CinemaSeat(1, 3),
                 new CinemaSeat(1, 4),
                 new CinemaSeat(1, 5),
@@ -1110,12 +1110,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 8),
                 new CinemaSeat(1, 9),
                 new CinemaSeat(1, 10),
-                null,
-                null
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(2, 0),
                 new CinemaSeat(2, 2),
                 new CinemaSeat(2, 3),
                 new CinemaSeat(2, 4),
@@ -1126,11 +1126,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 9),
                 new CinemaSeat(2, 10),
                 new CinemaSeat(2, 11),
-                null
+                new CinemaSeat(2, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(3, 0),
                 new CinemaSeat(3, 2),
                 new CinemaSeat(3, 3),
                 new CinemaSeat(3, 4),
@@ -1141,7 +1141,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 9),
                 new CinemaSeat(3, 10),
                 new CinemaSeat(3, 11),
-                null
+                new CinemaSeat(3, 0)
             },
             new List<CinemaSeat>
             {
@@ -1265,7 +1265,7 @@ public class CinemaReservationSystem
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(12, 0),
                 new CinemaSeat(12, 2),
                 new CinemaSeat(12, 3),
                 new CinemaSeat(12, 4),
@@ -1276,12 +1276,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 9),
                 new CinemaSeat(12, 10),
                 new CinemaSeat(12, 11),
-                null
+                new CinemaSeat(12, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(13, 0),
+                new CinemaSeat(13, 0),
                 new CinemaSeat(13, 3),
                 new CinemaSeat(13, 4),
                 new CinemaSeat(13, 5),
@@ -1290,13 +1290,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 8),
                 new CinemaSeat(13, 9),
                 new CinemaSeat(13, 10),
-                null,
-                null
+                new CinemaSeat(13, 0),
+                new CinemaSeat(13, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(14, 0),
+                new CinemaSeat(14, 0),
                 new CinemaSeat(14, 3),
                 new CinemaSeat(14, 4),
                 new CinemaSeat(14, 5),
@@ -1305,8 +1305,8 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 8),
                 new CinemaSeat(14, 9),
                 new CinemaSeat(14, 10),
-                null,
-                null
+                new CinemaSeat(14, 0),
+                new CinemaSeat(14, 0)
             }
         };
 
@@ -1349,7 +1349,7 @@ public class CinemaReservationSystem
         Console.Write(" ");
         var highestSeatNumber = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
-            .Max(s => s.SeatNumber)- 1;
+            .Max(s => s.SeatNumber);
 
         for (int i = 1; i <= highestSeatNumber; i++)
         {
@@ -1372,7 +1372,7 @@ public class CinemaReservationSystem
                 Console.Write(rowchar);
             }
 
-            if (seat.Row == '0')
+            if (seat.SeatNumber == 0)
             {
                 Console.Write("  ");
             }
