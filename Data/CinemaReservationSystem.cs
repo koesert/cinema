@@ -1346,7 +1346,7 @@ public class CinemaReservationSystem
 
     public static void DrawPlan(CinemaContext db, Showtime Showtime)
     {
-        Console.Write(" ");
+        Console.Write("  ");
         var highestSeatNumber = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
             .Max(s => s.SeatNumber);
@@ -1376,7 +1376,7 @@ public class CinemaReservationSystem
 
             if (seat.SeatNumber == 0)
             {
-                Console.Write("  ");
+                Console.Write(" ");
             }
             else if (seat.IsReserved)
             {
@@ -1405,6 +1405,13 @@ public class CinemaReservationSystem
         }
 
         Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.Write("Blauw: 20,-");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write("     Geel: 25,-");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write("     Rood: 30,-");
+        Console.ResetColor();
     }
     private void MovieScreenPrint()
     {
