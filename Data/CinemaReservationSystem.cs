@@ -1361,6 +1361,8 @@ public class CinemaReservationSystem
         Console.Write(rowchar);
         var showtimes = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
+            .OrderBy(s => s.Row)
+            .ThenBy(s => s.SeatNumber)
             .ToList();
 
         foreach (var seat in showtimes)
