@@ -1333,8 +1333,9 @@ public class CinemaReservationSystem
                 // var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, showtime);
                 // db.CinemaSeats.Add(cinemaSeat);
             }
+            
         }
-        db.SaveChanges(); // Opslaan van zitplaatsen in de database
+        db.SaveChanges();
     }
 
 
@@ -1348,11 +1349,11 @@ public class CinemaReservationSystem
         Console.Write(" ");
         var highestSeatNumber = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
-            .Max(s => s.SeatNumber);
+            .Max(s => s.SeatNumber)- 1;
 
         for (int i = 1; i <= highestSeatNumber; i++)
         {
-            Console.Write($" {(i < 10 ? i.ToString() + " " : i.ToString())}");
+            Console.Write($"{(i < 10 ? i.ToString() + " " : i.ToString())}");
         }
         Console.WriteLine();
 
@@ -1360,8 +1361,6 @@ public class CinemaReservationSystem
         Console.Write(rowchar);
         var showtimes = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id)
-            .OrderBy(s => s.Row)
-            .ThenBy(s => s.SeatNumber)
             .ToList();
 
         foreach (var seat in showtimes)

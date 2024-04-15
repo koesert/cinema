@@ -37,4 +37,13 @@ public class CinemaSeat
         Price = 0;
         Showtime = showtime;
     }
+    public CinemaSeat(Showtime showtime, int price)
+    {
+        Layout = "0";
+        Row = '0';
+        SeatNumber = 0;
+        Color = "null";
+        Price = price;
+        Showtime = showtime;
+    }
 }
