@@ -1,5 +1,6 @@
 using System.Text;
 using Cinema.Data;
+using Spectre.Console;
 
 public class CinemaReservationSystem
 {
@@ -1384,9 +1385,7 @@ public class CinemaReservationSystem
             }
             else if (seat.Color == "orange")
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write(seat.Layout);
-                Console.ResetColor();
+                AnsiConsole.Markup($"[orange1]{seat.Layout}[/]");
             }
             else if (seat.Color == "red")
             {
@@ -1405,10 +1404,11 @@ public class CinemaReservationSystem
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.Write("Blauw: 20,-");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write("     Geel: 25,-");
+        AnsiConsole.Markup($"[orange1]     Oranje: 25,-[/]");
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write("     Rood: 30,-");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write("     Groen: Gereserveerde Stoelen ");
         Console.WriteLine();
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
