@@ -1,7 +1,7 @@
 public enum CinemaFilterChoice
 {
     Genres,
-    Cast,
-    Directors,
-    Exit
+    Acteurs,
+    Directeuren,
+    Terug
 }
