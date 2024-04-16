@@ -73,10 +73,10 @@ namespace Cinema
                                 AnsiConsole.Write(new FigletText("Your Eyes").Centered().Color(Color.Blue));
                                 AnsiConsole.Write(new FigletText("---------------").Centered().Color(Color.Blue));
                                 AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                                continue; // Prompt for credentials again
+                                continue;
                             }
                         }
-                        break; // Add this break statement
+                        break;
                 }
             }
         }
