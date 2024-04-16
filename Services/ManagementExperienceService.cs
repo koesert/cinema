@@ -233,7 +233,7 @@ namespace Cinema.Services
 
                 CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(showTime, db);
                 AnsiConsole.Markup("[green]Film succesvol toegevoegd aan de database![/]");
-                AnsiConsole.WriteLine("Druk op een toets om terug te gaan....");
+                AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
                 Console.ReadKey();
                 break;
             }
