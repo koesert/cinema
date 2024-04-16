@@ -1120,7 +1120,7 @@ public class CinemaReservationSystem
             }
         };
     }
-    private void Configure150()
+    public void Configure150()
     {
         Seats = new List<List<CinemaSeat>>
         {
@@ -1339,12 +1339,15 @@ public class CinemaReservationSystem
 
 
 
-
-
-
-
-    public static void DrawPlan(CinemaContext db, Showtime Showtime)
+    public static void DrawPlan(CinemaContext db, Showtime Showtime, char selectedRow, int selectedSeatNumber)
     {
+        int originalLeft = Console.CursorLeft;
+        int originalTop = Console.CursorTop;
+
+        // Move the cursor to the top-left corner of the cinema hall layout area
+        Console.SetCursorPosition(0, 0);
+
+        // Write the cinema hall layout
         Console.Write("  ");
         var highestSeatNumber = db.CinemaSeats
             .Where(s => s.Showtime.Id == Showtime.Id && s.SeatNumber != 99)
@@ -1377,6 +1380,12 @@ public class CinemaReservationSystem
             {
                 Console.Write("   ");
             }
+            else if (seat.Row == selectedRow && seat.SeatNumber == selectedSeatNumber)
+            {
+                Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                Console.Write(seat.Layout + " ");
+                Console.ResetColor();
+            }
             else if (seat.IsReserved)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -1385,7 +1394,9 @@ public class CinemaReservationSystem
             }
             else if (seat.Color == "orange")
             {
-                AnsiConsole.Markup($"[orange1]{seat.Layout} [/]");
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write(seat.Layout + " ");
+                Console.ResetColor();
             }
             else if (seat.Color == "red")
             {
@@ -1401,11 +1412,13 @@ public class CinemaReservationSystem
             }
         }
 
+        // Write the additional information
         Console.WriteLine();
         MovieScreenPrint(db, Showtime);
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.Write("Blauw: 20,-");
-        AnsiConsole.Markup($"[orange1]     Oranje: 25,-[/]");
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.Write("     Oranje: 25,-");
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write("     Rood: 30,-");
         Console.ForegroundColor = ConsoleColor.Green;
@@ -1413,7 +1426,19 @@ public class CinemaReservationSystem
         Console.WriteLine();
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
+
+        // Restore the original cursor position
+        Console.SetCursorPosition(originalLeft, originalTop);
     }
+
+
+    public static void ClearConsole()
+    {
+        Console.SetCursorPosition(0, Console.CursorTop - 1);
+        Console.Write(new string(' ', Console.WindowWidth));
+        Console.SetCursorPosition(0, Console.CursorTop - 1);
+    }
+
     private static void MovieScreenPrint(CinemaContext db, Showtime Showtime)
     {
         var highestSeatNumber = db.CinemaSeats
@@ -1458,30 +1483,10 @@ public class CinemaReservationSystem
 
     public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
     {
-        var highestRowChar = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id)
-        .Max(s => s.Row);
-
-        int highestRow = highestRowChar - 'A' + 1;
-        int rowIndex = row - 'A';
-        if (rowIndex < 0 || rowIndex >= highestRow)
-        {
-            return null;
-        }
-
         var seatCheck = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id && s.Row == row && s.SeatNumber == seatNumber)
-        .ToList();
+            .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == row && s.SeatNumber == seatNumber);
 
-        if (seatCheck.Any() && seatCheck.First().SeatNumber > 0)
-        {
-
-            return seatCheck.First();
-        }
-        else
-        {
-            return null;
-        }
+        return seatCheck;
     }
 
     public static bool ReserveSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
