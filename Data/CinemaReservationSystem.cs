@@ -14,7 +14,7 @@ public class CinemaReservationSystem
         Showtime = showtime;
         if (totalseatnum == 150)
         {
-            Configure150(db);
+            Configure150();
         }
         else if (totalseatnum == 300)
         {
@@ -24,6 +24,31 @@ public class CinemaReservationSystem
         {
             Configure500();
         }
+        foreach (var row in Seats)
+        {
+            foreach (var seat in row)
+            {
+                if (seat is null)
+                {
+                    var cinemaSeat = new CinemaSeat(Showtime);
+                    db.CinemaSeats.Add(cinemaSeat);
+
+                }
+                else
+                {
+                    var Row = seat.Row;
+                    var SeatNumber = seat.SeatNumber;
+                    var Color = seat.Color;
+                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
+                    db.CinemaSeats.Add(cinemaSeat);
+
+
+                }
+
+            }
+
+        }
+        db.SaveChanges();
     }
     private void Configure500()
     {
@@ -31,10 +56,10 @@ public class CinemaReservationSystem
         {
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
-                null,
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
                 new CinemaSeat(1, 5),
                 new CinemaSeat(1, 6),
                 new CinemaSeat(1, 7),
@@ -57,16 +82,16 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 24),
                 new CinemaSeat(1, 25),
                 new CinemaSeat(1, 26),
-                null,
-                null,
-                null,
-                null
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0),
+                new CinemaSeat(1, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(2, 0),
+                new CinemaSeat(2, 0),
+                new CinemaSeat(2, 0),
                 new CinemaSeat(2, 4),
                 new CinemaSeat(2, 5),
                 new CinemaSeat(2, 6),
@@ -91,15 +116,15 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 25),
                 new CinemaSeat(2, 26),
                 new CinemaSeat(2, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(2, 0),
+                new CinemaSeat(2, 0),
+                new CinemaSeat(2, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(3, 0),
+                new CinemaSeat(3, 0),
+                new CinemaSeat(3, 0),
                 new CinemaSeat(3, 4),
                 new CinemaSeat(3, 5),
                 new CinemaSeat(3, 6),
@@ -124,15 +149,15 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 25),
                 new CinemaSeat(3, 26),
                 new CinemaSeat(3, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(3, 0),
+                new CinemaSeat(3, 0),
+                new CinemaSeat(3, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(4, 0),
+                new CinemaSeat(4, 0),
+                new CinemaSeat(4, 0),
                 new CinemaSeat(4, 4),
                 new CinemaSeat(4, 5),
                 new CinemaSeat(4, 6),
@@ -157,14 +182,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 25),
                 new CinemaSeat(4, 26),
                 new CinemaSeat(4, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(4, 0),
+                new CinemaSeat(4, 0),
+                new CinemaSeat(4, 0)
             },
             new List<CinemaSeat> {
-                null,
-                null,
-                null,
+                new CinemaSeat(5, 0),
+                new CinemaSeat(5, 0),
+                new CinemaSeat(5, 0),
                 new CinemaSeat(5, 4),
                 new CinemaSeat(5, 5),
                 new CinemaSeat(5, 6),
@@ -189,13 +214,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(5, 25),
                 new CinemaSeat(5, 26),
                 new CinemaSeat(5, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(5, 0),
+                new CinemaSeat(5, 0),
+                new CinemaSeat(5, 0)
             },
             new List<CinemaSeat> {
-                null,
-                null,
+                new CinemaSeat(6, 0),
+                new CinemaSeat(6, 0),
                 new CinemaSeat(6, 3),
                 new CinemaSeat(6, 4),
                 new CinemaSeat(6, 5),
@@ -222,12 +247,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 26),
                 new CinemaSeat(6, 27),
                 new CinemaSeat(6, 28),
-                null,
-                null
+                new CinemaSeat(6, 0),
+                new CinemaSeat(6, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(7, 0),
                 new CinemaSeat(7, 2),
                 new CinemaSeat(7, 3),
                 new CinemaSeat(7, 4),
@@ -256,7 +281,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(7, 27),
                 new CinemaSeat(7, 28),
                 new CinemaSeat(7, 29),
-                null
+                new CinemaSeat(7, 0)
             },
             new List<CinemaSeat>
             {
@@ -425,7 +450,7 @@ public class CinemaReservationSystem
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(13, 0),
                 new CinemaSeat(13, 2),
                 new CinemaSeat(13, 3),
                 new CinemaSeat(13, 4),
@@ -454,12 +479,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 27),
                 new CinemaSeat(13, 28),
                 new CinemaSeat(13, 29),
-                null
+                new CinemaSeat(13, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(14, 0),
+                new CinemaSeat(14, 0),
                 new CinemaSeat(14, 3),
                 new CinemaSeat(14, 4),
                 new CinemaSeat(14, 5),
@@ -486,13 +511,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 26),
                 new CinemaSeat(14, 27),
                 new CinemaSeat(14, 28),
-                null,
-                null
+                new CinemaSeat(14, 0),
+                new CinemaSeat(14, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(15, 0),
+                new CinemaSeat(15, 0),
                 new CinemaSeat(15, 3),
                 new CinemaSeat(15, 4),
                 new CinemaSeat(15, 5),
@@ -519,14 +544,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(15, 26),
                 new CinemaSeat(15, 27),
                 new CinemaSeat(15, 28),
-                null,
-                null
+                new CinemaSeat(15, 0),
+                new CinemaSeat(15, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0),
                 new CinemaSeat(16, 4),
                 new CinemaSeat(16, 5),
                 new CinemaSeat(16, 6),
@@ -551,15 +576,15 @@ public class CinemaReservationSystem
                 new CinemaSeat(16, 25),
                 new CinemaSeat(16, 26),
                 new CinemaSeat(16, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0),
                 new CinemaSeat(17, 4),
                 new CinemaSeat(17, 5),
                 new CinemaSeat(17, 6),
@@ -584,17 +609,17 @@ public class CinemaReservationSystem
                 new CinemaSeat(17, 25),
                 new CinemaSeat(17, 26),
                 new CinemaSeat(17, 27),
-                null,
-                null,
-                null
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
-                null,
-                null,
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
                 new CinemaSeat(18, 6),
                 new CinemaSeat(18, 7),
                 new CinemaSeat(18, 8),
@@ -615,21 +640,21 @@ public class CinemaReservationSystem
                 new CinemaSeat(18, 23),
                 new CinemaSeat(18, 24),
                 new CinemaSeat(18, 25),
-                null,
-                null,
-                null,
-                null,
-                null
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
                 new CinemaSeat(19, 8),
                 new CinemaSeat(19, 9),
                 new CinemaSeat(19, 10),
@@ -646,24 +671,24 @@ public class CinemaReservationSystem
                 new CinemaSeat(19, 21),
                 new CinemaSeat(19, 22),
                 new CinemaSeat(19, 23),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
                 new CinemaSeat(20, 9),
                 new CinemaSeat(20, 10),
                 new CinemaSeat(20, 11),
@@ -678,14 +703,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(20, 20),
                 new CinemaSeat(20, 21),
                 new CinemaSeat(20, 22),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0),
+                new CinemaSeat(20, 0)
             }
         };
     }
@@ -695,7 +720,7 @@ public class CinemaReservationSystem
         {
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(1, 0),
                 new CinemaSeat(1, 2),
                 new CinemaSeat(1, 3),
                 new CinemaSeat(1, 4),
@@ -712,11 +737,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 15),
                 new CinemaSeat(1, 16),
                 new CinemaSeat(1, 17),
-                null
+                new CinemaSeat(1, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(2, 0),
                 new CinemaSeat(2, 2),
                 new CinemaSeat(2, 3),
                 new CinemaSeat(2, 4),
@@ -733,11 +758,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 15),
                 new CinemaSeat(2, 16),
                 new CinemaSeat(2, 17),
-                null
+                new CinemaSeat(2, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(3, 0),
                 new CinemaSeat(3, 2),
                 new CinemaSeat(3, 3),
                 new CinemaSeat(3, 4),
@@ -754,11 +779,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 15),
                 new CinemaSeat(3, 16),
                 new CinemaSeat(3, 17),
-                null
+                new CinemaSeat(3, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(4, 0),
                 new CinemaSeat(4, 2),
                 new CinemaSeat(4, 3),
                 new CinemaSeat(4, 4),
@@ -775,11 +800,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 15),
                 new CinemaSeat(4, 16),
                 new CinemaSeat(4, 17),
-                null
+                new CinemaSeat(4, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(5, 0),
                 new CinemaSeat(5, 2),
                 new CinemaSeat(5, 3),
                 new CinemaSeat(5, 4),
@@ -796,11 +821,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(5, 15),
                 new CinemaSeat(5, 16),
                 new CinemaSeat(5, 17),
-                null
+                new CinemaSeat(5, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(6, 0),
                 new CinemaSeat(6, 2),
                 new CinemaSeat(6, 3),
                 new CinemaSeat(6, 4),
@@ -817,7 +842,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 15),
                 new CinemaSeat(6, 16),
                 new CinemaSeat(6, 17),
-                null
+                new CinemaSeat(6, 0)
             },
             new List<CinemaSeat>
             {
@@ -926,7 +951,7 @@ public class CinemaReservationSystem
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(12, 0),
                 new CinemaSeat(12, 2),
                 new CinemaSeat(12, 3),
                 new CinemaSeat(12, 4, "orange"),
@@ -943,11 +968,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 15, "orange"),
                 new CinemaSeat(12, 16),
                 new CinemaSeat(12, 17),
-                null
+                new CinemaSeat(12, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(13, 0),
                 new CinemaSeat(13, 2),
                 new CinemaSeat(13, 3),
                 new CinemaSeat(13, 4),
@@ -964,11 +989,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 15),
                 new CinemaSeat(13, 16),
                 new CinemaSeat(13, 17),
-                null
+                new CinemaSeat(13, 0)
             },
             new List<CinemaSeat>
             {
-                null,
+                new CinemaSeat(14, 0),
                 new CinemaSeat(14, 2),
                 new CinemaSeat(14, 3),
                 new CinemaSeat(14, 4),
@@ -985,12 +1010,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 15),
                 new CinemaSeat(14, 16),
                 new CinemaSeat(14, 17),
-                null
+                new CinemaSeat(14, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(15, 0),
+                new CinemaSeat(15, 0),
                 new CinemaSeat(15, 3),
                 new CinemaSeat(15, 4),
                 new CinemaSeat(15, 5),
@@ -1005,13 +1030,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(15, 14),
                 new CinemaSeat(15, 15),
                 new CinemaSeat(15, 16),
-                null,
-                null
+                new CinemaSeat(15, 0),
+                new CinemaSeat(15, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0),
                 new CinemaSeat(16, 3),
                 new CinemaSeat(16, 4),
                 new CinemaSeat(16, 5),
@@ -1026,13 +1051,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(16, 14),
                 new CinemaSeat(16, 15),
                 new CinemaSeat(16, 16),
-                null,
-                null
+                new CinemaSeat(16, 0),
+                new CinemaSeat(16, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0),
                 new CinemaSeat(17, 3),
                 new CinemaSeat(17, 4),
                 new CinemaSeat(17, 5),
@@ -1047,14 +1072,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(17, 14),
                 new CinemaSeat(17, 15),
                 new CinemaSeat(17, 16),
-                null,
-                null
+                new CinemaSeat(17, 0),
+                new CinemaSeat(17, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
                 new CinemaSeat(18, 4),
                 new CinemaSeat(18, 5),
                 new CinemaSeat(18, 6),
@@ -1067,15 +1092,15 @@ public class CinemaReservationSystem
                 new CinemaSeat(18, 13),
                 new CinemaSeat(18, 14),
                 new CinemaSeat(18, 15),
-                null,
-                null,
-                null
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0),
+                new CinemaSeat(18, 0)
             },
             new List<CinemaSeat>
             {
-                null,
-                null,
-                null,
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
                 new CinemaSeat(19, 4),
                 new CinemaSeat(19, 5),
                 new CinemaSeat(19, 6),
@@ -1088,13 +1113,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(19, 13),
                 new CinemaSeat(19, 14),
                 new CinemaSeat(19, 15),
-                null,
-                null,
-                null
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0),
+                new CinemaSeat(19, 0)
             }
         };
     }
-    private void Configure150(CinemaContext db)
+    private void Configure150()
     {
         Seats = new List<List<CinemaSeat>>
         {
@@ -1309,32 +1334,6 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 0)
             }
         };
-
-        foreach (var row in Seats)
-        {
-            foreach (var seat in row)
-            {
-                if (seat is null)
-                {
-                    var cinemaSeat = new CinemaSeat(Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-
-                }
-                else
-                {
-                    var Row = seat.Row;
-                    var SeatNumber = seat.SeatNumber;
-                    var Color = seat.Color;
-                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-
-
-                }
-
-            }
-
-        }
-        db.SaveChanges();
     }
 
 
@@ -1412,6 +1411,7 @@ public class CinemaReservationSystem
         Console.Write("     Rood: 30,-");
         Console.WriteLine();
         Console.ResetColor();
+        Console.WriteLine($"Zaal {Showtime.RoomId}");
     }
     private void MovieScreenPrint()
     {
