@@ -1402,6 +1402,7 @@ public class CinemaReservationSystem
         }
 
         Console.WriteLine();
+        MovieScreenPrint(db, Showtime);
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.Write("Blauw: 20,-");
         AnsiConsole.Markup($"[orange1]     Oranje: 25,-[/]");
@@ -1413,16 +1414,17 @@ public class CinemaReservationSystem
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
     }
-    private void MovieScreenPrint()
+    private static void MovieScreenPrint(CinemaContext db, Showtime Showtime)
     {
-        var counts = Seats.Select(innerList => innerList.Count(seat => seat != null)).ToList();
-        int len = counts.Max();
+        var highestSeatNumber = db.CinemaSeats
+            .Where(s => s.Showtime.Id == Showtime.Id)
+            .Max(s => s.SeatNumber) - 1;
         string line = "__";
         string screentext = " ";
-        for (int i = 1; i <= counts.Max(); i++)
+        for (int i = 1; i <= highestSeatNumber; i++)
         {
             line += "_";
-            if (i >= 6)
+            if (i >= 5)
             {
                 screentext += " ";
             }
