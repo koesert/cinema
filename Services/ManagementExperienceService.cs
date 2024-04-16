@@ -563,7 +563,9 @@ namespace Cinema.Services
                 string continueReserving = Console.ReadLine().ToLower();
                 if (continueReserving != "y")
                 {
+                    Console.Clear();
                     break;
+
                 }
             }
         }
