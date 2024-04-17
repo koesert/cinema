@@ -448,6 +448,8 @@ namespace Cinema.Services
 
         public void ShowCinemaHall(CinemaContext db, Showtime showtime)
         {
+
+            Console.CursorVisible = false;
             // Console.Clear();
             int currentRow = 0;
             int currentSeatNumber = 0;
@@ -472,9 +474,16 @@ namespace Cinema.Services
 
             while (true)
             {
-                // Calculate the line used for layout
+
                 Console.SetCursorPosition(0, selectedSeatLine);
-                Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{currentSeatNumber + 1}");
+                // Fetch the price of the currently selected seat from the database
+                var selectedSeatPrice = db.CinemaSeats
+                    .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
+
+                // Display the price of the currently selected seat
+                Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
+                Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+
 
                 // Draw the cinema hall layout with the new highlight
                 CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
@@ -563,6 +572,7 @@ namespace Cinema.Services
                     break;
                 }
             }
+            Console.CursorVisible = true;
         }
 
 

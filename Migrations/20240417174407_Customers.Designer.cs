@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    [Migration("20240414181810_CinemaSeatsidk")]
-    partial class CinemaSeatsidk
+    [Migration("20240417174407_Customers")]
+    partial class Customers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,25 @@ namespace cinema.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Administrators");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("Cinema.Data.Hall", b =>

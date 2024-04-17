@@ -42,6 +42,25 @@ namespace cinema.Migrations
                     b.ToTable("Administrators");
                 });
 
+            modelBuilder.Entity("Cinema.Data.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
             modelBuilder.Entity("Cinema.Data.Hall", b =>
                 {
                     b.Property<int>("Id")
