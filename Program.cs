@@ -28,6 +28,7 @@ namespace Cinema
 
             CinemaContext db = new CinemaContext(connectionString);
             ManagementExperienceService service = new ManagementExperienceService();
+            UserExperienceService customerService = new UserExperienceService();
 
             Console.Clear();
             InitialStateChoice currentChoice = InitialStateChoice.Login;
@@ -51,20 +52,52 @@ namespace Cinema
                         service.ListMoviesWithShowtimes(db);
                         break;
                     case InitialStateChoice.Login:
-                        string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                        string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                        Administrator admin = db.Administrators
-                            .FirstOrDefault(admin =>
-                                admin.Username == username && admin.Password == password
-                            );
-
-                        if (admin == null)
+                        var loginChoice = AnsiConsole.Prompt(
+                            new SelectionPrompt<string>()
+                                .Title("Selecteer gebruikerstype:")
+                                .PageSize(10)
+                                .AddChoices(new[] { "Admin", "Gebruiker" })
+                        );
+                        switch (loginChoice)
                         {
-                            AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                            break;
+                            case "Admin":
+                                string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
+                                string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
+
+                                Administrator admin = db.Administrators
+                                    .FirstOrDefault(admin =>
+                                        admin.Username == username && admin.Password == password
+                                    );
+
+                                if (admin == null)
+                                {
+                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
+                                    break;
+                                }
+
+                                service.ManageCinema(admin, db, configuration);
+                                break;
+                            case "Gebruiker":
+                                string customerName = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
+                                string customerPassword = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
+
+                                Customer customer = db.Customers
+                                    .FirstOrDefault(c =>
+                                        c.Username == customerName && c.Password == customerPassword
+                                    );
+
+                                if (customer == null)
+                                {
+                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
+                                    break;
+                                }
+
+                                AnsiConsole.MarkupLine("[green]Succesvol ingelogd als beheerder[/]");
+                                customerService.ManageUser(customer, db, configuration);
+
+                                // Add logic for user actions
+                                break;
                         }
-                        service.ManageCinema(admin, db, configuration);
                         break;
                 }
             }

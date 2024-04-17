@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    [Migration("20240417174407_Customers")]
+    [Migration("20240417175322_Customers")]
     partial class Customers
     {
         /// <inheritdoc />
@@ -165,23 +165,17 @@ namespace cinema.Migrations
                     b.Property<string>("CustomerEmail")
                         .HasColumnType("text");
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CustomerName")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("LastChangedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("PurchaseTotal")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTimeOffset>("PurchasedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("SeatNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SeatRow")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("ShowtimeId")
                         .HasColumnType("integer");
@@ -191,9 +185,11 @@ namespace cinema.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerId");
+
                     b.HasIndex("ShowtimeId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Ticket");
                 });
 
             modelBuilder.Entity("CinemaSeat", b =>
@@ -225,9 +221,14 @@ namespace cinema.Migrations
                     b.Property<int?>("ShowtimeId")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ShowtimeId");
+
+                    b.HasIndex("TicketId");
 
                     b.ToTable("CinemaSeats");
                 });
@@ -243,9 +244,15 @@ namespace cinema.Migrations
 
             modelBuilder.Entity("Cinema.Data.Ticket", b =>
                 {
+                    b.HasOne("Cinema.Data.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
                     b.HasOne("Cinema.Data.Showtime", "Showtime")
                         .WithMany()
                         .HasForeignKey("ShowtimeId");
+
+                    b.Navigation("Customer");
 
                     b.Navigation("Showtime");
                 });
@@ -256,7 +263,13 @@ namespace cinema.Migrations
                         .WithMany("CinemaSeats")
                         .HasForeignKey("ShowtimeId");
 
+                    b.HasOne("Cinema.Data.Ticket", "Ticket")
+                        .WithMany("Seats")
+                        .HasForeignKey("TicketId");
+
                     b.Navigation("Showtime");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Cinema.Data.Movie", b =>
@@ -267,6 +280,11 @@ namespace cinema.Migrations
             modelBuilder.Entity("Cinema.Data.Showtime", b =>
                 {
                     b.Navigation("CinemaSeats");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Ticket", b =>
+                {
+                    b.Navigation("Seats");
                 });
 #pragma warning restore 612, 618
         }

@@ -23,6 +23,7 @@ namespace Cinema.Data
         public DbSet<Administrator> Administrators { get; set; }
         public DbSet<CinemaSeat> CinemaSeats { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Ticket> Ticket { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
