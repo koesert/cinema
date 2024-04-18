@@ -26,7 +26,7 @@ public class UserExperienceService : ManagementExperienceService
       // Prompt the user for their choice
       var choice = AnsiConsole.Prompt(
           new SelectionPrompt<string>()
-              .Title("Welcome! What would you like to do?")
+              .Title($"Welcome {customer.Username}! What would you like to do?")
               .PageSize(10)
               .AddChoices(UserExperienceChoiceDescriptions.Select(kv => kv.Value))
       );
