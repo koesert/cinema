@@ -71,6 +71,7 @@ namespace Cinema
 
                                 if (admin == null)
                                 {
+                                    Console.Clear();
                                     AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
                                     break;
                                 }
@@ -88,6 +89,7 @@ namespace Cinema
 
                                 if (customer == null)
                                 {
+                                    Console.Clear();
                                     AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
                                     break;
                                 }
