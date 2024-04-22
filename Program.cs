@@ -49,7 +49,7 @@ namespace Cinema
                 switch (currentChoice)
                 {
                     case InitialStateChoice.ListMovies:
-                        service.ListMoviesWithShowtimes(db);
+                        customerService.ListMoviesWithShowtimes(db);
                         break;
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
