@@ -10,6 +10,7 @@ public class CinemaSeat
     public bool IsReserved { get; set; } = false;
     public int Price { get; set; }
     public Showtime Showtime { get; set; }
+    public Ticket Ticket { get; set; }
     public CinemaSeat() { }
     public CinemaSeat(char row, int seatnumber, string color)
     {

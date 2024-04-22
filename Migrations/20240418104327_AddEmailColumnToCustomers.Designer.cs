@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    [Migration("20240414181810_CinemaSeatsidk")]
-    partial class CinemaSeatsidk
+    [Migration("20240418104327_AddEmailColumnToCustomers")]
+    partial class AddEmailColumnToCustomers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

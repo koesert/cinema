@@ -448,6 +448,8 @@ namespace Cinema.Services
 
         public void ShowCinemaHall(CinemaContext db, Showtime showtime)
         {
+
+            Console.CursorVisible = false;
             // Console.Clear();
             int currentRow = 0;
             int currentSeatNumber = 0;
@@ -570,6 +572,7 @@ namespace Cinema.Services
                     break;
                 }
             }
+            Console.CursorVisible = true;
         }
 
 
