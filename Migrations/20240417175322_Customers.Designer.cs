@@ -10,11 +10,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Cinema.Migrations
+namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    [Migration("20240322050542_UpdatedDirectorsTableAdded")]
-    partial class UpdatedDirectorsTableAdded
+    [Migration("20240417175322_Customers")]
+    partial class Customers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,25 @@ namespace Cinema.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Administrators");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("Cinema.Data.Hall", b =>
@@ -87,8 +106,8 @@ namespace Cinema.Migrations
                     b.Property<List<string>>("Directors")
                         .HasColumnType("jsonb");
 
-                    b.Property<string>("Duration")
-                        .HasColumnType("text");
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
 
                     b.Property<List<string>>("Genres")
                         .HasColumnType("jsonb");
@@ -146,23 +165,17 @@ namespace Cinema.Migrations
                     b.Property<string>("CustomerEmail")
                         .HasColumnType("text");
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CustomerName")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("LastChangedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("PurchaseTotal")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTimeOffset>("PurchasedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("SeatNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SeatRow")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("ShowtimeId")
                         .HasColumnType("integer");
@@ -172,9 +185,52 @@ namespace Cinema.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerId");
+
                     b.HasIndex("ShowtimeId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Ticket");
+                });
+
+            modelBuilder.Entity("CinemaSeat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsReserved")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Layout")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
+                    b.Property<char>("Row")
+                        .HasColumnType("character(1)");
+
+                    b.Property<int>("SeatNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ShowtimeId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShowtimeId");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("CinemaSeats");
                 });
 
             modelBuilder.Entity("Cinema.Data.Showtime", b =>
@@ -188,16 +244,47 @@ namespace Cinema.Migrations
 
             modelBuilder.Entity("Cinema.Data.Ticket", b =>
                 {
+                    b.HasOne("Cinema.Data.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
                     b.HasOne("Cinema.Data.Showtime", "Showtime")
                         .WithMany()
                         .HasForeignKey("ShowtimeId");
 
+                    b.Navigation("Customer");
+
                     b.Navigation("Showtime");
+                });
+
+            modelBuilder.Entity("CinemaSeat", b =>
+                {
+                    b.HasOne("Cinema.Data.Showtime", "Showtime")
+                        .WithMany("CinemaSeats")
+                        .HasForeignKey("ShowtimeId");
+
+                    b.HasOne("Cinema.Data.Ticket", "Ticket")
+                        .WithMany("Seats")
+                        .HasForeignKey("TicketId");
+
+                    b.Navigation("Showtime");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Cinema.Data.Movie", b =>
                 {
                     b.Navigation("Showtimes");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Showtime", b =>
+                {
+                    b.Navigation("CinemaSeats");
+                });
+
+            modelBuilder.Entity("Cinema.Data.Ticket", b =>
+                {
+                    b.Navigation("Seats");
                 });
 #pragma warning restore 612, 618
         }

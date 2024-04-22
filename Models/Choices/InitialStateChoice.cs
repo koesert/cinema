@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -9,13 +10,11 @@ namespace Cinema.Models.Choices
 {
     public enum InitialStateChoice
     {
-        [Display(Name = "Blader door films & vertoningen")]
+        [Description("Blader door films & vertoningen")]
         ListMovies,
-
-        [Display(Name = "Inloggen")]
+        [Description("Inloggen")]
         Login,
-
-        [Display(Name = "Afsluiten")]
+        [Description("Afsluiten")]
         Exit
     }
 }

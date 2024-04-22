@@ -4,6 +4,7 @@ using Cinema.Models.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Sharprompt;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -16,6 +17,29 @@ namespace Cinema.Services
 {
     public class ManagementExperienceService
     {
+        // Mapping of enum values to their display names
+
+        private static readonly Dictionary<CinemaManagementMovieChoice, string> Descriptions = new Dictionary<CinemaManagementMovieChoice, string>
+        {
+            { CinemaManagementMovieChoice.ListShowtimes, "Lijst met aankomende vertoningen voor deze film" },
+            { CinemaManagementMovieChoice.DeleteMovie, "Verwijder deze film" },
+            { CinemaManagementMovieChoice.AddShowtime, "Voeg een vertoningstijd toe voor deze film" },
+            { CinemaManagementMovieChoice.Exit, "Uitloggen" }
+        };
+
+        private static readonly Dictionary<CinemaManagementAddMovieChoice, string> AddMovieChoiceDescriptions = new Dictionary<CinemaManagementAddMovieChoice, string>
+    {
+        { CinemaManagementAddMovieChoice.AddMovieManually, "Voeg film handmatig toe" },
+        { CinemaManagementAddMovieChoice.AddMovieJSON, "Voeg film(s) toe door JSON-bestand te laden" },
+        { CinemaManagementAddMovieChoice.Exit, "Terug" }
+    };
+        private static readonly Dictionary<CinemaManagementChoice, string> ManagementChoiceDescriptions = new Dictionary<CinemaManagementChoice, string>
+    {
+        { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
+        { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
+        { CinemaManagementChoice.Exit, "Terug" }
+    };
+
         public void ManageCinema(Administrator admin, CinemaContext db, IConfiguration configuration)
         {
             CinemaManagementChoice currentManagerChoice = CinemaManagementChoice.ListMovies;
@@ -23,7 +47,15 @@ namespace Cinema.Services
             {
                 Console.Clear();
 
-                currentManagerChoice = Prompt.Select<CinemaManagementChoice>($"Welkom, {admin.Username}, wat wil je doen?");
+                var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Welkom, {admin.Username}, wat wil je doen?")
+                        .PageSize(10)
+                        .AddChoices(ManagementChoiceDescriptions.Select(kv => kv.Value))
+                );
+
+                // Retrieve the enum value based on the selected description
+                currentManagerChoice = ManagementChoiceDescriptions.FirstOrDefault(kv => kv.Value == choice).Key;
 
                 switch (currentManagerChoice)
                 {
@@ -39,27 +71,43 @@ namespace Cinema.Services
             }
         }
 
-        private void ListMovies(CinemaContext db)
+        public void ListMovies(CinemaContext db)
         {
             Console.Clear();
 
             var movies = db.Movies.ToList();
-            var selectedMovie = Prompt.Select("Selecteer een film", movies, textSelector: movie => movie.Title);
+            var options = movies.Select(movie => movie.Title).ToList();
+            options.Insert(0, "Terug");
 
+            var selectedOption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een film")
+                    .PageSize(10)
+                    .AddChoices(options)
+            );
+
+            if (selectedOption == "Terug")
+            {
+                return;
+            }
+
+            var selectedMovie = movies.First(movie => movie.Title == selectedOption);
             HandleSelectedMovie(db, selectedMovie);
         }
-        private int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
+        public int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
         {
-            var movieOptions = new[]
-            {
-        CinemaManagementMovieChoice.ListShowtimes,
-        CinemaManagementMovieChoice.DeleteMovie,
-        CinemaManagementMovieChoice.AddShowtime,
-        CinemaManagementMovieChoice.Exit
-    };
+            var movieOptions = Descriptions.Values.ToList();
 
-            CinemaManagementMovieChoice currentChoice = Prompt.Select<CinemaManagementMovieChoice>("Wat wil je doen met de film?", movieOptions);
-            switch (currentChoice)
+            var selectedOption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wat wil je doen met de film?")
+                    .PageSize(10)
+                    .AddChoices(movieOptions)
+            );
+
+            var selectedChoice = Descriptions.FirstOrDefault(kv => kv.Value == selectedOption).Key;
+
+            switch (selectedChoice)
             {
                 case CinemaManagementMovieChoice.ListShowtimes:
                     ListShowtimes(db, selectedMovie);
@@ -75,10 +123,8 @@ namespace Cinema.Services
                 default:
                     break;
             }
-
             return 0;
         }
-
         private void ListShowtimes(CinemaContext db, Movie selectedMovie)
         {
             Console.Clear();
@@ -108,55 +154,107 @@ namespace Cinema.Services
         {
             Console.Clear();
 
-            var createShowtime = Prompt.Bind<CreateShowtimeForm>();
+            string roomId;
+            string startTime;
+            bool ready;
 
-            if (createShowtime.Ready.HasValue && !createShowtime.Ready.Value)
-                return;
+            // Prompt user to select RoomId
+            roomId = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een zaal:")
+                    .AddChoices(new[] { "1", "2", "3" })
+            );
 
-            var showTime = new Showtime()
+            // Prompt user for StartTime
+            startTime = AnsiConsole.Prompt(
+                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out _))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        return ValidationResult.Success();
+                    })
+            );
+
+            // Prompt user if they really want to add the movie
+            ready = AnsiConsole.Confirm("Weet je zeker dat je deze film wilt toevoegen?");
+
+            if (!ready)
+                ListMovies(db);
+
+            while (true)
             {
-                Movie = selectedMovie,
-                RoomId = createShowtime.RoomId,
-            };
-
-            if (!DateTimeOffset.TryParseExact(
-                createShowtime.StartTime,
-                "dd-MM-yyyy HH:mm",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal,
-                out DateTimeOffset StartTime
+                if (!DateTimeOffset.TryParseExact(
+                    startTime,
+                    "dd-MM-yyyy HH:mm",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal,
+                    out DateTimeOffset StartTime
                 ))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\"{createShowtime.StartTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                {
+                    AnsiConsole.Markup($"[red]\"{startTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.[/]");
+                    startTime = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Probeer Opnieuw:")
+                            .PromptStyle("yellow")
+                            .Validate(input =>
+                            {
+                                if (!DateTimeOffset.TryParseExact(
+                                    input,
+                                    "dd-MM-yyyy HH:mm",
+                                    CultureInfo.InvariantCulture,
+                                    DateTimeStyles.AssumeUniversal,
+                                    out _))
+                                {
+                                    return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                                }
+                                return ValidationResult.Success();
+                            })
+                    );
+                    continue;
+                }
+
+                var showTime = new Showtime()
+                {
+                    Movie = selectedMovie,
+                    RoomId = roomId,
+                    StartTime = StartTime,
+                };
+
+                db.Showtimes.Add(showTime);
+                db.SaveChanges();
+
+                CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(showTime, db);
+                AnsiConsole.Markup("[green]Film succesvol toegevoegd aan de database![/]");
+                AnsiConsole.WriteLine("Druk op een toets om terug te gaan....");
+                Console.ReadKey();
+                break;
             }
-
-            showTime.StartTime = StartTime;
-            db.Showtimes.Add(showTime);
-            db.SaveChanges();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Film succesvol toegevoegd aan de database!");
-            Console.ResetColor();
-
-            Console.WriteLine("Druk op een toets om terug te gaan....");
-            Console.ReadKey();
-
         }
+
+
 
         private int AddMovieChoice(CinemaContext db)
         {
-            var AddMovieOptions = new[]
-            {
-        CinemaManagementAddMovieChoice.AddMovieManually,
-        CinemaManagementAddMovieChoice.AddMovieJSON,
-        CinemaManagementAddMovieChoice.Exit
-            };
+            var addMovieOptions = AddMovieChoiceDescriptions.Keys.ToList();
 
+            var currentChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Hoe wil je de film toevoegen?")
+                    .PageSize(10)
+                    .AddChoices(AddMovieChoiceDescriptions.Select(kv => kv.Value))
+            );
 
-            CinemaManagementAddMovieChoice currentChoice = Prompt.Select<CinemaManagementAddMovieChoice>("Hoe wil je de film toevoegen?", AddMovieOptions);
+            var choiceEnum = AddMovieChoiceDescriptions.FirstOrDefault(kv => kv.Value == currentChoice).Key;
 
-            switch (currentChoice)
+            switch (choiceEnum)
             {
                 case CinemaManagementAddMovieChoice.AddMovieManually:
                     AddMovies(db);
@@ -210,7 +308,6 @@ namespace Cinema.Services
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Film succesvol toegevoegd aan de database!");
-
             }
 
             Console.ResetColor();
@@ -224,22 +321,22 @@ namespace Cinema.Services
         {
             Console.Clear();
 
-            var confirmDelete = Prompt.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt verwijderen?");
-
+            var confirmDelete = AnsiConsole.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt verwijderen?");
 
             if (confirmDelete)
             {
-
                 db.Movies.Remove(selectedMovie);
                 db.SaveChanges();
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\"{selectedMovie.Title}\" is succesvol verwijderd.");
-                Console.ResetColor();
-
+                AnsiConsole.MarkupLine($"[green]\"{selectedMovie.Title}\" is succesvol verwijderd.[/]");
             }
-            Console.WriteLine("Druk op een toets om terug te gaan....");
-            Console.ReadKey();
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Verwijdering geannuleerd.[/]");
+            }
+
+            AnsiConsole.MarkupLine("Druk op een toets om terug te gaan....");
+            Console.ReadKey(true);
         }
 
         public void AddMoviesFromJsonToDatabase(CinemaContext db)
@@ -248,269 +345,6 @@ namespace Cinema.Services
             List<Movie> movies = movieDataLoader.LoadMoviesFromJson("../../../Data/Json/movies.json");
 
             movieDataLoader.AddMoviesToDatabase(movies, db);
-        }
-
-        public void ListMoviesWithShowtimes(CinemaContext db)
-        {
-            Console.Clear();
-
-            var moviesQuery = db.Movies.Include(m => m.Showtimes); // Include Showtimes here
-            DateTime today = DateTime.UtcNow.Date;
-            int currentWeek = 0;
-
-            while (true)
-            {
-                DateTime startOfWeek = today.AddDays(7 * currentWeek);
-                DateTime endOfWeek = startOfWeek.AddDays(8);
-
-                var moviesWithShowtimes = moviesQuery
-                    .Where(m => m.Showtimes != null && m.Showtimes.Any(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek))
-                    .ToList();
-
-                List<string> options = new List<string> { "Filter door films" }; // Clear options list here
-
-                options.AddRange(moviesWithShowtimes.Select(m => m.Title));
-                System.Console.WriteLine();
-                if (currentWeek < 3) options.Add("Volgende week");
-                if (currentWeek > 0) options.Add("Vorige week");
-                options.Add("Terug");
-
-                var selectedOption = Prompt.Select($"Week van {startOfWeek:dd-MM} tot {endOfWeek.AddDays(-1):dd-MM}", options);
-
-                if (selectedOption == "Volgende week")
-                {
-                    currentWeek++;
-                    Console.Clear();
-                    continue;
-                }
-                else if (selectedOption == "Vorige week")
-                {
-                    currentWeek--;
-                    Console.Clear();
-                    continue;
-                }
-                else if (selectedOption == "Terug")
-                {
-                    break;
-                }
-                else if (selectedOption == "Filter door films")
-                {
-                    var filteredMovies = ApplyFilters(db).Include(m => m.Showtimes); // Apply filters
-                    moviesQuery = filteredMovies; // Update moviesQuery
-                    Console.Clear();
-                    continue;
-                }
-
-                var selectedMovie = moviesWithShowtimes.First(m => m.Title == selectedOption);
-                Console.WriteLine($"Je hebt \"{selectedMovie.Title}\" geselecteerd.");
-
-
-                DisplayMovieDetails(selectedMovie);
-
-                Console.WriteLine();
-
-                var showtimesThisWeek = selectedMovie.Showtimes
-                    .Where(s => s.StartTime >= startOfWeek && s.StartTime < endOfWeek)
-                    .ToList().OrderBy(s=> s.StartTime);
-
-                var selectedShowtime = Prompt.Select("Selecteer een voorstellingstijd", showtimesThisWeek,
-
-                textSelector: showtime => showtime.StartTime.ToString("ddd, MMMM d hh:mm tt"));
-
-                // Console.WriteLine($"You selected the showtime: {selectedShowtime.StartTime}");
-
-                var cinemahall = selectedShowtime.RoomId;
-                Console.Clear();
-                ShowCinemaHall(db, cinemahall);
-                break;
-
-            }
-        }
-
-
-        public void ShowCinemaHall(CinemaContext db, string cinemahall)
-        {
-            CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(cinemahall);
-            cinemaSystem.DrawPlan();
-
-            Console.WriteLine("\n\n");
-
-            while (true)
-            {
-                Console.WriteLine("Voer het aantal stoelen in dat je wilt reserveren:");
-                int numSeatsToReserve;
-                while (!int.TryParse(Console.ReadLine(), out numSeatsToReserve) || numSeatsToReserve < 1)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Ongeldige invoer. Voer een geldig aantal stoelen in om te reserveren.");
-                    Console.ResetColor();
-                }
-
-                List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
-
-                for (int i = 0; i < numSeatsToReserve; i++)
-                {
-                    char selectedRow;
-                    char endRow = 'T';
-                    if (cinemahall == "1") endRow = 'N';
-                    if (cinemahall == "2") endRow = 'S';
-
-                    Console.WriteLine($"Voer de rij in (A-{endRow}) voor stoel {i + 1}:");
-                    while (!char.TryParse(Console.ReadLine().ToUpper(), out selectedRow) || selectedRow < 'A' || selectedRow > endRow)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Ongeldige rij. Voer een geldige rij in (A-{endRow}).");
-                        Console.ResetColor();
-                    }
-
-                    int selectedSeatNumber;
-                    while (true)
-                    {
-                        Console.WriteLine($"Voer het stoelnummer in voor stoel {i + 1} (1-{cinemaSystem.Seats[0].Count}):");
-                        if (int.TryParse(Console.ReadLine(), out selectedSeatNumber) && selectedSeatNumber >= 1 && selectedSeatNumber <= cinemaSystem.Seats[0].Count)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine($"Ongeldig stoelnummer. Voer een nummer in tussen 1 en {cinemaSystem.Seats[0].Count}.");
-                            Console.ResetColor();
-                        }
-                    }
-
-                    selectedSeats.Add(cinemaSystem.FindSeat(selectedRow, selectedSeatNumber));
-                }
-
-                Console.Clear();
-                bool allSeatsAvailable = true;
-                foreach (CinemaSeat selectedSeat in selectedSeats)
-                {
-                    if (selectedSeat == null)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Op tenminste één van de geselecteerde plaatsen zit geen stoel.");
-                        Console.ResetColor();
-                        allSeatsAvailable = false;
-                        break;
-                    }
-                    else if (selectedSeat.IsReserved)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} is al gereserveerd.");
-                        Console.ResetColor();
-                        allSeatsAvailable = false;
-                        break;
-                    }
-                }
-                // Console.Clear();
-                if (allSeatsAvailable)
-                {
-                    bool allSeatsReserved = true;
-                    foreach (CinemaSeat selectedSeat in selectedSeats)
-                    {
-                        if (!cinemaSystem.ReserveSeat(selectedSeat.Row, selectedSeat.SeatNumber))
-                        {
-                            allSeatsReserved = false;
-                            break;
-                        }
-                    }
-                    if (allSeatsReserved)
-                    {
-                        foreach (CinemaSeat selectedSeat in selectedSeats)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"Stoel {selectedSeat.Row}{selectedSeat.SeatNumber} succesvol gereserveerd!");
-                            Console.ResetColor();
-                        }
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Reservering mislukt. Sommige van de geselecteerde stoelen zijn al gereserveerd.");
-                        Console.ResetColor();
-                    }
-                }
-
-                cinemaSystem.DrawPlan();
-
-                Console.WriteLine("Wil je meer stoelen reserveren? (Y/N)");
-                string continueReserving = Console.ReadLine();
-                if (continueReserving.ToUpper() != "Y")
-                {
-                    break;
-                }
-            }
-
-
-            Console.ReadLine();
-        }
-
-
-
-
-        private IQueryable<Movie> ApplyFilters(CinemaContext db)
-        {
-            var allMovies = db.Movies.ToList();
-            var moviesQuery = allMovies.AsQueryable();
-
-            var filterOption = Prompt.Select<CinemaFilterChoice>("Selecteer een optie om films te filteren",
-                new[] { CinemaFilterChoice.Genres, CinemaFilterChoice.Directors, CinemaFilterChoice.Cast });
-
-            switch (filterOption)
-            {
-                case CinemaFilterChoice.Genres:
-                    var allGenres = allMovies.SelectMany(movie => movie.Genres ?? Enumerable.Empty<string>())
-                                             .Where(genre => genre != null)
-                                             .Distinct()
-                                             .ToList();
-                    var selectedGenres = Prompt.MultiSelect("Selecteer genres om films te filteren", allGenres);
-                    // Filter films op basis van geselecteerde genres
-                    moviesQuery = allMovies.Where(movie => movie.Genres != null &&
-                        movie.Genres.Intersect(selectedGenres ?? Enumerable.Empty<string>()).Any())
-                        .AsQueryable();
-                    break;
-
-                case CinemaFilterChoice.Cast:
-                    var allActors = allMovies.SelectMany(movie => movie.Cast ?? Enumerable.Empty<string>())
-                                             .Where(actor => actor != null)
-                                             .Distinct()
-                                             .ToList();
-                    var selectedActors = Prompt.MultiSelect("Selecteer acteurs om films te filteren", allActors);
-                    // Filter films op basis van geselecteerde acteurs
-                    moviesQuery = allMovies.Where(movie => movie.Cast != null &&
-                        movie.Cast.Intersect(selectedActors ?? Enumerable.Empty<string>()).Any())
-                        .AsQueryable();
-                    break;
-
-                case CinemaFilterChoice.Directors:
-                    var allDirectors = allMovies.SelectMany(movie => movie.Directors ?? Enumerable.Empty<string>())
-                                                .Where(director => director != null)
-                                                .Distinct()
-                                                .ToList();
-                    var selectedDirectors = Prompt.MultiSelect("Selecteer regisseurs om films te filteren", allDirectors);
-                    // Filter films op basis van geselecteerde regisseurs
-                    moviesQuery = allMovies.Where(movie => movie.Directors != null &&
-                        movie.Directors.Intersect(selectedDirectors ?? Enumerable.Empty<string>()).Any())
-                        .AsQueryable();
-                    break;
-
-                default:
-                    break;
-            }
-
-            return moviesQuery;
-        }
-
-        private void DisplayMovieDetails(Movie movie)
-        {
-            Console.WriteLine($"Details voor \"{movie.Title}\":");
-            Console.WriteLine($"- Genre: {string.Join(", ", movie.Genres)}");
-            Console.WriteLine($"- Duur: {movie.Duration} minuten");
-            Console.WriteLine($"- Regisseurs: {string.Join(", ", movie.Directors)}");
-            Console.WriteLine($"- Beschrijving: {movie.Description}");
-            Console.WriteLine($"- Minimum leeftijdsbeoordeling: {movie.MinAgeRating}");
-            Console.WriteLine();
         }
     }
 }
