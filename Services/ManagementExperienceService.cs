@@ -37,9 +37,16 @@ namespace Cinema.Services
     {
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
+        { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.Exit, "Terug" }
     };
-
+        private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
+        {
+            { CinemaManagementVoucherChoice.MakeVoucher, "Maak nieuwe voucher aan" },
+            { CinemaManagementVoucherChoice.DeleteVoucher, "Verwijder een bestaande voucher" },
+            { CinemaManagementVoucherChoice.DisplayVouchers, "Lijst met alle bestaande vouchers"},
+            { CinemaManagementVoucherChoice.Exit, "Terug" }
+        };
         public void ManageCinema(Administrator admin, CinemaContext db, IConfiguration configuration)
         {
             CinemaManagementChoice currentManagerChoice = CinemaManagementChoice.ListMovies;
@@ -64,6 +71,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.AddMovie:
                         AddMovieChoice(db);
+                        break;
+                    case CinemaManagementChoice.VoucherPanel:
+                        Voucherpanel(db);
                         break;
                     default:
                         break;
@@ -345,6 +355,131 @@ namespace Cinema.Services
             List<Movie> movies = movieDataLoader.LoadMoviesFromJson("../../../Data/Json/movies.json");
 
             movieDataLoader.AddMoviesToDatabase(movies, db);
+        }
+
+        public int Voucherpanel(CinemaContext db)
+        {
+            Console.Clear();
+            var VoucherOptions = VoucherChoiceDescriptions.Keys.ToList();
+
+            var currentChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wat wilt u aan vouchers wijzigen?")
+                    .PageSize(10)
+                    .AddChoices(VoucherChoiceDescriptions.Select(kv => kv.Value))
+            );
+
+            var choiceEnum = VoucherChoiceDescriptions.FirstOrDefault(kv => kv.Value == currentChoice).Key;
+
+            switch (choiceEnum)
+            {
+                case CinemaManagementVoucherChoice.MakeVoucher:
+                    MakeVoucher(db);
+                    break;
+                case CinemaManagementVoucherChoice.DeleteVoucher:
+                    DeleteVoucher(db);
+                    break;
+                case CinemaManagementVoucherChoice.DisplayVouchers:
+                    DisplayVouchers(db);
+                    break;
+                case CinemaManagementVoucherChoice.Exit:
+                    return 1;
+                default:
+                    break;
+            }
+
+            return 0;
+        }
+
+        public void MakeVoucher(CinemaContext db)
+        {
+            Console.Clear();
+
+            string discountType;
+            string code;
+            double discount;
+            bool ready;
+
+            // Prompt user to select RoomId
+            discountType = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een kortingstype:")
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
+            );
+            List<Voucher> vouchers = Voucher.Vouchers;
+
+            code = AnsiConsole.Prompt(
+            new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
+                .PromptStyle("yellow")
+                .Validate(input => 
+                {
+                    string result = LogicLayerVoucher.CodeCheck(input);
+                    return true;
+                })
+            );
+
+            Console.Clear();
+            AnsiConsole.Markup($"[yellow]Code: {code}[/]\n");
+
+            discount = AnsiConsole.Prompt(
+            new TextPrompt<double>($"Voeg {discountType} korting: ")
+                .PromptStyle("yellow")
+                .Validate(input => 
+                {
+                    string inputString = Convert.ToString(input);
+                    input = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(inputString) : LogicLayerVoucher.CheckDiscount(inputString);
+                    return true;
+                })
+            );
+            Voucher voucher = discountType.Contains("%") ? new PercentVoucher(code, discount) : voucher = new Voucher(code, discount);
+
+            AnsiConsole.Markup($"[blue]Nieuwe Voucher: {voucher.ToString()}[/]\n");
+            ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt toevoegen?");
+            if (!ready)
+                return;
+
+            vouchers.Add(voucher);
+            AnsiConsole.Markup("[green]Voucher succesvol toegevoegd![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+        }
+
+        public void DeleteVoucher(CinemaContext db)
+        {
+            List<Voucher> vouchers = Voucher.Vouchers;
+
+            Voucher vouchertodelete = AnsiConsole.Prompt(
+                new SelectionPrompt<Voucher>()
+                    .Title("Selecteer een voucher om te verwijderen:")
+                    .AddChoices(vouchers)
+            );
+
+            Console.Clear();
+
+            AnsiConsole.Markup($"[blue]Gekozen Voucher: {vouchertodelete.ToString()}[/]\n");
+            bool ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt verwijderen?");
+            if (!ready)
+                return;
+
+            vouchers.Remove(vouchertodelete);
+            AnsiConsole.Markup("[green]Voucher succesvol verwijderd![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+        }
+
+        public void DisplayVouchers(CinemaContext db)
+        {
+            List<Voucher> vouchers = Voucher.Vouchers;
+            if (vouchers.Count == 0)
+            {
+                Console.WriteLine("Currently no existing vouchers...");
+                return;
+            }
+            Console.WriteLine("Current vouchers:");
+            foreach (Voucher voucher in vouchers)
+            {
+                Console.WriteLine($"{vouchers.IndexOf(voucher)+1}. {voucher.ToString()}");
+            }
         }
     }
 }

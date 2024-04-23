@@ -15,6 +15,9 @@ namespace Cinema.Models.Choices
         [Display(Name = "Voeg een film toe")]
         AddMovie,
 
+        [Display(Name = "Beheer Vouchers")]
+        VoucherPanel,
+
         [Display(Name = "Terug")]
         Exit
     }
