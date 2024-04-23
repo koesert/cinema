@@ -1,4 +1,4 @@
-using System.Linq;
+using Spectre.Console;
 public class LogicLayerVoucher
 {
     public static string CodeCheck(string code)
@@ -66,8 +66,9 @@ public class LogicLayerVoucher
             {
                 return number;
             }
-            Console.WriteLine("Number contains non digital characters. Please try again:");
+            AnsiConsole.Markup("[red]Input bevat letters/symbolen. Probeer opnieuw:\n[/]");
             input = Console.ReadLine();
+            Console.Clear();
         }
         return 1;
     }
@@ -77,12 +78,13 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, out double number) && number < 100)
+            if (double.TryParse(input, out double number) && number <= 100)
             {
                 return number;
             }
-            Console.WriteLine("Number exceeds the limit (100), or contains non digital characters. Please try again:");
+            AnsiConsole.Markup("[red]Input overschrijdt het limiet (100), of bevat letters/symbolen. Probeer opnieuw:\n[/]");
             input = Console.ReadLine();
+            Console.Clear();
         }
         return 1;
     }
