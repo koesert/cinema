@@ -56,27 +56,12 @@ namespace Cinema
                             new SelectionPrompt<string>()
                                 .Title("Selecteer gebruikerstype:")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker" })
+                                .AddChoices(new[] { "Admin", "Gebruiker" , "Registreren"})
                         );
                         switch (loginChoice)
                         {
                             case "Admin":
-                                string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                                string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                                Administrator admin = db.Administrators
-                                    .FirstOrDefault(admin =>
-                                        admin.Username == username && admin.Password == password
-                                    );
-
-                                if (admin == null)
-                                {
-                                    Console.Clear();
-                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                                    break;
-                                }
-
-                                service.ManageCinema(admin, db, configuration);
+                                PresentAdminLogin.Start(db);                                
                                 break;
                             case "Gebruiker":
                                 string customerName = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
@@ -99,6 +84,8 @@ namespace Cinema
 
                                 // Add logic for user actions
                                 break;
+                            // case "Registreren":
+                            //     PresentRegistration.Start();
                         }
                         break;
                 }
