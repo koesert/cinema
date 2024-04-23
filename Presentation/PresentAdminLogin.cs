@@ -10,8 +10,10 @@ public class PresentAdminLogin
 
         while (!loginSuccessful)
         {
-            AnsiConsole.MarkupLine("[bold blue]Administrator Login[/]");
-            AnsiConsole.WriteLine();
+            var rule = new Rule("[bold blue]Administrator login[/]");
+            rule.Justification = Justify.Left;
+            rule.Style = Style.Parse("blue dim");
+            AnsiConsole.Write(rule);
 
             string username = AskUsername();
             string password = AskPassword();
@@ -27,6 +29,7 @@ public class PresentAdminLogin
             {
                 AnsiConsole.MarkupLine("[green]Inloggen succesvol! Welkom, Administrator.[/]");
                 // PresentAdminOptions.Start();
+                break;
             }
         }
     }

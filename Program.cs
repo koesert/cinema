@@ -64,23 +64,7 @@ namespace Cinema
                                 PresentAdminLogin.Start(db);                                
                                 break;
                             case "Gebruiker":
-                                string customerName = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                                string customerPassword = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                                Customer customer = db.Customers
-                                    .FirstOrDefault(c =>
-                                        c.Username == customerName && c.Password == customerPassword
-                                    );
-
-                                if (customer == null)
-                                {
-                                    Console.Clear();
-                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                                    break;
-                                }
-
-                                AnsiConsole.MarkupLine("[green]Succesvol ingelogd als beheerder[/]");
-                                customerService.ManageUser(customer, db, configuration);
+                                PresentCustomerLogin.Start(db);
 
                                 // Add logic for user actions
                                 break;
