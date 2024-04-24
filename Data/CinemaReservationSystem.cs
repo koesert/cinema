@@ -134,7 +134,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 9, "orange"),
                 new CinemaSeat(3, 10, "orange"),
                 new CinemaSeat(3, 11, "orange"),
-                new CinemaSeat(3, 13, "orange"),
+                new CinemaSeat(3, 12, "orange"),
                 new CinemaSeat(3, 13, "orange"),
                 new CinemaSeat(3, 14, "orange"),
                 new CinemaSeat(3, 15, "orange"),
