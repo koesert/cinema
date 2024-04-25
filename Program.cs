@@ -65,11 +65,10 @@ namespace Cinema
                                 break;
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);
-
-                                // Add logic for user actions
                                 break;
-                            // case "Registreren":
-                            //     PresentRegistration.Start();
+                            case "Registreren":
+                                PresentCustomerRegistration.Start(db);
+                                break;
                         }
                         break;
                 }

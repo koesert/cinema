@@ -15,10 +15,10 @@ public class PresentCustomerLogin
             rule.Style = Style.Parse("blue dim");
             AnsiConsole.Write(rule);
 
-            string username = AskUsername();
+            string email = AskEmail();
             string password = AskPassword();
 
-            Customer customer = Customer.FindCustomer(db, username, password);
+            Customer customer = Customer.FindCustomer(db, email, password);
 
             if (customer == null)
             {
@@ -27,23 +27,24 @@ public class PresentCustomerLogin
             }
             else
             {
+                loginSuccessful = true;
                 AnsiConsole.MarkupLine($"[green]Inloggen succesvol! Welkom {customer.Username}![/]");
                 // PresentCustomerOptions.Start(customer);
-                break;
+                continue;
             }
         }
     }
 
-    private static string AskUsername()
+    private static string AskEmail()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold green]gebruikersnaam[/] in:")
+            new TextPrompt<string>("Voer uw [bold green]email[/] in:")
                 .PromptStyle("blue")
-                .Validate(username =>
+                .Validate(email =>
                 {
-                    if (string.IsNullOrWhiteSpace(username))
+                    if (string.IsNullOrWhiteSpace(email))
                     {
-                        return ValidationResult.Error("[red]Gebruikersnaam mag niet leeg zijn[/]");
+                        return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
                     }
                     return ValidationResult.Success();
                 })

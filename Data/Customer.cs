@@ -8,23 +8,39 @@ namespace Cinema.Data
 		public string Email { get; set; }
 		public static List<Customer> AllCustomers = new List<Customer>();
 
+		private Customer(string username, string password, string email)
+		{
+			Username = username;
+			Password = password;
+			Email = email;
+		}
+
 		private static void RetrieveCustomers(CinemaContext db)
 		{
 			AllCustomers = db.Customers.ToList();
 		}
 
-		public static Customer FindCustomer(CinemaContext db, string username, string password)
+		public static Customer FindCustomer(CinemaContext db, string email, string password)
 		{
 			RetrieveCustomers(db);
 
 			foreach (Customer existingCustomer in AllCustomers)
 			{
-				if (existingCustomer.Username == username && existingCustomer.Password == password)
+				if (existingCustomer.Email == email && existingCustomer.Password == password)
 				{
 					return existingCustomer;
 				}
 			}
 			return null;
+		}
+
+		public static Customer CreateCustomer(CinemaContext db, string username, string password, string email)
+		{
+			Customer newCustomer = new Customer(username, password, email);
+			db.Customers.Add(newCustomer);
+            db.SaveChanges();
+
+			return newCustomer;
 		}
 	}
 }
