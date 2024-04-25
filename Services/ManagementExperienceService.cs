@@ -406,14 +406,12 @@ namespace Cinema.Services
                     .Title("Selecteer een kortingstype:")
                     .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
             );
-            List<Voucher> vouchers = Voucher.Vouchers;
-
             code = AnsiConsole.Prompt(
             new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
                 .PromptStyle("yellow")
                 .Validate(input => 
                 {
-                    string result = LogicLayerVoucher.CodeCheck(input);
+                    string result = LogicLayerVoucher.CodeCheck(db, input);
                     return true;
                 })
             );
@@ -433,7 +431,8 @@ namespace Cinema.Services
             if (!ready)
                 return;
 
-            vouchers.Add(voucher);
+            db.Vouchers.Add(voucher);
+            db.SaveChanges();
             AnsiConsole.Markup("[green]Voucher succesvol toegevoegd![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
@@ -441,8 +440,7 @@ namespace Cinema.Services
 
         public void DeleteVoucher(CinemaContext db)
         {
-            List<Voucher> vouchers = Voucher.Vouchers;
-
+            List<Voucher> vouchers = db.Vouchers.ToList();
             Voucher vouchertodelete = AnsiConsole.Prompt(
                 new SelectionPrompt<Voucher>()
                     .Title("Selecteer een voucher om te verwijderen:")
@@ -456,7 +454,8 @@ namespace Cinema.Services
             if (!ready)
                 return;
 
-            vouchers.Remove(vouchertodelete);
+            db.Vouchers.Remove(vouchertodelete);
+            db.SaveChanges();
             AnsiConsole.Markup("[green]Voucher succesvol verwijderd![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
@@ -464,7 +463,7 @@ namespace Cinema.Services
 
         public void DisplayVouchers(CinemaContext db)
         {
-            List<Voucher> vouchers = Voucher.Vouchers;
+            List<Voucher> vouchers = db.Vouchers.ToList();
             if (vouchers.Count == 0)
             {
                 Console.WriteLine("Currently no existing vouchers...");

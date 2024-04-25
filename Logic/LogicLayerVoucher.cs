@@ -1,9 +1,12 @@
+using System.Data.Common;
+using Cinema.Data;
 using Spectre.Console;
+
 public class LogicLayerVoucher
 {
-    public static string CodeCheck(string code)
+    public static string CodeCheck(CinemaContext db ,string code)
     {
-        List<Voucher> vouchers = Voucher.Vouchers;
+        List<Voucher> vouchers = db.Vouchers.ToList();
         bool check = false;
         while (!check)
         {
@@ -14,7 +17,7 @@ public class LogicLayerVoucher
                     if (voucher.Code == code)
                     {
                         Console.WriteLine("There already appears to be an existing voucher using this code. Please try a different one.");
-                        code = CodeCheck(Console.ReadLine());
+                        code = CodeCheck(db, Console.ReadLine());
                         break;
                     }
                 }
@@ -42,9 +45,9 @@ public class LogicLayerVoucher
         }
         return "";
     }
-    public static int IndexToRemoveCheck(int indextoremove)
+    public static int IndexToRemoveCheck(CinemaContext db, int indextoremove)
     {
-        List<Voucher> vouchers = Voucher.Vouchers;
+        List<Voucher> vouchers = db.Vouchers.ToList();
         bool check = false;
         while (!check)
         {
