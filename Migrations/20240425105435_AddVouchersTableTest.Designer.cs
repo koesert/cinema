@@ -250,6 +250,9 @@ namespace cinema.Migrations
                     b.Property<double>("Discount")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("DiscountType")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Vouchers");

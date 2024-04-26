@@ -91,4 +91,22 @@ public class LogicLayerVoucher
         }
         return 1;
     }
+
+    public static string GenerateRandomCode(CinemaContext db)
+    {
+        Random random = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        string code = "";
+        
+        for (int i = 0; i < 15; i++)
+        {
+            code += chars[random.Next(chars.Length)];
+        }
+        
+        if (db.Vouchers.ToList().Any(x => x.Code == code))
+        {
+            return GenerateRandomCode(db);
+        }
+        return code;
+    }
 }

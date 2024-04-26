@@ -5,7 +5,7 @@
 namespace cinema.Migrations
 {
     /// <inheritdoc />
-    public partial class AddVouchersTableTest : Migration
+    public partial class AddTypeToVouchersTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +17,7 @@ namespace cinema.Migrations
                 nullable: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

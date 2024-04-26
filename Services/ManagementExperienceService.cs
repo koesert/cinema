@@ -397,6 +397,7 @@ namespace Cinema.Services
 
             string discountType;
             string code;
+            string random;
             double discount;
             bool ready;
 
@@ -406,15 +407,27 @@ namespace Cinema.Services
                     .Title("Selecteer een kortingstype:")
                     .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
             );
-            code = AnsiConsole.Prompt(
-            new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
-                .PromptStyle("yellow")
-                .Validate(input => 
-                {
-                    string result = LogicLayerVoucher.CodeCheck(db, input);
-                    return true;
-                })
+            random = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer Code Invoer:")
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken" })
             );
+            if (random.Contains("Genereer"))
+            {
+                code = LogicLayerVoucher.GenerateRandomCode(db);
+            }
+            else
+            {
+                code = AnsiConsole.Prompt(
+                new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
+                    .PromptStyle("yellow")
+                    .Validate(input => 
+                    {
+                        string result = LogicLayerVoucher.CodeCheck(db, input);
+                        return true;
+                    })
+                );
+            }
 
             Console.Clear();
             AnsiConsole.Markup($"[blue]Code: {code}[/]\n");
