@@ -27,7 +27,7 @@ public class PresentCustomerRegistration
 
             if (newCustomer != null)
             {
-                 AnsiConsole.Status()
+                AnsiConsole.Status()
                     .Spinner(Spinner.Known.Star)
                     .SpinnerStyle(Style.Parse("bold blue"))
                     .Start($"Account voor [bold blue]{username}[/] is succesvol aangemaakt!", ctx =>
@@ -36,7 +36,7 @@ public class PresentCustomerRegistration
                         Task.Delay(3000).Wait();
                         
                     });
-                    PresentCustomerOptions.Start(newCustomer);
+                PresentCustomerOptions.Start(newCustomer, db);
             }
         }
     }
