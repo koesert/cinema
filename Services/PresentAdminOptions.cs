@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Cinema.Services
 {
-    public class ManagementExperienceService
+    public class PresentAdminOptions
     {
         // Mapping of enum values to their display names
 

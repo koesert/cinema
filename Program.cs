@@ -27,7 +27,7 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
-            ManagementExperienceService service = new ManagementExperienceService();
+            PresentAdminOptions service = new PresentAdminOptions();
             UserExperienceService customerService = new UserExperienceService();
 
             Console.Clear();
