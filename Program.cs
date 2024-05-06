@@ -55,48 +55,18 @@ namespace Cinema
                             new SelectionPrompt<string>()
                                 .Title("Selecteer gebruikerstype:")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker" })
+                                .AddChoices(new[] { "Admin", "Gebruiker" , "Account aanmaken"})
                         );
                         switch (loginChoice)
                         {
                             case "Admin":
-                                string username = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                                string password = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                                Administrator admin = db.Administrators
-                                    .FirstOrDefault(admin =>
-                                        admin.Username == username && admin.Password == password
-                                    );
-
-                                if (admin == null)
-                                {
-                                    Console.Clear();
-                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                                    break;
-                                }
-
-                                PresentAdminOptions.Start(admin, db);
+                                PresentAdminLogin.Start(db);                                
                                 break;
                             case "Gebruiker":
-                                string customerName = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
-                                string customerPassword = AnsiConsole.Prompt(new TextPrompt<string>("Wachtwoord").Secret());
-
-                                Customer customer = db.Customers
-                                    .FirstOrDefault(c =>
-                                        c.Username == customerName && c.Password == customerPassword
-                                    );
-
-                                if (customer == null)
-                                {
-                                    Console.Clear();
-                                    AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord[/]");
-                                    break;
-                                }
-
-                                AnsiConsole.MarkupLine("[green]Succesvol ingelogd als beheerder[/]");
-                                customerService.ManageUser(customer, db, configuration);
-
-                                // Add logic for user actions
+                                PresentCustomerLogin.Start(db);
+                                break;
+                            case "Account aanmaken":
+                                PresentCustomerRegistration.Start(db);
                                 break;
                         }
                         break;
