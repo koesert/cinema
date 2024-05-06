@@ -16,7 +16,7 @@ public class PresentCustomerRegistration
         {
             var rule = new Rule("[bold blue]Klanten registratie[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
 
             string username = AskUsername(existingCustomers);
@@ -27,8 +27,8 @@ public class PresentCustomerRegistration
 
             if (newCustomer != null)
             {
-                 AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Star)
+                AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Aesthetic)
                     .SpinnerStyle(Style.Parse("bold blue"))
                     .Start($"Account voor [bold blue]{username}[/] is succesvol aangemaakt!", ctx =>
                     {
@@ -36,7 +36,7 @@ public class PresentCustomerRegistration
                         Task.Delay(3000).Wait();
                         
                     });
-                    PresentCustomerOptions.Start(newCustomer);
+                PresentCustomerOptions.Start(newCustomer, db);
             }
         }
     }

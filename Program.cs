@@ -27,7 +27,6 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
-            ManagementExperienceService service = new ManagementExperienceService();
             UserExperienceService customerService = new UserExperienceService();
 
             Console.Clear();
@@ -56,7 +55,7 @@ namespace Cinema
                             new SelectionPrompt<string>()
                                 .Title("Selecteer gebruikerstype:")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker" , "Registreren"})
+                                .AddChoices(new[] { "Admin", "Gebruiker" , "Account aanmaken"})
                         );
                         switch (loginChoice)
                         {
@@ -66,7 +65,7 @@ namespace Cinema
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);
                                 break;
-                            case "Registreren":
+                            case "Account aanmaken":
                                 PresentCustomerRegistration.Start(db);
                                 break;
                         }

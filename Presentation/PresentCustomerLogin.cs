@@ -12,7 +12,7 @@ public class PresentCustomerLogin
         {
             var rule = new Rule("[bold blue]Klanten login[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
 
             string email = AskEmail();
@@ -23,14 +23,19 @@ public class PresentCustomerLogin
             if (customer == null)
             {
                 AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord. Probeer het opnieuw.[/]");
-                AnsiConsole.WriteLine();
             }
             else
             {
-                loginSuccessful = true;
-                AnsiConsole.MarkupLine($"[green]Inloggen succesvol! Welkom {customer.Username}![/]");
-                // PresentCustomerOptions.Start(customer);
-                continue;
+                AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Aesthetic)
+                    .SpinnerStyle(Style.Parse("blue"))
+                    .Start($"[blue]Inloggen succesvol! Welkom [bold grey93]{customer.Username}[/]![/]", ctx =>
+                    {
+                        loginSuccessful = true;
+                        Task.Delay(2500).Wait();
+                    });
+                PresentCustomerOptions.Start(customer, db);
+                break;
             }
         }
     }
@@ -38,7 +43,7 @@ public class PresentCustomerLogin
     private static string AskEmail()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold green]email[/] in:")
+            new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
                 .PromptStyle("blue")
                 .Validate(email =>
                 {
@@ -54,7 +59,7 @@ public class PresentCustomerLogin
     private static string AskPassword()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold green]wachtwoord[/] in:")
+            new TextPrompt<string>("Voer uw [bold blue]wachtwoord[/] in:")
                 .PromptStyle("blue")
                 .Secret()
                 .Validate(password =>
