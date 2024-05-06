@@ -8,9 +8,7 @@ namespace Cinema.Data
         public string RoomId { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public Movie Movie { get; set; }
-
-        [Column(TypeName = "jsonb")]
-        public List<CinemaSeat> Prices { get; set; }
+        public double Prices { get; set; }
         public virtual ICollection<CinemaSeat> CinemaSeats { get; set; }
     }
 }
