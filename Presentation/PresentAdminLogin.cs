@@ -1,4 +1,5 @@
 using Cinema.Data;
+using Cinema.Services;
 using Spectre.Console;
 
 public class PresentAdminLogin
@@ -28,7 +29,7 @@ public class PresentAdminLogin
             else
             {
                 AnsiConsole.MarkupLine("[green]Inloggen succesvol! Welkom, Administrator.[/]");
-                // PresentAdminOptions.Start();
+                PresentAdminOptions.Start(db.Administrators.FirstOrDefault(x => x.Username == username && x.Password == password), db);
                 break;
             }
         }
