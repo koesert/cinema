@@ -10,7 +10,7 @@ namespace Cinema.Data
         public Movie Movie { get; set; }
 
         [Column(TypeName = "jsonb")]
-        public List<Seat> Prices { get; set; }
+        public List<CinemaSeat> Prices { get; set; }
         public virtual ICollection<CinemaSeat> CinemaSeats { get; set; }
     }
 }
