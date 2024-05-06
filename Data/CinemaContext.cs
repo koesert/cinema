@@ -16,7 +16,6 @@ namespace Cinema.Data
             _connectionString = connectionString;
         }
 
-        public DbSet<Hall> Halls { get; set; }
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Showtime> Showtimes { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
