@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Cinema.Services
 {
-    public class PresentAdminOptions
+    public static class PresentAdminOptions
     {
         // Mapping of enum values to their display names
 
@@ -46,7 +46,7 @@ namespace Cinema.Services
             { CinemaManagementVoucherChoice.DeleteVoucher, "Verwijder een bestaande voucher" },
             { CinemaManagementVoucherChoice.Exit, "Terug" }
         };
-        public void ManageCinema(Administrator admin, CinemaContext db, IConfiguration configuration)
+        public static void Start(Administrator admin, CinemaContext db)
         {
             CinemaManagementChoice currentManagerChoice = CinemaManagementChoice.ListMovies;
             while (currentManagerChoice != CinemaManagementChoice.Exit)
@@ -80,7 +80,7 @@ namespace Cinema.Services
             }
         }
 
-        public void ListMovies(CinemaContext db)
+        public static void ListMovies(CinemaContext db)
         {
             Console.Clear();
 
@@ -103,7 +103,7 @@ namespace Cinema.Services
             var selectedMovie = movies.First(movie => movie.Title == selectedOption);
             HandleSelectedMovie(db, selectedMovie);
         }
-        public int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
+        public static int HandleSelectedMovie(CinemaContext db, Movie selectedMovie)
         {
             var movieOptions = Descriptions.Values.ToList();
 
@@ -134,7 +134,7 @@ namespace Cinema.Services
             }
             return 0;
         }
-        private void ListShowtimes(CinemaContext db, Movie selectedMovie)
+        private static void ListShowtimes(CinemaContext db, Movie selectedMovie)
         {
             Console.Clear();
             Console.WriteLine($"Vertoningen voor {selectedMovie.Title}:");
@@ -159,7 +159,7 @@ namespace Cinema.Services
         }
 
 
-        private void AddShowtime(CinemaContext db, Movie selectedMovie)
+        private static void AddShowtime(CinemaContext db, Movie selectedMovie)
         {
             Console.Clear();
 
@@ -250,7 +250,7 @@ namespace Cinema.Services
 
 
 
-        private int AddMovieChoice(CinemaContext db)
+        private static int AddMovieChoice(CinemaContext db)
         {
             var addMovieOptions = AddMovieChoiceDescriptions.Keys.ToList();
 
@@ -279,7 +279,7 @@ namespace Cinema.Services
 
             return 0;
         }
-        private void AddMovies(CinemaContext db)
+        private static void AddMovies(CinemaContext db)
         {
             Console.Clear();
             var newMovie = Prompt.Bind<CreateMovieForm>();
@@ -326,7 +326,7 @@ namespace Cinema.Services
             Console.ReadKey();
         }
 
-        private void DeleteMovie(CinemaContext db, Movie selectedMovie)
+        private static void DeleteMovie(CinemaContext db, Movie selectedMovie)
         {
             Console.Clear();
 
@@ -348,7 +348,7 @@ namespace Cinema.Services
             Console.ReadKey(true);
         }
 
-        public void AddMoviesFromJsonToDatabase(CinemaContext db)
+        public static void AddMoviesFromJsonToDatabase(CinemaContext db)
         {
             MovieDataLoader movieDataLoader = new MovieDataLoader();
             List<Movie> movies = movieDataLoader.LoadMoviesFromJson("../../../Data/Json/movies.json");
@@ -356,7 +356,7 @@ namespace Cinema.Services
             movieDataLoader.AddMoviesToDatabase(movies, db);
         }
 
-        public int Voucherpanel(CinemaContext db)
+        public static int Voucherpanel(CinemaContext db)
         {
             Console.Clear();
             var VoucherOptions = VoucherChoiceDescriptions.Keys.ToList();
@@ -387,7 +387,7 @@ namespace Cinema.Services
             return 0;
         }
 
-        public void MakeVoucher(CinemaContext db)
+        public static void MakeVoucher(CinemaContext db)
         {
             Console.Clear();
 
@@ -447,7 +447,7 @@ namespace Cinema.Services
             Console.ReadKey();
         }
 
-        public void DeleteVoucher(CinemaContext db)
+        public static void DeleteVoucher(CinemaContext db)
         {
             List<Voucher> vouchers = db.Vouchers.ToList();
             Voucher vouchertodelete = AnsiConsole.Prompt(

@@ -2,7 +2,7 @@
 {
     public class Ticket
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string TicketNumber { get; set; }
         public Showtime Showtime { get; set; }
         public Customer Customer { get; set; }

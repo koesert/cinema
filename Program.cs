@@ -27,7 +27,6 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
-            PresentAdminOptions service = new PresentAdminOptions();
             UserExperienceService customerService = new UserExperienceService();
 
             Console.Clear();
@@ -76,7 +75,7 @@ namespace Cinema
                                     break;
                                 }
 
-                                service.ManageCinema(admin, db, configuration);
+                                PresentAdminOptions.Start(admin, db);
                                 break;
                             case "Gebruiker":
                                 string customerName = AnsiConsole.Prompt(new TextPrompt<string>("Gebruikersnaam"));
