@@ -8,7 +8,7 @@ public class PresentCustomerOptions
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Klanten opties[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
         AnsiConsole.MarkupLine($"[bold blue]Welkom [bold grey93]{loggedInCustomer.Username}[/]![/]");
         var optionChoice = AnsiConsole.Prompt(
@@ -23,7 +23,6 @@ public class PresentCustomerOptions
                 AnsiConsole.Clear();
                 break;
             case "Reserveringen bekijken":
-                AnsiConsole.Clear();
                 PresentReservations.Start(loggedInCustomer, db);
                 break;
             case "Account beheren":

@@ -8,7 +8,7 @@ public class PresentAccountOptions
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Account opties[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()

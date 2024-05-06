@@ -12,7 +12,7 @@ public class PresentCustomerLogin
         {
             var rule = new Rule("[bold blue]Klanten login[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
 
             string email = AskEmail();
@@ -27,9 +27,9 @@ public class PresentCustomerLogin
             else
             {
                 AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Flip)
-                    .SpinnerStyle(Style.Parse("dodgerblue3"))
-                    .Start($"[dodgerblue3]Inloggen succesvol! Welkom [bold grey93]{customer.Username}[/]![/]", ctx =>
+                    .Spinner(Spinner.Known.Aesthetic)
+                    .SpinnerStyle(Style.Parse("blue"))
+                    .Start($"[blue]Inloggen succesvol! Welkom [bold grey93]{customer.Username}[/]![/]", ctx =>
                     {
                         loginSuccessful = true;
                         Task.Delay(2500).Wait();

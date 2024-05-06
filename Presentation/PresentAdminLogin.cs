@@ -12,7 +12,7 @@ public class PresentAdminLogin
         {
             var rule = new Rule("[bold blue]Administrator login[/]");
             rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue dim");
+            rule.Style = Style.Parse("blue");
             AnsiConsole.Write(rule);
 
             string username = AskUsername();
