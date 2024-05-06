@@ -1,6 +1,7 @@
 using System.Data.Common;
 using Cinema.Data;
 using Spectre.Console;
+using System.Globalization;
 
 public class LogicLayerVoucher
 {
@@ -65,7 +66,7 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, out double number) && number > 0)
+            if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double number) && number > 0)
             {
                 return number;
             }
@@ -81,7 +82,7 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, out double number) && number <= 100 && number > 0)
+            if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double number) && number <= 100 && number > 0)
             {
                 return number;
             }
