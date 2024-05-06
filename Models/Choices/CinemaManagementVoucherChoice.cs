@@ -10,9 +10,6 @@ namespace Cinema.Models.Choices
         [Display(Name = "Verwijder een bestaande voucher")]
         DeleteVoucher,
 
-        [Display(Name = "Lijst met alle bestaande vouchers")]
-        DisplayVouchers,
-
         [Display(Name = "Terug")]
         Exit
     }

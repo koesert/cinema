@@ -44,7 +44,6 @@ namespace Cinema.Services
         {
             { CinemaManagementVoucherChoice.MakeVoucher, "Maak nieuwe voucher aan" },
             { CinemaManagementVoucherChoice.DeleteVoucher, "Verwijder een bestaande voucher" },
-            { CinemaManagementVoucherChoice.DisplayVouchers, "Lijst met alle bestaande vouchers"},
             { CinemaManagementVoucherChoice.Exit, "Terug" }
         };
         public void ManageCinema(Administrator admin, CinemaContext db, IConfiguration configuration)
@@ -379,9 +378,6 @@ namespace Cinema.Services
                 case CinemaManagementVoucherChoice.DeleteVoucher:
                     DeleteVoucher(db);
                     break;
-                case CinemaManagementVoucherChoice.DisplayVouchers:
-                    DisplayVouchers(db);
-                    break;
                 case CinemaManagementVoucherChoice.Exit:
                     return 1;
                 default:
@@ -472,21 +468,6 @@ namespace Cinema.Services
             AnsiConsole.Markup("[green]Voucher succesvol verwijderd![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
-        }
-
-        public void DisplayVouchers(CinemaContext db)
-        {
-            List<Voucher> vouchers = db.Vouchers.ToList();
-            if (vouchers.Count == 0)
-            {
-                Console.WriteLine("Currently no existing vouchers...");
-                return;
-            }
-            Console.WriteLine("Current vouchers:");
-            foreach (Voucher voucher in vouchers)
-            {
-                Console.WriteLine($"{vouchers.IndexOf(voucher)+1}. {voucher.ToString()}");
-            }
         }
     }
 }
