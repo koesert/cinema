@@ -65,11 +65,11 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, out double number))
+            if (double.TryParse(input, out double number) && number > 0)
             {
                 return number;
             }
-            AnsiConsole.Markup("[red]Input bevat letters/symbolen. Probeer opnieuw:\n[/]");
+            AnsiConsole.Markup("[red]Input bevat letters/symbolen of is kleiner dan 0. Probeer opnieuw:\n[/]");
             input = Console.ReadLine();
             Console.Clear();
         }
@@ -81,11 +81,11 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, out double number) && number <= 100)
+            if (double.TryParse(input, out double number) && number <= 100 && number > 0)
             {
                 return number;
             }
-            AnsiConsole.Markup("[red]Input overschrijdt het limiet (100), of bevat letters/symbolen. Probeer opnieuw:\n[/]");
+            AnsiConsole.Markup("[red]Input voldoet niet aan grenswaarden (0-100), of bevat letters/symbolen. Probeer opnieuw:\n[/]");
             input = Console.ReadLine();
             Console.Clear();
         }
