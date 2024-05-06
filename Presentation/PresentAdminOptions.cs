@@ -414,25 +414,21 @@ namespace Cinema.Services
             }
             else
             {
-                code = AnsiConsole.Prompt(
+                string stringcode = AnsiConsole.Prompt(
                 new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
                     .PromptStyle("yellow")
-                    .Validate(input => 
-                    {
-                        string result = LogicLayerVoucher.CodeCheck(db, input);
-                        return true;
-                    })
                 );
+                code = LogicLayerVoucher.CodeCheck(db, stringcode);
             }
 
             Console.Clear();
             AnsiConsole.Markup($"[blue]Code: {code}[/]\n");
 
-            discount = AnsiConsole.Prompt(
-            new TextPrompt<double>($"Voeg {discountType} korting: ")
+            string stringdiscount = AnsiConsole.Prompt(
+            new TextPrompt<string>($"Voeg {discountType} korting: ")
                 .PromptStyle("yellow")
             );
-            discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(Convert.ToString(discount)) : LogicLayerVoucher.CheckDiscount(Convert.ToString(discount));
+            discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
             Voucher voucher = discountType.Contains("%") ? new PercentVoucher(code, discount) : new Voucher(code, discount);
 
             AnsiConsole.Markup($"[blue]Nieuwe Voucher: {voucher.ToString()}[/]\n");

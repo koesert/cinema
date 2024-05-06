@@ -17,7 +17,7 @@ public class LogicLayerVoucher
                 {
                     if (voucher.Code == code)
                     {
-                        Console.WriteLine("There already appears to be an existing voucher using this code. Please try a different one.");
+                        AnsiConsole.Markup("[red]Er blijkt al een voucher te bestaan die gebruik maakt van deze code. Voer A.U.B een nieuwe in:\n[/]");
                         code = CodeCheck(db, Console.ReadLine());
                         break;
                     }
@@ -66,7 +66,11 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double number) && number > 0)
+            if (input.Contains("."))
+            {
+                input = input.Replace(".", ",");
+            }
+            if (double.TryParse(input, out double number) && number > 0)
             {
                 return number;
             }
@@ -82,7 +86,11 @@ public class LogicLayerVoucher
         bool check = false;
         while (!check)
         {
-            if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double number) && number <= 100 && number > 0)
+            if (input.Contains("."))
+            {
+                input = input.Replace(".", ",");
+            }
+            if (double.TryParse(input, out double number) && number <= 100 && number > 0)
             {
                 return number;
             }
