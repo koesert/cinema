@@ -164,8 +164,8 @@ namespace Cinema.Services
             Console.Clear();
 
             string roomId;
+            DateTimeOffset selectedDate;
             string startTime;
-            bool ready;
 
             // Prompt user to select RoomId
             roomId = AnsiConsole.Prompt(
@@ -174,82 +174,132 @@ namespace Cinema.Services
                     .AddChoices(new[] { "1", "2", "3" })
             );
 
-            // Prompt user for StartTime
-            startTime = AnsiConsole.Prompt(
-                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
-                    .PromptStyle("yellow")
-                    .Validate(input =>
-                    {
-                        if (!DateTimeOffset.TryParseExact(
-                            input,
-                            "dd-MM-yyyy HH:mm",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal,
-                            out _))
-                        {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
-                        }
-                        return ValidationResult.Success();
-                    })
-            );
+            // Prompt user to select date
+            selectedDate = PromptDateSelection();
 
-            // Prompt user if they really want to add the movie
-            ready = AnsiConsole.Confirm("Weet je zeker dat je deze film wilt toevoegen?");
+            var formattedDate = selectedDate.ToString("dd-MM-yyyy");
 
-            if (!ready)
-                ListMovies(db);
+            var availableHours = GetAvailableHours(db, roomId, formattedDate, selectedMovie.Duration);
 
-            while (true)
+            if (availableHours.Any())
             {
-                if (!DateTimeOffset.TryParseExact(
-                    startTime,
-                    "dd-MM-yyyy HH:mm",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AssumeUniversal,
-                    out DateTimeOffset StartTime
-                ))
+                // Prompt user to select start time
+                startTime = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Selecteer een starttijd:")
+                        .AddChoices(availableHours)
+                );
+
+                if (!AnsiConsole.Confirm("Weet je zeker dat je deze film wilt toevoegen?"))
                 {
-                    AnsiConsole.Markup($"[red]\"{startTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.[/]");
-                    startTime = AnsiConsole.Prompt(
-                        new TextPrompt<string>("Probeer Opnieuw:")
-                            .PromptStyle("yellow")
-                            .Validate(input =>
-                            {
-                                if (!DateTimeOffset.TryParseExact(
-                                    input,
-                                    "dd-MM-yyyy HH:mm",
-                                    CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal,
-                                    out _))
-                                {
-                                    return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
-                                }
-                                return ValidationResult.Success();
-                            })
-                    );
-                    continue;
+                    ListMovies(db);
+                    return;
+                }
+
+                DateTimeOffset showtimeStartTime;
+                if (!TryParseAndValidateDateTime($"{formattedDate} {startTime}", out showtimeStartTime))
+                {
+                    AnsiConsole.Markup($"[red]\"{formattedDate} {startTime}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.[/]");
+                    AddShowtime(db, selectedMovie);
+                    return;
                 }
 
                 var showTime = new Showtime()
                 {
                     Movie = selectedMovie,
                     RoomId = roomId,
-                    StartTime = StartTime,
+                    StartTime = showtimeStartTime,
                 };
 
-                db.Showtimes.Add(showTime);
-                db.SaveChanges();
-
-                CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(showTime, db);
-                AnsiConsole.Markup("[green]Film succesvol toegevoegd aan de database![/]");
-                AnsiConsole.WriteLine("Druk op een toets om terug te gaan....");
-                Console.ReadKey();
-                break;
+                try
+                {
+                    db.Showtimes.Add(showTime);
+                    db.SaveChanges();
+                    CinemaReservationSystem cinemaSystem = CinemaReservationSystem.GetCinemaReservationSystem(showTime, db);
+                    AnsiConsole.Markup("[green]Film succesvol toegevoegd aan de database![/]");
+                    AnsiConsole.WriteLine("Druk op een toets om terug te gaan....");
+                    Console.ReadKey();
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.Markup($"[red]Er is een fout opgetreden bij het toevoegen van de film: {ex.Message}[/]");
+                }
             }
+            else
+            {
+                AnsiConsole.WriteLine("Er zijn geen beschikbaar tijden\n");
+                AnsiConsole.WriteLine("Druk op een toets om terug te gaan....");
+
+                Console.ReadKey();
+            }
+
+
         }
 
+        private static DateTimeOffset PromptDateSelection()
+        {
+            var currentDate = DateTimeOffset.UtcNow.Date;
+            var dates = Enumerable.Range(0, 28)
+                                  .Select(offset => currentDate.AddDays(offset))
+                                  .ToList();
 
+            var selectedDateString = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een datum:")
+                    .AddChoices(dates.Select(date => date.ToString("dd-MM-yyyy")))
+            );
 
+            return DateTimeOffset.ParseExact(selectedDateString, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+        }
+
+        private static bool TryParseAndValidateDateTime(string input, out DateTimeOffset result)
+        {
+            return DateTimeOffset.TryParseExact(
+                input,
+                "dd-MM-yyyy HH:mm",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out result
+            );
+        }
+
+        private static List<string> GetAvailableHours(CinemaContext db, string roomId, string date, int movieDuration)
+        {
+            var parsedDate = DateTimeOffset.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+            var startTime = new DateTimeOffset(parsedDate.Year, parsedDate.Month, parsedDate.Day, 12, 0, 0, TimeSpan.Zero);
+            var endTime = new DateTimeOffset(parsedDate.Year, parsedDate.Month, parsedDate.Day, 22, 0, 0, TimeSpan.Zero);
+
+            var utcStartTime = startTime.ToUniversalTime();
+            var utcEndTime = endTime.ToUniversalTime();
+
+            var bookedShowtimes = db.Showtimes
+                                    .Where(s => s.RoomId == roomId && s.StartTime >= utcStartTime && s.StartTime <= utcEndTime)
+                                    .Select(s => new { s.StartTime, EndTime = s.StartTime.AddMinutes(movieDuration) })
+                                    .ToList();
+
+            var availableHours = new List<string>();
+            var currentTime = utcStartTime;
+            while (currentTime <= utcEndTime)
+            {
+                // Check if the movie fits starting from the current hour
+                var isMovieFit = Enumerable.Range(0, movieDuration).All(offset =>
+                {
+                    var currentOffset = currentTime.AddMinutes(offset);
+                    return !bookedShowtimes.Any(s => currentOffset >= s.StartTime && currentOffset < s.EndTime);
+                });
+
+                if (isMovieFit)
+                {
+                    availableHours.Add(currentTime.ToString("HH:mm"));
+                }
+
+                // Move to the next hour
+                currentTime = currentTime.AddHours(1);
+            }
+
+            return availableHours;
+        }
         private static int AddMovieChoice(CinemaContext db)
         {
             var addMovieOptions = AddMovieChoiceDescriptions.Keys.ToList();
