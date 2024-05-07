@@ -3,18 +3,19 @@ using Spectre.Console;
 
 public class PresentAccountOptions
 {
+    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Account opties[/]");
-            rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue");
-            AnsiConsole.Write(rule);
+        rule.Justification = Justify.Left;
+        rule.Style = Style.Parse("blue");
+        AnsiConsole.Write(rule);
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
                 .PageSize(10)
-                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen" , "Wachtwoord aanpassen", "Terug"})
+                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen", "Wachtwoord aanpassen", "Terug" })
         );
         switch (optionChoice)
         {

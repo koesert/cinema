@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Cinema.Data;
 
 public class CinemaSeat
@@ -8,9 +9,11 @@ public class CinemaSeat
     public int SeatNumber { get; set; }
     public string Color { get; set; }
     public bool IsReserved { get; set; } = false;
-    public int Price { get; set; }
+    public decimal Price { get; set; }
     public Showtime Showtime { get; set; }
-    public Ticket Ticket { get; set; }
+    public int? TicketId { get; set; }
+    public Ticket? Ticket { get; set; }
+    public bool IsSelected { get; set; } = false;
     public CinemaSeat() { }
     public CinemaSeat(char row, int seatnumber, string color)
     {

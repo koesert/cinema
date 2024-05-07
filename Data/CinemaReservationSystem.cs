@@ -42,8 +42,6 @@ public class CinemaReservationSystem
                     var Color = seat.Color;
                     var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
                     db.CinemaSeats.Add(cinemaSeat);
-
-
                 }
 
             }
@@ -1392,6 +1390,12 @@ public class CinemaReservationSystem
                 Console.Write(seat.Layout + " ");
                 Console.ResetColor();
             }
+            else if (seat.IsSelected)
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.Write(seat.Layout + " ");
+                Console.ResetColor();
+            }
             else if (seat.Color == "orange")
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -1423,6 +1427,8 @@ public class CinemaReservationSystem
         Console.Write("     Rood: 30,-");
         Console.ForegroundColor = ConsoleColor.Green;
         Console.Write("     Groen: Gereserveerde Stoelen ");
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write("     Grijs: Geselecteerde Stoelen ");
         Console.WriteLine();
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
@@ -1430,6 +1436,7 @@ public class CinemaReservationSystem
         // Restore the original cursor position
         Console.SetCursorPosition(originalLeft, originalTop);
     }
+
 
 
     public static void ClearConsole()

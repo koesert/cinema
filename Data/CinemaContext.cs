@@ -30,5 +30,11 @@ namespace Cinema.Data
             optionsBuilder.UseNpgsql(_connectionString);
             base.OnConfiguring(optionsBuilder);
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CinemaSeat>()
+                .Ignore(c => c.IsSelected);
+        }
     }
 }
