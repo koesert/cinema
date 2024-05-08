@@ -16,7 +16,7 @@ public class PresentReservations
 
         foreach (Ticket Reservation in AllCustomersReservations)
         {
-            if (Reservation.Customer.Id == customer.Id)
+            if (Reservation.CustomerEmail == customer.Email)
             {
                 ThisCustomerReservations.Add(Reservation);
             }
