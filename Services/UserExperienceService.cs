@@ -102,7 +102,15 @@ public class UserExperienceService
       }
       else if (selectedOption == "Terug")
       {
-        break;
+        if (loggedInCustomer != null)
+        {
+          PresentCustomerOptions.Start(loggedInCustomer, db);
+          break;
+        }
+        else
+        {
+          break;
+        }
       }
       else if (selectedOption == "Filter door films")
       {
@@ -300,6 +308,12 @@ public class UserExperienceService
 
     if (reservationKeyInfo == "Yes")
     {
+
+      foreach (var seat in selectedSeats)
+      {
+        seat.IsReserved = true;
+      }
+
       ReserveSeats(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
       AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
       Console.WriteLine("Press any key to return to start.");

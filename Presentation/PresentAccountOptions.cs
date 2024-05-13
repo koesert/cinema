@@ -1,7 +1,7 @@
 using Cinema.Data;
 using Spectre.Console;
 
-public class PresentAccountOptions
+public static class PresentAccountOptions
 {
     [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)

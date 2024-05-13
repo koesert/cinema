@@ -1,7 +1,7 @@
 using Cinema.Data;
 using Spectre.Console;
 
-public class PresentCustomerOptions
+public static class PresentCustomerOptions
 {
     [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
@@ -17,7 +17,7 @@ public class PresentCustomerOptions
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
                 .PageSize(10)
-                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Account beheren", "Terug" })
+                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Account beheren", "Log Uit" })
         );
         switch (optionChoice)
         {
@@ -31,7 +31,7 @@ public class PresentCustomerOptions
                 AnsiConsole.Clear();
                 PresentAccountOptions.Start(loggedInCustomer, db);
                 break;
-            case "Terug":
+            case "Log Uit":
                 AnsiConsole.Clear();
                 break;
         }
