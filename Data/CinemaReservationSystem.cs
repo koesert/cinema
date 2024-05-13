@@ -29,23 +29,13 @@ public class CinemaReservationSystem
         {
             foreach (var seat in row)
             {
-                if (seat is null)
-                {
-                    var cinemaSeat = new CinemaSeat(Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-
-                }
-                else
-                {
-                    var Row = seat.Row;
-                    var SeatNumber = seat.SeatNumber;
-                    var Color = seat.Color;
-                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-                }
-
+                var Row = seat.Row;
+                var SeatNumber = seat.SeatNumber;
+                var Color = seat.Color;
+                var Type = seat.Type;
+                var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Type, Showtime);
+                db.CinemaSeats.Add(cinemaSeat);
             }
-
         }
         db.SaveChanges();
     }
