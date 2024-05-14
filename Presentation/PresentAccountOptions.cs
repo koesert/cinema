@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Cinema;
 using Cinema.Data;
 using Spectre.Console;
 
@@ -26,7 +25,7 @@ public class PresentAccountOptions
 
         switch (optionChoice)
         {
-            case "[blue]Email aanpassen[/]":
+            case "Email aanpassen":
                 AnsiConsole.Clear();
                 var emailRule = new Rule("[blue]Email aanpassen[/]")
                 {
@@ -86,7 +85,7 @@ public class PresentAccountOptions
                     Start(loggedInCustomer, db);
                 }
                 break;
-            case "[blue]Gebruikersnaam aanpassen[/]":
+            case "Gebruikersnaam aanpassen":
                 AnsiConsole.Clear();
                 var usernameRule = new Rule("[blue]Gebruikersnaam aanpassen[/]")
                 {
@@ -149,8 +148,71 @@ public class PresentAccountOptions
                     Start(loggedInCustomer, db);
                 }
                 break;
-            case "[blue]Wachtwoord aanpassen[/]":
+            case "Wachtwoord aanpassen":
                 AnsiConsole.Clear();
+                var passwordRule = new Rule("[blue]Wachtwoord aanpassen[/]")
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("blue dim")
+                };
+                AnsiConsole.Write(passwordRule);
+
+                string newPassword = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Wat word uw nieuwe [bold blue]wachtwoord[/]?")
+                        .PromptStyle("blue")
+                        .Secret()
+                        .Validate(password =>
+                        {
+                            if (password == loggedInCustomer.Password)
+                            {
+                                return ValidationResult.Error("[red]Wachtwoord mag niet hetzelfde zijn als uw huidige wachtwoord[/]");
+                            }
+                            if (string.IsNullOrWhiteSpace(password))
+                            {
+                                return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
+                            }
+                            if (password.Length < 6)
+                            {
+                                return ValidationResult.Error("[red]Wachtwoord moet minimaal 6 tekens lang zijn[/]");
+                            }
+                            if (!password.Any(char.IsDigit))
+                            {
+                                return ValidationResult.Error("[red]Wachtwoord moet minimaal één cijfer bevatten[/]");
+                            }
+                            if (!password.All(char.IsLetterOrDigit))
+                            {
+                                return ValidationResult.Error("[red]Wachtwoord mag alleen letters (hoofdletters en kleine letters) en cijfers bevatten[/]");
+                            }
+                            return ValidationResult.Success();
+                        })
+                );
+
+                if (AnsiConsole.Confirm($"Weet u zeker dat u uw [blue]wachtwoord[/] wilt aanpassen?"))
+                {
+                    AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("blue"))
+                        .Start("[blue]Wachtwoord[/] updaten...", ctx =>
+                        {
+                            loggedInCustomer.Password = newPassword;
+                            Customer.UpdateCustomer(db, loggedInCustomer);
+                            Thread.Sleep(2500);
+                        });
+                    AnsiConsole.MarkupLine("[blue]Wachtwoord[/] geüpdatet!");
+                    Thread.Sleep(2500);
+                    Start(loggedInCustomer, db);
+                }
+                else
+                {
+                    AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("red"))
+                        .Start("[red]Annuleren...[/]", ctx =>
+                        {
+                            Thread.Sleep(2500);
+                        });
+                    Start(loggedInCustomer, db);
+                }
                 break;
             case "[red]Account verwijderen[/]":
                 AnsiConsole.Clear();
