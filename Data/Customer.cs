@@ -42,5 +42,17 @@ namespace Cinema.Data
 
 			return newCustomer;
 		}
+
+		public static void UpdateCustomer(CinemaContext db, Customer customer)
+		{
+			db.Customers.Update(customer);
+			db.SaveChanges();
+		}
+
+		public static void DeleteCustomer(CinemaContext db, Customer customer)
+		{
+			db.Customers.Remove(customer);
+			db.SaveChanges();
+		}
 	}
 }
