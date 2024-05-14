@@ -14,6 +14,8 @@ public class UserExperienceService
       { UserExperienceChoice.ViewTickets, "Bekijk uw tickets" },
       { UserExperienceChoice.Logout, "Uitloggen" }
   };
+
+  [Obsolete]
   public void ManageUser(Customer customer, CinemaContext db, IConfiguration configuration)
   {
     // Initialize the current user choice
@@ -40,11 +42,11 @@ public class UserExperienceService
       {
         case UserExperienceChoice.ListMovies:
           // Implement logic to list movies for the user
-          ListMoviesWithShowtimes(db);
+          ListMoviesWithShowtimes(customer, db);
           break;
         case UserExperienceChoice.ViewTickets:
           // Implement logic to view user's tickets
-          ViewTickets(db);
+          ViewTickets(db, customer);
           break;
         default:
           break;
@@ -52,7 +54,8 @@ public class UserExperienceService
     }
   }
 
-  public void ListMoviesWithShowtimes(CinemaContext db)
+  [Obsolete]
+  public void ListMoviesWithShowtimes(Customer loggedInCustomer, CinemaContext db)
   {
     Console.Clear();
 
@@ -99,7 +102,15 @@ public class UserExperienceService
       }
       else if (selectedOption == "Terug")
       {
-        break;
+        if (loggedInCustomer != null)
+        {
+          PresentCustomerOptions.Start(loggedInCustomer, db);
+          break;
+        }
+        else
+        {
+          break;
+        }
       }
       else if (selectedOption == "Filter door films")
       {
@@ -146,61 +157,52 @@ public class UserExperienceService
           }
         }
         Console.Clear();
-        ShowCinemaHall(db, selectedShowtime);
+        ShowCinemaHall(loggedInCustomer, db, selectedShowtime);
       }
     }
   }
 
-  public void ShowCinemaHall(CinemaContext db, Showtime showtime)
+  [Obsolete]
+  public void ShowCinemaHall(Customer loggedInCustomer, CinemaContext db, Showtime showtime)
   {
-
     Console.CursorVisible = false;
-    // Console.Clear();
     int currentRow = 0;
     int currentSeatNumber = 0;
     int layoutLinesUsed = CalculateLinesUsedForLayout(db, showtime);
-    int selectedSeatLine = layoutLinesUsed + 1; // Adjust this based on your layout
+    int selectedSeatLine = layoutLinesUsed + 1;
+    string ticketNumber = LogicLayerVoucher.GenerateRandomCode(db);
+    List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
 
-    // Find the first available seat to start highlighting
     var firstAvailableSeat = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0) // Exclude empty spaces
+        .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
         .OrderBy(s => s.Row)
         .ThenBy(s => s.SeatNumber)
         .FirstOrDefault();
 
     if (firstAvailableSeat != null)
     {
-      currentRow = firstAvailableSeat.Row - 'A'; // Convert char to index (e.g., 'A' -> 0)
-      currentSeatNumber = firstAvailableSeat.SeatNumber - 1; // Convert seat number to index (e.g., 1 -> 0)
+      currentRow = firstAvailableSeat.Row - 'A';
+      currentSeatNumber = firstAvailableSeat.SeatNumber - 1;
     }
 
-    // Draw the cinema hall layout initially
     CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
     while (true)
     {
-
       Console.SetCursorPosition(0, selectedSeatLine);
-      // Fetch the price of the currently selected seat from the database
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      // Display the price of the currently selected seat
       Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
       Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
 
-
-      // Draw the cinema hall layout with the new highlight
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
-      // Listen for arrow key inputs and process user actions
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
       if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)
       {
-        // Check if moving up is possible
         if (currentRow > 0)
         {
-          // Check if there is a seat in the row above at the same seat number
           var seatAbove = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow - 1) && s.SeatNumber == currentSeatNumber + 1);
           if (seatAbove != null)
           {
@@ -210,7 +212,6 @@ public class UserExperienceService
       }
       else if (keyInfo.Key == ConsoleKey.DownArrow || keyInfo.Key == ConsoleKey.S)
       {
-        // Check if moving down is possible
         var seatBelow = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow + 1) && s.SeatNumber == currentSeatNumber + 1);
         if (seatBelow != null)
         {
@@ -219,66 +220,151 @@ public class UserExperienceService
       }
       else if (keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.A)
       {
-        // Fetch the minimum seat number for the current row from the database
         var minSeatNumberForRow = db.CinemaSeats
             .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
-            .Where(s => s.SeatNumber != 0) // Exclude seat numbers that are 0 (empty spaces)
-            .Min(s => (int?)s.SeatNumber); // Use (int?) to handle null case safely
+            .Where(s => s.SeatNumber != 0)
+            .Min(s => (int?)s.SeatNumber);
 
-        // Adjust the seat number to move left, ensuring it's within bounds
         currentSeatNumber = Math.Max(minSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber - 1);
       }
       else if (keyInfo.Key == ConsoleKey.RightArrow || keyInfo.Key == ConsoleKey.D)
       {
-        // Fetch the maximum seat number for the current row from the database
         var maxSeatNumberForRow = db.CinemaSeats
             .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
-            .Max(s => (int?)s.SeatNumber); // Use (int?) to handle null case safely
+            .Max(s => (int?)s.SeatNumber);
 
-        // Adjust the seat number to move right, ensuring it's within bounds
         currentSeatNumber = Math.Min(maxSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber + 1);
       }
       else if (keyInfo.Key == ConsoleKey.Enter)
       {
-        // Seat selection logic
         char selectedRow = (char)('A' + currentRow);
         int selectedSeatNumber = currentSeatNumber + 1;
 
-        CinemaSeat selectedSeat = CinemaReservationSystem.FindSeat(selectedRow, selectedSeatNumber, showtime, db);
-        if (selectedSeat == null)
-        {
-          AnsiConsole.MarkupLine($"[red]Seat {selectedRow}{selectedSeatNumber} does not exist[/]");
-        }
-        else if (selectedSeat.IsReserved)
-        {
-          AnsiConsole.MarkupLine($"[red]Seat {selectedRow}{selectedSeatNumber} is already reserved.[/]");
-        }
-        else
-        {
-          // Update the seat reservation status in the database
-          selectedSeat.IsReserved = true;
-          db.SaveChanges();
+        var selectedSeat = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == selectedRow && s.SeatNumber == selectedSeatNumber);
 
-          // Redraw the cinema hall layout after successful reservation
-          Console.Clear();
-          // Display "Successfully reserved seat" message in green
-          Console.ForegroundColor = ConsoleColor.Green;
-          Console.WriteLine("Successfully reserved seat");
-          Console.ResetColor(); // Reset color back to default
-          ShowCinemaHall(db, showtime);
-
-          // Exit loop to prevent further input handling after reservation
-          break;
+        if (selectedSeat != null && !selectedSeat.IsReserved)
+        {
+          if (selectedSeats.Contains(selectedSeat))
+          {
+            selectedSeats.Remove(selectedSeat);
+            selectedSeat.IsSelected = false; // Unselect the seat
+          }
+          else
+          {
+            selectedSeats.Add(selectedSeat);
+            selectedSeat.IsSelected = true; // Select the seat
+          }
         }
+      }
+      else if (keyInfo.Key == ConsoleKey.Spacebar)
+      {
+        // Call a method to handle reservation
+        HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+        break;
       }
       else if (keyInfo.Key == ConsoleKey.Escape)
       {
-        // Exit loop if user presses escape key
+        Console.Clear();
         break;
       }
     }
     Console.CursorVisible = true;
   }
+
+  [Obsolete]
+  private void HandleReservation(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+  {
+    if (selectedSeats.Count == 0)
+    {
+      AnsiConsole.MarkupLine("[red]No seats selected.[/]");
+      ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
+      return;
+    }
+
+    Console.Clear();
+    Console.WriteLine("Selected Seats:");
+    var table = new Table();
+    table.Border = TableBorder.Rounded;
+    table.AddColumn("Row");
+    table.AddColumn("Seat Number");
+    table.AddColumn("Price");
+
+    decimal totalSeatPrice = 0;
+    foreach (var seat in selectedSeats)
+    {
+      table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"${seat.Price}");
+      totalSeatPrice += seat.Price;
+    }
+    AnsiConsole.Render(table);
+
+    Console.WriteLine($"Total Price: ${totalSeatPrice}");
+
+    var reservationKeyInfo = AnsiConsole.Prompt(
+    new SelectionPrompt<string>()
+        .PageSize(3)
+        .AddChoices("Yes", "No")
+        .Title("Do you want to reserve these seats?")
+        .HighlightStyle(new Style(Color.Blue)));
+
+    if (reservationKeyInfo == "Yes")
+    {
+
+      foreach (var seat in selectedSeats)
+      {
+        seat.IsReserved = true;
+      }
+
+      ReserveSeats(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+      AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
+      Console.WriteLine("Press any key to return to start.");
+      Console.ReadKey(true);
+      Console.Clear();
+    }
+    else
+    {
+      ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
+    }
+  }
+
+
+
+
+  private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+  {
+    if (loggedInCustomer != null)
+    {
+      var ticket = new Ticket
+      {
+        Customer = loggedInCustomer,
+        Showtime = showtime,
+        PurchasedAt = DateTime.UtcNow,
+        TicketNumber = ticketNumber,
+        CustomerEmail = loggedInCustomer.Email,
+        Seats = selectedSeats.ToList(),
+        PurchaseTotal = selectedSeats.Sum(s => s.Price)
+      };
+      db.Tickets.Add(ticket);
+    }
+    else
+    {
+      Console.Write("Enter your email to proceed with the reservation: ");
+      string userEmail = Console.ReadLine();
+
+      var ticket = new Ticket
+      {
+        Showtime = showtime,
+        PurchasedAt = DateTime.UtcNow,
+        TicketNumber = ticketNumber,
+        CustomerEmail = userEmail,
+        Seats = selectedSeats.ToList(),
+        PurchaseTotal = selectedSeats.Sum(s => s.Price)
+      };
+      db.Tickets.Add(ticket);
+    }
+    db.SaveChanges();
+  }
+
+
   private int CalculateLinesUsedForLayout(CinemaContext db, Showtime showtime)
   {
     int linesUsed = 0;
@@ -383,6 +469,8 @@ public class UserExperienceService
 
     return moviesQuery;
   }
+
+  [Obsolete]
   private void DisplayMovieDetails(Movie movie)
   {
     var table = new Table();
@@ -401,8 +489,141 @@ public class UserExperienceService
     AnsiConsole.Render(table);
   }
 
-  private void ViewTickets(CinemaContext db)
+  private void ViewTickets(CinemaContext db, Customer customer)
   {
-    // Implement logic to view user's tickets
+    Console.Clear();
+    var tickets = db.Tickets
+        .Include(t => t.Showtime)
+        .Where(t => t.Customer.Id == customer.Id)
+        .ToList();
+
+    if (tickets.Any())
+    {
+      foreach (var ticket in tickets)
+      {
+        // Display ticket information
+        Console.WriteLine($"Ticket Number: {ticket.TicketNumber}");
+        Console.WriteLine($"Showtime: {ticket.Showtime.StartTime}");
+        Console.WriteLine($"Purchased At: {ticket.PurchasedAt}");
+        Console.WriteLine($"Total Price: {ticket.PurchaseTotal}");
+        Console.WriteLine();
+      }
+    }
+    else
+    {
+      Console.WriteLine("You have no tickets.");
+    }
+
+    Console.WriteLine("Press any key to continue...");
+    Console.ReadKey();
   }
+
+  public void ShowCinemaHall(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats)
+  {
+    Console.CursorVisible = false;
+    int currentRow = 0;
+    int currentSeatNumber = 0;
+    int layoutLinesUsed = CalculateLinesUsedForLayout(db, showtime);
+    int selectedSeatLine = layoutLinesUsed + 1;
+    string ticketNumber = LogicLayerVoucher.GenerateRandomCode(db);
+    // List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
+
+    var firstAvailableSeat = db.CinemaSeats
+        .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
+        .OrderBy(s => s.Row)
+        .ThenBy(s => s.SeatNumber)
+        .FirstOrDefault();
+
+    if (firstAvailableSeat != null)
+    {
+      currentRow = firstAvailableSeat.Row - 'A';
+      currentSeatNumber = firstAvailableSeat.SeatNumber - 1;
+    }
+
+    CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+
+    while (true)
+    {
+      Console.SetCursorPosition(0, selectedSeatLine);
+      var selectedSeatPrice = db.CinemaSeats
+          .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
+
+      Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
+      Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+
+      CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+
+      ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+      if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)
+      {
+        if (currentRow > 0)
+        {
+          var seatAbove = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow - 1) && s.SeatNumber == currentSeatNumber + 1);
+          if (seatAbove != null)
+          {
+            currentRow--;
+          }
+        }
+      }
+      else if (keyInfo.Key == ConsoleKey.DownArrow || keyInfo.Key == ConsoleKey.S)
+      {
+        var seatBelow = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow + 1) && s.SeatNumber == currentSeatNumber + 1);
+        if (seatBelow != null)
+        {
+          currentRow++;
+        }
+      }
+      else if (keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.A)
+      {
+        var minSeatNumberForRow = db.CinemaSeats
+            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
+            .Where(s => s.SeatNumber != 0)
+            .Min(s => (int?)s.SeatNumber);
+
+        currentSeatNumber = Math.Max(minSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber - 1);
+      }
+      else if (keyInfo.Key == ConsoleKey.RightArrow || keyInfo.Key == ConsoleKey.D)
+      {
+        var maxSeatNumberForRow = db.CinemaSeats
+            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
+            .Max(s => (int?)s.SeatNumber);
+
+        currentSeatNumber = Math.Min(maxSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber + 1);
+      }
+      else if (keyInfo.Key == ConsoleKey.Enter)
+      {
+        char selectedRow = (char)('A' + currentRow);
+        int selectedSeatNumber = currentSeatNumber + 1;
+
+        var selectedSeat = db.CinemaSeats.FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == selectedRow && s.SeatNumber == selectedSeatNumber);
+
+        if (selectedSeat != null && !selectedSeat.IsReserved)
+        {
+          if (selectedSeats.Contains(selectedSeat))
+          {
+            selectedSeats.Remove(selectedSeat);
+            selectedSeat.IsSelected = false; // Unselect the seat
+          }
+          else
+          {
+            selectedSeats.Add(selectedSeat);
+            selectedSeat.IsSelected = true; // Select the seat
+          }
+        }
+      }
+      else if (keyInfo.Key == ConsoleKey.Spacebar)
+      {
+        // Call a method to handle reservation
+        HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+        break;
+      }
+      else if (keyInfo.Key == ConsoleKey.Escape)
+      {
+        Console.Clear();
+        break;
+      }
+    }
+    Console.CursorVisible = true;
+  }
+
 }

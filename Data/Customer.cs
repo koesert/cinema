@@ -15,6 +15,10 @@ namespace Cinema.Data
 			Email = email;
 		}
 
+		public Customer()
+		{
+		}
+
 		private static void RetrieveCustomers(CinemaContext db)
 		{
 			AllCustomers = db.Customers.ToList();
@@ -38,7 +42,7 @@ namespace Cinema.Data
 		{
 			Customer newCustomer = new Customer(username, password, email);
 			db.Customers.Add(newCustomer);
-            db.SaveChanges();
+			db.SaveChanges();
 
 			return newCustomer;
 		}

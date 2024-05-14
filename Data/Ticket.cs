@@ -1,4 +1,6 @@
-﻿namespace Cinema.Data
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Cinema.Data
 {
     public class Ticket
     {
@@ -9,7 +11,7 @@
         public string CustomerEmail { get; set; }
         public DateTimeOffset PurchasedAt { get; set; }
         public DateTimeOffset CancelledAt { get; set; }
-        public List<CinemaSeat> Seats { get; set; }
-        public decimal PurchaseTotal => Seats.Sum(s => s.Price);
+        public ICollection<CinemaSeat> Seats { get; set; } = new List<CinemaSeat>();
+        public decimal PurchaseTotal { get; set; }
     }
 }

@@ -2,11 +2,16 @@ using System.Text.RegularExpressions;
 using Cinema.Data;
 using Spectre.Console;
 
-public class PresentAccountOptions
+public static class PresentAccountOptions
 {
+    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         AnsiConsole.Clear();
+        var rule = new Rule("[bold blue]Account opties[/]");
+        rule.Justification = Justify.Left;
+        rule.Style = Style.Parse("blue");
+        AnsiConsole.Write(rule);
         var rule = new Rule("[bold blue]Account opties[/]")
         {
             Justification = Justify.Left,
@@ -18,7 +23,7 @@ public class PresentAccountOptions
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
                 .PageSize(10)
-                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen" , "Wachtwoord aanpassen", "[red]Account verwijderen[/]" ,"Terug"})
+                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen", "Wachtwoord aanpassen", "[red]Account verwijderen[/]", "Terug" })
         );
 
         List<Customer> existingCustomers = db.Customers.ToList();
@@ -33,7 +38,7 @@ public class PresentAccountOptions
                     Style = Style.Parse("blue dim")
                 };
                 AnsiConsole.Write(emailRule);
-                
+
                 string newEmail = AnsiConsole.Prompt
                     (
                         new TextPrompt<string>("Wat word uw nieuwe [blue]email[/]?")
@@ -217,10 +222,10 @@ public class PresentAccountOptions
             case "[red]Account verwijderen[/]":
                 AnsiConsole.Clear();
                 var deleteAccountRule = new Rule("[red]Account verwijderen[/]")
-                    {
-                        Justification = Justify.Left,
-                        Style = Style.Parse("red dim")
-                    };
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("red dim")
+                };
                 AnsiConsole.Write(deleteAccountRule);
                 if (AnsiConsole.Confirm($"Weet u zeker dat u uw account wilt [red]verwijderen[/]?"))
                 {
