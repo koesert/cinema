@@ -62,6 +62,7 @@ public class UserExperienceService
     var moviesQuery = db.Movies.Include(m => m.Showtimes);
     DateTime today = DateTime.UtcNow.Date;
     int currentWeek = 0;
+    string filterDescription = ""; // Variable to hold active filter description
 
     while (true)
     {
@@ -77,6 +78,7 @@ public class UserExperienceService
 
       options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
       AnsiConsole.MarkupLine("");
+      AnsiConsole.MarkupLine(filterDescription); // Display active filters
       if (currentWeek < 3) options.Add("Volgende week");
       if (currentWeek > 0) options.Add("Vorige week");
       options.Add("Terug");
@@ -114,8 +116,9 @@ public class UserExperienceService
       }
       else if (selectedOption == "Filter door films")
       {
-        var filteredMovies = ApplyFilters(db).Include(m => m.Showtimes);
-        moviesQuery = filteredMovies;
+        var result = ApplyFilters(db);
+        moviesQuery = result.Item1.Include(m => m.Showtimes);
+        filterDescription = result.Item2; // Update active filter description
         Console.Clear();
         continue;
       }
@@ -393,29 +396,29 @@ public class UserExperienceService
   }
 
 
-  private IQueryable<Movie> ApplyFilters(CinemaContext db)
+  private (IQueryable<Movie>, string) ApplyFilters(CinemaContext db)
   {
     var allMovies = db.Movies.ToList();
     var moviesQuery = allMovies.AsQueryable();
+    string activeFilters = "Active Filters: ";
 
     var filterOption = AnsiConsole.Prompt(
-    new SelectionPrompt<CinemaFilterChoice>()
-        .Title("Selecteer een optie om films te filteren")
-        .PageSize(4)
-        .AddChoices(new[]
-        {
-                    CinemaFilterChoice.Genres,
-                    CinemaFilterChoice.Directeuren,
-                    CinemaFilterChoice.Acteurs,
-                    CinemaFilterChoice.Terug
-        })
-);
+        new SelectionPrompt<CinemaFilterChoice>()
+            .Title("Selecteer een optie om films te filteren")
+            .PageSize(4)
+            .AddChoices(new[]
+            {
+                CinemaFilterChoice.Genres,
+                CinemaFilterChoice.Directeuren,
+                CinemaFilterChoice.Acteurs,
+                CinemaFilterChoice.Terug
+            })
+    );
 
     switch (filterOption)
     {
       case CinemaFilterChoice.Genres:
         var allGenres = allMovies.SelectMany(movie => movie.Genres ?? Enumerable.Empty<string>())
-                                .Where(genre => genre != null)
                                 .Distinct()
                                 .ToList();
         var selectedGenres = AnsiConsole.Prompt(
@@ -424,15 +427,14 @@ public class UserExperienceService
                 .PageSize(10)
                 .AddChoices(allGenres)
         );
-        // Filter films op basis van geselecteerde genres
         moviesQuery = allMovies.Where(movie => movie.Genres != null &&
-            movie.Genres.Intersect(selectedGenres ?? Enumerable.Empty<string>()).Any())
+            movie.Genres.Intersect(selectedGenres).Any())
             .AsQueryable();
+        activeFilters += "Genres: " + string.Join(", ", selectedGenres);
         break;
 
       case CinemaFilterChoice.Acteurs:
         var allActors = allMovies.SelectMany(movie => movie.Cast ?? Enumerable.Empty<string>())
-                                .Where(actor => actor != null)
                                 .Distinct()
                                 .ToList();
         var selectedActors = AnsiConsole.Prompt(
@@ -441,15 +443,14 @@ public class UserExperienceService
                 .PageSize(10)
                 .AddChoices(allActors)
         );
-        // Filter films op basis van geselecteerde acteurs
         moviesQuery = allMovies.Where(movie => movie.Cast != null &&
-            movie.Cast.Intersect(selectedActors ?? Enumerable.Empty<string>()).Any())
+            movie.Cast.Intersect(selectedActors).Any())
             .AsQueryable();
+        activeFilters += "Acteurs: " + string.Join(", ", selectedActors);
         break;
 
       case CinemaFilterChoice.Directeuren:
         var allDirectors = allMovies.SelectMany(movie => movie.Directors ?? Enumerable.Empty<string>())
-                                    .Where(director => director != null)
                                     .Distinct()
                                     .ToList();
         var selectedDirectors = AnsiConsole.Prompt(
@@ -459,16 +460,18 @@ public class UserExperienceService
                 .AddChoices(allDirectors)
         );
         moviesQuery = allMovies.Where(movie => movie.Directors != null &&
-            movie.Directors.Intersect(selectedDirectors ?? Enumerable.Empty<string>()).Any())
+            movie.Directors.Intersect(selectedDirectors).Any())
             .AsQueryable();
+        activeFilters += "Directeuren: " + string.Join(", ", selectedDirectors);
         break;
 
       default:
-        break;
+        return (null, null); // Handle the case when "Terug" is chosen
     }
 
-    return moviesQuery;
+    return (moviesQuery, activeFilters);
   }
+
 
   [Obsolete]
   private void DisplayMovieDetails(Movie movie)
