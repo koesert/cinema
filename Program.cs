@@ -16,12 +16,12 @@ namespace Cinema
         {
             { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
             { InitialStateChoice.Login, "Inloggen" },
+            { InitialStateChoice.reservering, "zie reservering (gast)" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
         [Obsolete]
         public static void Main(string[] args)
-        public static void Main()
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
@@ -52,6 +52,9 @@ namespace Cinema
                 {
                     case InitialStateChoice.ListMovies:
                         customerService.ListMoviesWithShowtimes(loggedInCustomer, db);
+                        break;
+                    case InitialStateChoice.reservering:
+                        PresentGuestReservationLogin.Start(db);
                         break;
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
