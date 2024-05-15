@@ -1421,7 +1421,7 @@ public class CinemaReservationSystem
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write("30,-");
         Console.ResetColor();
-        Console.Write("    E: ");
+        Console.Write(" E: ");
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.Write("25,-");
         Console.ResetColor();
@@ -1433,7 +1433,7 @@ public class CinemaReservationSystem
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write("35,-");
         Console.ResetColor();
-        Console.Write("    L: ");
+        Console.Write(" L: ");
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.Write("40,-");
         Console.ResetColor();
@@ -1446,9 +1446,9 @@ public class CinemaReservationSystem
         Console.Write("60,-");
         Console.ResetColor();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("     Groen: Gereserveerde Stoelen ");
+        Console.Write(" Groen: Gereserveerde Stoelen ");
         Console.ForegroundColor = ConsoleColor.Gray;
-        Console.Write("     Grijs: Geselecteerde Stoelen ");
+        Console.Write(" Grijs: Geselecteerde Stoelen ");
         Console.WriteLine();
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
