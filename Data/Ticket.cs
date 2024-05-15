@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cinema.Data
 {
@@ -13,5 +15,12 @@ namespace Cinema.Data
         public DateTimeOffset CancelledAt { get; set; }
         public ICollection<CinemaSeat> Seats { get; set; } = new List<CinemaSeat>();
         public decimal PurchaseTotal { get; set; }
+
+        public static string GeneretaTicketNumber()
+        {
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
     }
+
 }

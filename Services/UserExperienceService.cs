@@ -329,44 +329,80 @@ public class UserExperienceService
     }
   }
 
-
-
-
   private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
   {
     if (loggedInCustomer != null)
     {
-      var ticket = new Ticket
-      {
-        Customer = loggedInCustomer,
-        Showtime = showtime,
-        PurchasedAt = DateTime.UtcNow,
-        TicketNumber = ticketNumber,
-        CustomerEmail = loggedInCustomer.Email,
-        Seats = selectedSeats.ToList(),
-        PurchaseTotal = selectedSeats.Sum(s => s.Price)
-      };
-      db.Tickets.Add(ticket);
+      CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email);
     }
     else
     {
-      Console.Write("Enter your email to proceed with the reservation: ");
-      string userEmail = Console.ReadLine();
+      string userEmail = null;
+      bool emailIsValid = false;
 
-      var ticket = new Ticket
+      while (!emailIsValid)
       {
-        Showtime = showtime,
-        PurchasedAt = DateTime.UtcNow,
-        TicketNumber = ticketNumber,
-        CustomerEmail = userEmail,
-        Seats = selectedSeats.ToList(),
-        PurchaseTotal = selectedSeats.Sum(s => s.Price)
-      };
-      db.Tickets.Add(ticket);
+        Console.Write("Enter your email to proceed with the reservation: ");
+        userEmail = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(userEmail))
+        {
+          AnsiConsole.Markup("[red]Email mag niet leeg zijn[/]");
+          Console.WriteLine("");
+          continue;
+        }
+
+        if (!userEmail.Contains('@'))
+        {
+          AnsiConsole.Markup("[red]Email moet een @' symbool bevatten.[/]");
+          Console.WriteLine("");
+          continue;
+        }
+
+        if (db.Customers.Any(c => c.Email.ToLower() == userEmail.ToLower()))
+        {
+          AnsiConsole.Markup("[red]Deze email is al in gebruik. Please use a different email.[/]");
+          Console.WriteLine("");
+        }
+        else
+        {
+          emailIsValid = true;
+        }
+      }
+
+      CreateTicket(db, showtime, selectedSeats, ticketNumber, userEmail);
     }
     db.SaveChanges();
   }
 
+  private void CreateTicket(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, string userEmail)
+  {
+    var ticket = new Ticket
+    {
+      Showtime = showtime,
+      PurchasedAt = DateTime.UtcNow,
+      TicketNumber = ticketNumber,
+      CustomerEmail = userEmail,
+      Seats = selectedSeats.ToList(),
+      PurchaseTotal = selectedSeats.Sum(s => s.Price)
+    };
+    db.Tickets.Add(ticket);
+  }
+
+  private void CreateTicket(CinemaContext db, Customer loggedInCustomer, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, string userEmail)
+  {
+    var ticket = new Ticket
+    {
+      Customer = loggedInCustomer,
+      Showtime = showtime,
+      PurchasedAt = DateTime.UtcNow,
+      TicketNumber = ticketNumber,
+      CustomerEmail = userEmail,
+      Seats = selectedSeats.ToList(),
+      PurchaseTotal = selectedSeats.Sum(s => s.Price)
+    };
+    db.Tickets.Add(ticket);
+  }
 
   private int CalculateLinesUsedForLayout(CinemaContext db, Showtime showtime)
   {
