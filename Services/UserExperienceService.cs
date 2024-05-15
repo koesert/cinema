@@ -62,7 +62,7 @@ public class UserExperienceService
     var moviesQuery = db.Movies.Include(m => m.Showtimes);
     DateTime today = DateTime.UtcNow.Date;
     int currentWeek = 0;
-    string filterDescription = ""; // Variable to hold active filter description
+    string filterDescription = "";
 
     while (true)
     {
@@ -111,6 +111,7 @@ public class UserExperienceService
         }
         else
         {
+          Console.Clear();
           break;
         }
       }
@@ -118,13 +119,14 @@ public class UserExperienceService
       {
         var result = ApplyFilters(db);
         moviesQuery = result.Item1.Include(m => m.Showtimes);
-        filterDescription = result.Item2; // Update active filter description
+        filterDescription = result.Item2;
         Console.Clear();
         continue;
       }
 
       var selectedMovie = moviesWithUpcomingShowtimes.First(m => m.Title == selectedOption);
 
+      Console.Clear();
       DisplayMovieDetails(selectedMovie);
       AnsiConsole.MarkupLine("");
 
