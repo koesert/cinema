@@ -71,7 +71,7 @@ spyrabv@gmail.com
     public static void Confirm()
     {
         EmailConfirmation send = new EmailConfirmation();
-        send.SendMessage("yegorgudz@gmail.com", "John Doe", "The Matrix", "2024-05-20", "18:30", "A1, A2, A3", "Screen 1");
+        send.SendMessage("alexkonsta1996@gmail.com", "Alex Konsta", "The Matrix", "2024-05-20", "18:30", "A1, A2, A3", "Screen 1");
     }
 }
 
