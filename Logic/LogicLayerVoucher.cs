@@ -107,7 +107,7 @@ public class LogicLayerVoucher
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         string code = "";
         
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 10; i++)
         {
             code += chars[random.Next(chars.Length)];
         }
