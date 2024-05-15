@@ -27,32 +27,51 @@ public static class PresentGuestReservationOptions
                            .Where(t => t.TicketNumber == ticket.TicketNumber)
                            .Select(t => t.Showtime)
                            .FirstOrDefault();
+        var seatList = db.CinemaSeats
+                    .Where(t => t.TicketId == ticket.Id)
+                    .ToList();
+        string seats =" ";
+        foreach (var item in seatList)
+        {
+            seats += $"type:{item.Layout} {item.Row}{item.SeatNumber}\n ";
+        }
+
+        
 
         string KoopDatum = ticket.PurchasedAt.ToString("dd-MM-yyyy HH:mm:ss");
-        string startDatum = showtime.StartTime.ToString("dd-MM-yyyy HH:mm:ss");
+        string startDatum = showtime.StartTime.ToString("dd-MM-yyyy HH:mm");
 
         var table = new Table();
         table.Border = TableBorder.Rounded;
         table.AddColumn("Film");
         table.AddColumn("duur");
         table.AddColumn("zaal");
+        table.AddColumn("stoel");
         table.AddColumn("start tijd");
         table.AddColumn("gekocht op");
         table.AddColumn("Totale prijs");
 
-        table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), startDatum, KoopDatum, $"{ticket.PurchaseTotal} euro");
+        table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), seats, startDatum, KoopDatum, $"{ticket.PurchaseTotal} euro");
         AnsiConsole.Render(table);
 
+        var choices = new List<string>();
+
+        if (2 > 1)
+        {
+            choices.Add("Cancel ticket");
+        }
+
+        choices.Add("Terug");
+        
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
                 .PageSize(10)
-                .AddChoices(new[] { "Cancel ticket", "Terug" })
+                .AddChoices(choices.ToArray())
         );
         switch (optionChoice)
         {
             case "Cancel ticket":
-                user.Yoyo(ticket, db);
                 Console.ReadLine();
                 break;
             case "Terug":

@@ -12,13 +12,7 @@ public static class PresentAccountOptions
         rule.Justification = Justify.Left;
         rule.Style = Style.Parse("blue");
         AnsiConsole.Write(rule);
-        var rule = new Rule("[bold blue]Account opties[/]")
-        {
-            Justification = Justify.Left,
-            Style = Style.Parse("blue dim")
-        };
-        AnsiConsole.Write(rule);
-
+        
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
