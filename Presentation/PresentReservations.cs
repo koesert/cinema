@@ -24,6 +24,16 @@ public class PresentReservations
         if (ThisCustomerReservations.Count == 0)
         {
             AnsiConsole.MarkupLine($"Nog geen [blue]reservaties[/] voor [bold grey93]{customer.Username}[/].");
+            var terug = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Navigeren:")
+                    .AddChoices(new[] {
+                        "Terug"
+                    }));
+            if (terug == "Terug")
+            {
+                PresentCustomerOptions.Start(customer,db);
+            }
         }
         else
         {
