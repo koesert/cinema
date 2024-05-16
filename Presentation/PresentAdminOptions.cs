@@ -44,6 +44,7 @@ namespace Cinema.Services
         {
             { CinemaManagementVoucherChoice.MakeVoucher, "Maak nieuwe voucher aan" },
             { CinemaManagementVoucherChoice.DeleteVoucher, "Verwijder een bestaande voucher" },
+            { CinemaManagementVoucherChoice.ChangeVoucher, "Wijzig een bestaande voucher" },
             { CinemaManagementVoucherChoice.Exit, "Terug" }
         };
         public static void Start(Administrator admin, CinemaContext db)
@@ -409,6 +410,7 @@ namespace Cinema.Services
         public static int Voucherpanel(CinemaContext db)
         {
             Console.Clear();
+            UpdateVouchers(db);
             var VoucherOptions = VoucherChoiceDescriptions.Keys.ToList();
 
             var currentChoice = AnsiConsole.Prompt(
@@ -428,6 +430,9 @@ namespace Cinema.Services
                 case CinemaManagementVoucherChoice.DeleteVoucher:
                     DeleteVoucher(db);
                     break;
+                case CinemaManagementVoucherChoice.ChangeVoucher:
+                    ChangeExistingVoucher(db);
+                    break;
                 case CinemaManagementVoucherChoice.Exit:
                     return 1;
                 default:
@@ -445,6 +450,9 @@ namespace Cinema.Services
             string code;
             string random;
             double discount;
+            string dateoption = "";
+            string expDate = DateTimeOffset.Now.AddMonths(6).ToString("dd-MM-yyyy HH:mm");
+            DateTimeOffset date;
             bool ready;
 
             // Prompt user to select RoomId
@@ -471,17 +479,50 @@ namespace Cinema.Services
                 code = LogicLayerVoucher.CodeCheck(db, stringcode);
             }
 
+            dateoption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer VervalDatum invoer:")
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken" })
+            );
+            if (dateoption.Contains("aanmaken"))
+            {
+                expDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out _))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            }
+
+            date = DateTimeOffset.ParseExact(expDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            Customer customer = AnsiConsole.Prompt(
+                new SelectionPrompt<Customer>()
+                    .Title("Selecteer de klant aan wie u een voucher wilt binden:")
+                    .AddChoices(db.Customers.ToList())
+            );
+
             Console.Clear();
-            AnsiConsole.Markup($"[blue]Code: {code}[/]\n");
+            AnsiConsole.Markup($"[blue]Code: {code}, VervalDatum: {expDate}, Klant: {customer.Email}[/]\n");
 
             string stringdiscount = AnsiConsole.Prompt(
             new TextPrompt<string>($"Voeg {discountType} korting: ")
                 .PromptStyle("yellow")
             );
             discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
-            Voucher voucher = discountType.Contains("%") ? new PercentVoucher(code, discount) : new Voucher(code, discount);
+            Voucher voucher = discountType.Contains("%") ? new PercentVoucher(code, discount, date, customer.Email) : new Voucher(code, discount, date, customer.Email);
 
-            AnsiConsole.Markup($"[blue]Nieuwe Voucher: {voucher.ToString()}[/]\n");
+            AnsiConsole.Markup($"[blue]Nieuwe Voucher: {voucher}[/]\n");
             ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt toevoegen?");
             if (!ready)
                 return;
@@ -512,6 +553,129 @@ namespace Cinema.Services
             db.Vouchers.Remove(vouchertodelete);
             db.SaveChanges();
             AnsiConsole.Markup("[green]Voucher succesvol verwijderd![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+        }
+
+        public static void UpdateVouchers(CinemaContext db)
+        {
+            List<Voucher> expiredvouchers = db.Vouchers.Where(x => DateTimeOffset.UtcNow > x.ExpirationDate.UtcDateTime.AddHours(-2)).ToList();
+            foreach (Voucher voucher in expiredvouchers)
+            {
+                voucher.Active = false;
+            }
+            db.SaveChanges();
+        }
+
+        public static void ChangeExistingVoucher(CinemaContext db)
+        {
+            string option;
+            string code;
+            List<Voucher> vouchers = db.Vouchers.ToList();
+            Voucher voucher = AnsiConsole.Prompt(
+                new SelectionPrompt<Voucher>()
+                    .Title("Selecteer een voucher om te wijzigen")
+                    .AddChoices(vouchers)
+            );
+
+            Console.Clear();
+
+            AnsiConsole.Markup($"[blue]Gekozen Voucher: {voucher.ToString()}[/]\n");
+
+            option = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer wat u wilt wijzigen aan deze voucher:")
+                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant"})
+            );
+            Console.Clear();  
+            if (option.Contains("Code"))
+            {
+                AnsiConsole.Markup($"[blue]Oude Code: {voucher.Code}[/]\n");
+                string random = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer Code Invoer:")
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken" })
+                );
+                if (random.Contains("Genereer"))
+                {
+                    code = LogicLayerVoucher.GenerateRandomCode(db);
+                }
+                else
+                {
+                    AnsiConsole.Markup($"[blue]Oude Code: {voucher.Code}[/]\n");
+                    string stringcode = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
+                        .PromptStyle("yellow")
+                    );
+                    code = LogicLayerVoucher.CodeCheck(db, stringcode);
+                    
+                }
+                voucher.Code = code;
+            }
+            else if (option.Contains("Korting"))
+            {
+                AnsiConsole.Markup($"[blue]Oude Korting: {voucher.Discount}{voucher.DiscountType}[/]\n");
+                string discountType = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een kortingstype:")
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
+                );
+                string stringdiscount = AnsiConsole.Prompt(
+                new TextPrompt<string>($"Voeg {discountType} korting: ")
+                    .PromptStyle("yellow")
+                );
+                double discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
+                voucher.Discount = discount;
+            }
+            else if (option.Contains("datum"))
+            {
+                AnsiConsole.Markup($"[blue]Oude Vervaldatum: {voucher.ExpirationDate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+                string expDate = DateTimeOffset.Now.AddMonths(6).ToString("dd-MM-yyyy HH:mm");
+                string dateoption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer VervalDatum invoer:")
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken" })
+                );
+                if (dateoption.Contains("aanmaken"))
+                {
+                    expDate = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                        .PromptStyle("yellow")
+                        .Validate(input =>
+                        {
+                            if (!DateTimeOffset.TryParseExact(
+                                input,
+                                "dd-MM-yyyy HH:mm",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.AssumeUniversal,
+                                out _))
+                            {
+                                return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                            }
+                            return ValidationResult.Success();
+                        }));
+                }
+                voucher.ExpirationDate = DateTimeOffset.ParseExact(expDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            }
+            else if (option.Contains("Klant"))
+            {
+                Customer oldcustomer = db.Customers.FirstOrDefault(c => c.Email == voucher.CustomerEmail);
+                AnsiConsole.Markup($"[blue]Oude Klant: {oldcustomer}[/]\n");
+                Customer customer = AnsiConsole.Prompt(
+                new SelectionPrompt<Customer>()
+                    .Title("Selecteer de klant aan wie u een voucher wilt binden:")
+                    .AddChoices(db.Customers.ToList())
+                );
+                voucher.CustomerEmail = customer.Email;
+            }
+
+            AnsiConsole.Markup($"[blue]Gewijzigde Voucher: {voucher.ToString()}[/]\n");
+            bool ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt opslaan?");
+            if (!ready)
+                return;
+
+            db.SaveChanges();
+            AnsiConsole.Markup("[green]Voucher succesvol opgeslagen![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
         }

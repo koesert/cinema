@@ -1,9 +1,8 @@
 class PercentVoucher : Voucher
 {
-    public PercentVoucher(string code, double discount) : base(code, discount) 
+    public PercentVoucher(string code, double discount, DateTimeOffset expDate, string customerEmail) : base(code, discount, expDate, customerEmail) 
     { 
         DiscountType = "%";
-
     }
     public override double ApplyDiscount(double price)
     {

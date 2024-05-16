@@ -46,5 +46,10 @@ namespace Cinema.Data
 
 			return newCustomer;
 		}
+
+		public override string ToString()
+		{
+			return $"Username: {Username}, Email: {Email}";
+		}
 	}
 }
