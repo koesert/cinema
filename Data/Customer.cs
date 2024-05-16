@@ -38,6 +38,19 @@ namespace Cinema.Data
 			return null;
 		}
 
+		public static bool CheckEmailCustomer(CinemaContext db, string email)
+		{
+			RetrieveCustomers(db);
+
+			foreach (Customer existingCustomer in AllCustomers)
+			{
+				if (existingCustomer.Email == email)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 		public static Customer CreateCustomer(CinemaContext db, string username, string password, string email)
 		{
 			Customer newCustomer = new Customer(username, password, email);
@@ -45,6 +58,18 @@ namespace Cinema.Data
 			db.SaveChanges();
 
 			return newCustomer;
+		}
+
+		public static void UpdateCustomer(CinemaContext db, Customer customer)
+		{
+			db.Customers.Update(customer);
+			db.SaveChanges();
+		}
+
+		public static void DeleteCustomer(CinemaContext db, Customer customer)
+		{
+			db.Customers.Remove(customer);
+			db.SaveChanges();
 		}
 	}
 }
