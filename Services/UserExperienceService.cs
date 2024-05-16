@@ -376,7 +376,7 @@ public class UserExperienceService
     var ticket = new Ticket
     {
       Showtime = showtime,
-      PurchasedAt = DateTime.UtcNow,
+      PurchasedAt = DateTime.UtcNow.AddHours(2),
       TicketNumber = ticketNumber,
       CustomerEmail = userEmail,
       Seats = selectedSeats.ToList(),
@@ -391,7 +391,7 @@ public class UserExperienceService
     {
       Customer = loggedInCustomer,
       Showtime = showtime,
-      PurchasedAt = DateTime.UtcNow,
+      PurchasedAt = DateTime.UtcNow.AddHours(2),
       TicketNumber = ticketNumber,
       CustomerEmail = userEmail,
       Seats = selectedSeats.ToList(),
@@ -498,7 +498,7 @@ public class UserExperienceService
         break;
 
       default:
-        return (null, null); // Handle the case when "Terug" is chosen
+        return (null, null);
     }
 
     return (moviesQuery, activeFilters);
