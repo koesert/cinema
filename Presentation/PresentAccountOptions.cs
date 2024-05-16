@@ -2,8 +2,9 @@ using System.Text.RegularExpressions;
 using Cinema.Data;
 using Spectre.Console;
 
-public class PresentAccountOptions
+public static class PresentAccountOptions
 {
+    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         AnsiConsole.Clear();
@@ -13,12 +14,12 @@ public class PresentAccountOptions
             Style = Style.Parse("blue dim")
         };
         AnsiConsole.Write(rule);
-
+        
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("")
                 .PageSize(10)
-                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen" , "Wachtwoord aanpassen", "[red]Account verwijderen[/]" ,"Terug"})
+                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen", "Wachtwoord aanpassen", "[red]Account verwijderen[/]", "Terug" })
         );
 
         List<Customer> existingCustomers = db.Customers.ToList();
@@ -33,7 +34,7 @@ public class PresentAccountOptions
                     Style = Style.Parse("blue dim")
                 };
                 AnsiConsole.Write(emailRule);
-                
+
                 string newEmail = AnsiConsole.Prompt
                     (
                         new TextPrompt<string>("Wat word uw nieuwe [blue]email[/]?")
@@ -217,10 +218,10 @@ public class PresentAccountOptions
             case "[red]Account verwijderen[/]":
                 AnsiConsole.Clear();
                 var deleteAccountRule = new Rule("[red]Account verwijderen[/]")
-                    {
-                        Justification = Justify.Left,
-                        Style = Style.Parse("red dim")
-                    };
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("red dim")
+                };
                 AnsiConsole.Write(deleteAccountRule);
                 if (AnsiConsole.Confirm($"Weet u zeker dat u uw account wilt [red]verwijderen[/]?"))
                 {
