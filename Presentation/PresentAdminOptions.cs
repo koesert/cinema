@@ -560,10 +560,9 @@ namespace Cinema.Services
         public static void UpdateVouchers(CinemaContext db)
         {
             List<Voucher> expiredvouchers = db.Vouchers.Where(x => DateTimeOffset.UtcNow > x.ExpirationDate.UtcDateTime.AddHours(-2)).ToList();
-            foreach (Voucher voucher in expiredvouchers)
-            {
-                voucher.Active = false;
-            }
+            List<Voucher> indatevouchers = db.Vouchers.Where(x => DateTimeOffset.UtcNow <= x.ExpirationDate.UtcDateTime.AddHours(-2)).ToList();
+            foreach (Voucher voucher in expiredvouchers) voucher.Active = false;
+            foreach (Voucher voucher in indatevouchers) voucher.Active = true;
             db.SaveChanges();
         }
 

@@ -9,5 +9,5 @@ class PercentVoucher : Voucher
         Discount = price * (Discount / 100);
         return base.ApplyDiscount(price);
     }
-    public override string ToString() => $"Code: '{Code}', Korting {Discount}%";
+    public override string ToString() => $"Code: '{Code}', Korting {Discount}%, Vervaldatum: '{ExpirationDate.ToString("dd-MM-yyyy HH:mm")}, Gebonden aan Klant met Email: '{CustomerEmail}'";
 } 
