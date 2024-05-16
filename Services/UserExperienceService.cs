@@ -344,26 +344,19 @@ public class UserExperienceService
 
       while (!emailIsValid)
       {
-        Console.Write("Enter your email to proceed with the reservation: ");
+        Console.Write("Voer uw e-mailadres in om verder te gaan met de reservering: ");
         userEmail = Console.ReadLine();
 
-        if (string.IsNullOrWhiteSpace(userEmail))
+        if (!RegisterValidity.CheckEmail(userEmail))
         {
-          AnsiConsole.Markup("[red]Email mag niet leeg zijn[/]");
-          Console.WriteLine("");
-          continue;
-        }
-
-        if (!userEmail.Contains('@'))
-        {
-          AnsiConsole.Markup("[red]Email moet een @' symbool bevatten.[/]");
+          AnsiConsole.Markup("[red]Voer alstublieft een geldig e-mailadres in.[/]");
           Console.WriteLine("");
           continue;
         }
 
         if (db.Customers.Any(c => c.Email.ToLower() == userEmail.ToLower()))
         {
-          AnsiConsole.Markup("[red]Deze email is al in gebruik. Please use a different email.[/]");
+          AnsiConsole.Markup("[red]Dit e-mailadres is al in gebruik. Gebruik een ander e-mailadres.[/]");
           Console.WriteLine("");
         }
         else
@@ -376,6 +369,7 @@ public class UserExperienceService
     }
     db.SaveChanges();
   }
+
 
   private void CreateTicket(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, string userEmail)
   {
