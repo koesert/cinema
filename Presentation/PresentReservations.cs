@@ -44,7 +44,7 @@ public class PresentReservations
 
             var selectedOption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("Alle reserveringen:")
+                    .Title("")
                     .AddChoices(choices)
                     .PageSize(10));
 
@@ -56,7 +56,9 @@ public class PresentReservations
             {
                 var selectedReservationIndex = movieOptions[selectedOption];
                 var selectedReservation = customerReservations[selectedReservationIndex];
-                PresentDetailedReservation.Start(selectedReservation);
+                var selectedMovie = selectedReservation.Showtime.Movie;
+                var selectedShowtime = selectedReservation.Showtime;
+                PresentDetailedReservation.Start(selectedReservation, selectedMovie, selectedShowtime, db, customer);
             }
         }
     }
