@@ -17,20 +17,29 @@ public static class PresentGuestReservationOptions
         AnsiConsole.Write(rule);
 
         Console.WriteLine("Ticket:\n");
-        if (ticket.CancelledAt.HasValue)
-        {
-            AnsiConsole.MarkupLine("[red]Ticket is geannuleerd.[/]");
 
-        }
         Movie movie = db.Tickets
-                           .Where(t => t.TicketNumber == ticket.TicketNumber)
-                           .Select(t => t.Showtime.Movie)
-                           .FirstOrDefault();
+                   .Where(t => t.TicketNumber == ticket.TicketNumber)
+                   .Select(t => t.Showtime.Movie)
+                   .FirstOrDefault();
 
         Showtime showtime = db.Tickets
                            .Where(t => t.TicketNumber == ticket.TicketNumber)
                            .Select(t => t.Showtime)
                            .FirstOrDefault();
+
+        var now = DateTimeOffset.UtcNow.AddHours(2);
+        var halfHourBeforeShowtime = ticket.Showtime.StartTime.AddMinutes(-30);
+        if (ticket.CancelledAt.HasValue)
+        {
+            AnsiConsole.MarkupLine("[red]Ticket is geannuleerd.[/]");
+
+        }
+        else if (now > halfHourBeforeShowtime)
+        {
+            AnsiConsole.MarkupLine("[red]De vertoning is al begonnen of geweest.[/]");
+        }
+
         var seatList = db.CinemaSeats
                     .Where(t => t.TicketId == ticket.Id)
                     .ToList();
@@ -39,8 +48,6 @@ public static class PresentGuestReservationOptions
         {
             seats += $"type:{item.Layout} {item.Row}{item.SeatNumber}\n ";
         }
-
-
 
         string KoopDatum = ticket.PurchasedAt.ToString("dd-MM-yyyy HH:mm:ss");
         string startDatum = showtime.StartTime.ToString("dd-MM-yyyy HH:mm");
@@ -59,8 +66,6 @@ public static class PresentGuestReservationOptions
         AnsiConsole.Render(table);
 
         var choices = new List<string>();
-        var now = DateTimeOffset.UtcNow.AddHours(2);
-        var halfHourBeforeShowtime = ticket.Showtime.StartTime.AddMinutes(-30);
 
         if (!ticket.CancelledAt.HasValue && now < halfHourBeforeShowtime)
         {
