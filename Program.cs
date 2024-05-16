@@ -16,6 +16,7 @@ namespace Cinema
         {
             { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
             { InitialStateChoice.Login, "Inloggen" },
+            { InitialStateChoice.reservering, "zie reservering (gast)" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
@@ -51,6 +52,9 @@ namespace Cinema
                 {
                     case InitialStateChoice.ListMovies:
                         customerService.ListMoviesWithShowtimes(loggedInCustomer, db);
+                        break;
+                    case InitialStateChoice.reservering:
+                        PresentGuestReservationLogin.Start(db);
                         break;
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
