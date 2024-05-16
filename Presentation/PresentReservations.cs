@@ -36,7 +36,7 @@ public class PresentReservations
         else
         {
             var movieOptions = customerReservations
-                .Select((r, index) => new { Index = index, Option = $"Reservering: [bold]{r.Showtime.Movie.Title} - {r.Showtime.StartTime:g}[/]" })
+                .Select((r, index) => new { Index = index, Option = $"Reservering: [bold]{r.Showtime.Movie.Title} - {r.Showtime.StartTime:g} (Reserveringsnummer: {r.TicketNumber})[/]" })
                 .ToDictionary(x => x.Option, x => x.Index);
 
             var choices = movieOptions.Keys.ToList();
