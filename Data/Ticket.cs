@@ -13,7 +13,7 @@ namespace Cinema.Data
         public Customer Customer { get; set; }
         public string CustomerEmail { get; set; }
         public DateTimeOffset PurchasedAt { get; set; }
-        public DateTimeOffset CancelledAt { get; set; }
+        public DateTimeOffset? CancelledAt { get; set; }
         public ICollection<CinemaSeat> Seats { get; set; } = new List<CinemaSeat>();
         public decimal PurchaseTotal { get; set; }
 
@@ -44,10 +44,17 @@ namespace Cinema.Data
             return null;
         }
 
-        public static void DeleteTicket(Ticket ticket, CinemaContext db)
+        public static void CancelTicket(Ticket ticket, CinemaContext db)
         {
+            ticket.CancelledAt = DateTime.UtcNow.AddHours(2);
 
-            db.Ticket.Update(ticket);
+            var seats = db.CinemaSeats.Where(seat => seat.TicketId == ticket.Id).ToList();
+
+            foreach (var seat in seats)
+            {
+                seat.IsReserved = false;
+            }
+
             db.SaveChanges();
         }
     }

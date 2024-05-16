@@ -19,24 +19,35 @@ public static class PresentGuestReservationOptions
         Console.WriteLine("Ticket:\n");
 
         Movie movie = db.Tickets
-                           .Where(t => t.TicketNumber == ticket.TicketNumber)
-                           .Select(t => t.Showtime.Movie)
-                           .FirstOrDefault();
+                   .Where(t => t.TicketNumber == ticket.TicketNumber)
+                   .Select(t => t.Showtime.Movie)
+                   .FirstOrDefault();
 
         Showtime showtime = db.Tickets
                            .Where(t => t.TicketNumber == ticket.TicketNumber)
                            .Select(t => t.Showtime)
                            .FirstOrDefault();
+
+        var now = DateTimeOffset.UtcNow.AddHours(2);
+        var halfHourBeforeShowtime = ticket.Showtime.StartTime.AddMinutes(-30);
+        if (ticket.CancelledAt.HasValue)
+        {
+            AnsiConsole.MarkupLine("[red]Ticket is geannuleerd.[/]");
+
+        }
+        else if (now > halfHourBeforeShowtime)
+        {
+            AnsiConsole.MarkupLine("[red]De vertoning is al begonnen of geweest.[/]");
+        }
+
         var seatList = db.CinemaSeats
                     .Where(t => t.TicketId == ticket.Id)
                     .ToList();
-        string seats =" ";
+        string seats = " ";
         foreach (var item in seatList)
         {
             seats += $"type:{item.Layout} {item.Row}{item.SeatNumber}\n ";
         }
-
-        
 
         string KoopDatum = ticket.PurchasedAt.ToString("dd-MM-yyyy HH:mm:ss");
         string startDatum = showtime.StartTime.ToString("dd-MM-yyyy HH:mm");
@@ -56,13 +67,13 @@ public static class PresentGuestReservationOptions
 
         var choices = new List<string>();
 
-        if (2 > 1)
+        if (!ticket.CancelledAt.HasValue && now < halfHourBeforeShowtime)
         {
             choices.Add("Cancel ticket");
         }
 
         choices.Add("Terug");
-        
+
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Selecteer een optie:")
@@ -72,8 +83,34 @@ public static class PresentGuestReservationOptions
         switch (optionChoice)
         {
             case "Cancel ticket":
-                Console.ReadLine();
+                AnsiConsole.Clear();
+                var deleteTicketRule = new Rule("[red]Ticket verwijderen[/]")
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("red dim")
+                };
+                AnsiConsole.Write(deleteTicketRule);
+                if (AnsiConsole.Confirm($"Weet u zeker dat u uw ticket wilt [red]verwijderen[/]?"))
+                {
+                    AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("red"))
+                        .Start("[red]Ticket verwijderen...[/]", ctx =>
+                        {
+                            Ticket.CancelTicket(ticket, db);
+                            Thread.Sleep(2500);
+                        });
+                    AnsiConsole.MarkupLine("[red]Ticket verwijderd. Tot ziens![/]");
+                    Thread.Sleep(2500);
+                    AnsiConsole.Clear();
+                    break;
+                }
+                else
+                {
+                    Start(ticket, db);
+                }
                 break;
+
             case "Terug":
                 AnsiConsole.Clear();
                 break;
