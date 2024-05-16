@@ -37,7 +37,7 @@ public class PresentDetailedReservation
         table.AddColumn("Totale prijs");
 
         table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), seats, startDatum, KoopDatum, $"{reservation.PurchaseTotal} euro");
-        AnsiConsole.Render(table);
+        AnsiConsole.Write(table);
 
         var navigateChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()

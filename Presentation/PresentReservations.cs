@@ -22,10 +22,10 @@ public class PresentReservations
 
         if (!customerReservations.Any())
         {
-            AnsiConsole.MarkupLine($"Geen [blue]reservaties[/] voor [bold grey93]{customer.Username}[/].");
+            AnsiConsole.MarkupLine($"Geen [blue]reserveringen[/] gevonden voor [bold grey93]{customer.Username}[/].");
             var navigateChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("Navigeren:")
+                    .Title("")
                     .AddChoices(new[] { "Terug" }));
 
             if (navigateChoice == "Terug")

@@ -7,7 +7,7 @@ public class PresentAccountOptions
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         AnsiConsole.Clear();
-        var rule = new Rule("[bold blue]Account opties[/]")
+        var rule = new Rule("[bold blue]Account opties:[/]")
         {
             Justification = Justify.Left,
             Style = Style.Parse("blue dim")
@@ -16,7 +16,7 @@ public class PresentAccountOptions
 
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Selecteer een optie:")
+                .Title("")
                 .PageSize(10)
                 .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen" , "Wachtwoord aanpassen", "[red]Account verwijderen[/]" ,"Terug"})
         );

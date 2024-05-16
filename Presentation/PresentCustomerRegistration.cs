@@ -14,9 +14,11 @@ public class PresentCustomerRegistration
 
         while (!registerSuccesful)
         {
-            var rule = new Rule("[bold blue]Klanten registratie[/]");
-            rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue");
+            var rule = new Rule("[bold blue]Klanten registratie:[/]")
+            {
+                Justification = Justify.Left,
+                Style = Style.Parse("blue")
+            };
             AnsiConsole.Write(rule);
 
             string username = AskUsername(existingCustomers);
