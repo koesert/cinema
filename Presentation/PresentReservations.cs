@@ -10,15 +10,15 @@ public class PresentReservations
 
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Uw reservaties:[/]");
-            rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue");
-            AnsiConsole.Write(rule);
+        rule.Justification = Justify.Left;
+        rule.Style = Style.Parse("blue");
+        AnsiConsole.Write(rule);
 
-        foreach(Ticket Reservation in AllCustomersReservations)
+        foreach (Ticket Reservation in AllCustomersReservations)
         {
-            if (Reservation.Customer.Id == customer.Id)
+            if (Reservation.CustomerEmail == customer.Email)
             {
-                ThisCustomerReservations.Add(Reservation) ;
+                ThisCustomerReservations.Add(Reservation);
             }
         }
         if (ThisCustomerReservations.Count == 0)

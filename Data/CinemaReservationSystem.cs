@@ -29,25 +29,13 @@ public class CinemaReservationSystem
         {
             foreach (var seat in row)
             {
-                if (seat is null)
-                {
-                    var cinemaSeat = new CinemaSeat(Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-
-                }
-                else
-                {
-                    var Row = seat.Row;
-                    var SeatNumber = seat.SeatNumber;
-                    var Color = seat.Color;
-                    var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Showtime);
-                    db.CinemaSeats.Add(cinemaSeat);
-
-
-                }
-
+                var Row = seat.Row;
+                var SeatNumber = seat.SeatNumber;
+                var Color = seat.Color;
+                var Type = seat.Type;
+                var cinemaSeat = new CinemaSeat(Row, SeatNumber, Color, Type, Showtime);
+                db.CinemaSeats.Add(cinemaSeat);
             }
-
         }
         db.SaveChanges();
     }
@@ -71,13 +59,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 12),
                 new CinemaSeat(1, 13),
                 new CinemaSeat(1, 14),
-                new CinemaSeat(1, 15),
+                new CinemaSeat(1, 15, 1),
                 new CinemaSeat(1, 16),
                 new CinemaSeat(1, 17),
                 new CinemaSeat(1, 18),
                 new CinemaSeat(1, 19),
                 new CinemaSeat(1, 20),
-                new CinemaSeat(1, 21),
+                new CinemaSeat(1, 21, 2),
                 new CinemaSeat(1, 22),
                 new CinemaSeat(1, 23),
                 new CinemaSeat(1, 24),
@@ -96,7 +84,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 4),
                 new CinemaSeat(2, 5),
                 new CinemaSeat(2, 6),
-                new CinemaSeat(2, 7),
+                new CinemaSeat(2, 7, 1),
                 new CinemaSeat(2, 8),
                 new CinemaSeat(2, 9),
                 new CinemaSeat(2, 10, "orange"),
@@ -110,7 +98,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 18, "orange"),
                 new CinemaSeat(2, 19, "orange"),
                 new CinemaSeat(2, 20, "orange"),
-                new CinemaSeat(2, 21, "orange"),
+                new CinemaSeat(2, 21, "orange", 2),
                 new CinemaSeat(2, 22),
                 new CinemaSeat(2, 23),
                 new CinemaSeat(2, 24),
@@ -131,7 +119,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 6),
                 new CinemaSeat(3, 7),
                 new CinemaSeat(3, 8),
-                new CinemaSeat(3, 9, "orange"),
+                new CinemaSeat(3, 9, "orange", 1),
                 new CinemaSeat(3, 10, "orange"),
                 new CinemaSeat(3, 11, "orange"),
                 new CinemaSeat(3, 12, "orange"),
@@ -148,7 +136,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 23),
                 new CinemaSeat(3, 24),
                 new CinemaSeat(3, 25),
-                new CinemaSeat(3, 26),
+                new CinemaSeat(3, 26, 2),
                 new CinemaSeat(3, 27),
                 new CinemaSeat(3, 99),
                 new CinemaSeat(3, 99),
@@ -161,7 +149,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 0),
                 new CinemaSeat(4, 4),
                 new CinemaSeat(4, 5),
-                new CinemaSeat(4, 6),
+                new CinemaSeat(4, 6, 1),
                 new CinemaSeat(4, 7),
                 new CinemaSeat(4, 8),
                 new CinemaSeat(4, 9, "orange"),
@@ -176,7 +164,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 18, "orange"),
                 new CinemaSeat(4, 19, "orange"),
                 new CinemaSeat(4, 20, "orange"),
-                new CinemaSeat(4, 21, "orange"),
+                new CinemaSeat(4, 21, "orange", 2),
                 new CinemaSeat(4, 22, "orange"),
                 new CinemaSeat(4, 23),
                 new CinemaSeat(4, 24),
@@ -203,14 +191,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(5, 13, "orange"),
                 new CinemaSeat(5, 14, "red"),
                 new CinemaSeat(5, 15, "red"),
-                new CinemaSeat(5, 16, "red"),
+                new CinemaSeat(5, 16, "red", 2),
                 new CinemaSeat(5, 17, "red"),
                 new CinemaSeat(5, 18, "orange"),
                 new CinemaSeat(5, 19, "orange"),
                 new CinemaSeat(5, 20, "orange"),
                 new CinemaSeat(5, 21, "orange"),
                 new CinemaSeat(5, 22, "orange"),
-                new CinemaSeat(5, 23, "orange"),
+                new CinemaSeat(5, 23, "orange", 1),
                 new CinemaSeat(5, 24),
                 new CinemaSeat(5, 25),
                 new CinemaSeat(5, 26),
@@ -232,7 +220,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 10, "orange"),
                 new CinemaSeat(6, 11, "orange"),
                 new CinemaSeat(6, 12, "orange"),
-                new CinemaSeat(6, 13, "red"),
+                new CinemaSeat(6, 13, "red", 1),
                 new CinemaSeat(6, 14, "red"),
                 new CinemaSeat(6, 15, "red"),
                 new CinemaSeat(6, 16, "red"),
@@ -242,7 +230,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 20, "orange"),
                 new CinemaSeat(6, 21, "orange"),
                 new CinemaSeat(6, 22, "orange"),
-                new CinemaSeat(6, 23, "orange"),
+                new CinemaSeat(6, 23, "orange", 2),
                 new CinemaSeat(6, 24),
                 new CinemaSeat(6, 25),
                 new CinemaSeat(6, 26),
@@ -274,12 +262,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(7, 19, "red"),
                 new CinemaSeat(7, 20, "orange"),
                 new CinemaSeat(7, 21, "orange"),
-                new CinemaSeat(7, 22, "orange"),
+                new CinemaSeat(7, 22, "orange", 2),
                 new CinemaSeat(7, 23, "orange"),
                 new CinemaSeat(7, 24, "orange"),
                 new CinemaSeat(7, 25),
                 new CinemaSeat(7, 26),
-                new CinemaSeat(7, 27),
+                new CinemaSeat(7, 27, 1),
                 new CinemaSeat(7, 28),
                 new CinemaSeat(7, 29),
                 new CinemaSeat(7, 99)
@@ -302,7 +290,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(8, 14, "red"),
                 new CinemaSeat(8, 15, "red"),
                 new CinemaSeat(8, 16, "red"),
-                new CinemaSeat(8, 17, "red"),
+                new CinemaSeat(8, 17, "red", 1),
                 new CinemaSeat(8, 18, "red"),
                 new CinemaSeat(8, 19, "red"),
                 new CinemaSeat(8, 20, "orange"),
@@ -311,7 +299,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(8, 23, "orange"),
                 new CinemaSeat(8, 24, "orange"),
                 new CinemaSeat(8, 25),
-                new CinemaSeat(8, 26),
+                new CinemaSeat(8, 26, 2),
                 new CinemaSeat(8, 27),
                 new CinemaSeat(8, 28),
                 new CinemaSeat(8, 29),
@@ -334,7 +322,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(9, 13, "red"),
                 new CinemaSeat(9, 14, "red"),
                 new CinemaSeat(9, 15, "red"),
-                new CinemaSeat(9, 16, "red"),
+                new CinemaSeat(9, 16, "red", 1),
                 new CinemaSeat(9, 17, "red"),
                 new CinemaSeat(9, 18, "red"),
                 new CinemaSeat(9, 19, "red"),
@@ -347,7 +335,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(9, 26),
                 new CinemaSeat(9, 27),
                 new CinemaSeat(9, 28),
-                new CinemaSeat(9, 29),
+                new CinemaSeat(9, 29, 2),
                 new CinemaSeat(9, 30)
             },
             new List<CinemaSeat>
@@ -358,14 +346,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(10, 4),
                 new CinemaSeat(10, 5),
                 new CinemaSeat(10, 6, "orange"),
-                new CinemaSeat(10, 7, "orange"),
+                new CinemaSeat(10, 7, "orange", 1),
                 new CinemaSeat(10, 8, "orange"),
                 new CinemaSeat(10, 9, "orange"),
                 new CinemaSeat(10, 10, "orange"),
                 new CinemaSeat(10, 11, "orange"),
                 new CinemaSeat(10, 12, "red"),
                 new CinemaSeat(10, 13, "red"),
-                new CinemaSeat(10, 14, "red"),
+                new CinemaSeat(10, 14, "red", 2),
                 new CinemaSeat(10, 15, "red"),
                 new CinemaSeat(10, 16, "red"),
                 new CinemaSeat(10, 17, "red"),
@@ -391,7 +379,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(11, 4),
                 new CinemaSeat(11, 5),
                 new CinemaSeat(11, 6),
-                new CinemaSeat(11, 7, "orange"),
+                new CinemaSeat(11, 7, "orange", 1),
                 new CinemaSeat(11, 8, "orange"),
                 new CinemaSeat(11, 9, "orange"),
                 new CinemaSeat(11, 10, "orange"),
@@ -408,7 +396,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(11, 21, "orange"),
                 new CinemaSeat(11, 22, "orange"),
                 new CinemaSeat(11, 23, "orange"),
-                new CinemaSeat(11, 24, "orange"),
+                new CinemaSeat(11, 24, "orange", 2),
                 new CinemaSeat(11, 25),
                 new CinemaSeat(11, 26),
                 new CinemaSeat(11, 27),
@@ -422,7 +410,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 2),
                 new CinemaSeat(12, 3),
                 new CinemaSeat(12, 4),
-                new CinemaSeat(12, 5),
+                new CinemaSeat(12, 5, 2),
                 new CinemaSeat(12, 6),
                 new CinemaSeat(12, 7),
                 new CinemaSeat(12, 8, "orange"),
@@ -434,7 +422,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 14, "red"),
                 new CinemaSeat(12, 15, "red"),
                 new CinemaSeat(12, 16, "red"),
-                new CinemaSeat(12, 17, "red"),
+                new CinemaSeat(12, 17, "red", 1),
                 new CinemaSeat(12, 18, "red"),
                 new CinemaSeat(12, 19, "red"),
                 new CinemaSeat(12, 20, "orange"),
@@ -455,7 +443,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 2),
                 new CinemaSeat(13, 3),
                 new CinemaSeat(13, 4),
-                new CinemaSeat(13, 5),
+                new CinemaSeat(13, 5, 1),
                 new CinemaSeat(13, 6),
                 new CinemaSeat(13, 7),
                 new CinemaSeat(13, 8),
@@ -472,7 +460,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 19, "orange"),
                 new CinemaSeat(13, 20, "orange"),
                 new CinemaSeat(13, 21, "orange"),
-                new CinemaSeat(13, 22, "orange"),
+                new CinemaSeat(13, 22, "orange", 2),
                 new CinemaSeat(13, 23),
                 new CinemaSeat(13, 24),
                 new CinemaSeat(13, 25),
@@ -495,7 +483,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 9, "orange"),
                 new CinemaSeat(14, 10, "orange"),
                 new CinemaSeat(14, 11, "orange"),
-                new CinemaSeat(14, 12, "orange"),
+                new CinemaSeat(14, 12, "orange", 1),
                 new CinemaSeat(14, 13, "orange"),
                 new CinemaSeat(14, 14, "orange"),
                 new CinemaSeat(14, 15, "orange"),
@@ -508,7 +496,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 22, "orange"),
                 new CinemaSeat(14, 23),
                 new CinemaSeat(14, 24),
-                new CinemaSeat(14, 25),
+                new CinemaSeat(14, 25, 2),
                 new CinemaSeat(14, 26),
                 new CinemaSeat(14, 27),
                 new CinemaSeat(14, 28),
@@ -525,7 +513,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(15, 6),
                 new CinemaSeat(15, 7),
                 new CinemaSeat(15, 8),
-                new CinemaSeat(15, 9),
+                new CinemaSeat(15, 9, 1),
                 new CinemaSeat(15, 10, "orange"),
                 new CinemaSeat(15, 11, "orange"),
                 new CinemaSeat(15, 12, "orange"),
@@ -534,7 +522,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(15, 15, "orange"),
                 new CinemaSeat(15, 16, "orange"),
                 new CinemaSeat(15, 17, "orange"),
-                new CinemaSeat(15, 18, "orange"),
+                new CinemaSeat(15, 18, "orange", 2),
                 new CinemaSeat(15, 19, "orange"),
                 new CinemaSeat(15, 20, "orange"),
                 new CinemaSeat(15, 21, "orange"),
@@ -556,10 +544,10 @@ public class CinemaReservationSystem
                 new CinemaSeat(16, 4),
                 new CinemaSeat(16, 5),
                 new CinemaSeat(16, 6),
-                new CinemaSeat(16, 7),
+                new CinemaSeat(16, 7, 2),
                 new CinemaSeat(16, 8),
                 new CinemaSeat(16, 9),
-                new CinemaSeat(16, 10),
+                new CinemaSeat(16, 10, 1),
                 new CinemaSeat(16, 11, "orange"),
                 new CinemaSeat(16, 12, "orange"),
                 new CinemaSeat(16, 13, "orange"),
@@ -588,7 +576,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(17, 0),
                 new CinemaSeat(17, 4),
                 new CinemaSeat(17, 5),
-                new CinemaSeat(17, 6),
+                new CinemaSeat(17, 6, 2),
                 new CinemaSeat(17, 7),
                 new CinemaSeat(17, 8),
                 new CinemaSeat(17, 9),
@@ -603,7 +591,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(17, 18, "orange"),
                 new CinemaSeat(17, 19),
                 new CinemaSeat(17, 20),
-                new CinemaSeat(17, 21),
+                new CinemaSeat(17, 21, 1),
                 new CinemaSeat(17, 22),
                 new CinemaSeat(17, 23),
                 new CinemaSeat(17, 24),
@@ -627,7 +615,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(18, 9),
                 new CinemaSeat(18, 10),
                 new CinemaSeat(18, 11),
-                new CinemaSeat(18, 12),
+                new CinemaSeat(18, 12, 1),
                 new CinemaSeat(18, 13),
                 new CinemaSeat(18, 14),
                 new CinemaSeat(18, 15),
@@ -639,7 +627,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(18, 21),
                 new CinemaSeat(18, 22),
                 new CinemaSeat(18, 23),
-                new CinemaSeat(18, 24),
+                new CinemaSeat(18, 24, 2),
                 new CinemaSeat(18, 25),
                 new CinemaSeat(18, 99),
                 new CinemaSeat(18, 99),
@@ -662,7 +650,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(19, 11),
                 new CinemaSeat(19, 12),
                 new CinemaSeat(19, 13),
-                new CinemaSeat(19, 14),
+                new CinemaSeat(19, 14, 2),
                 new CinemaSeat(19, 15),
                 new CinemaSeat(19, 16),
                 new CinemaSeat(19, 17),
@@ -671,7 +659,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(19, 20),
                 new CinemaSeat(19, 21),
                 new CinemaSeat(19, 22),
-                new CinemaSeat(19, 23),
+                new CinemaSeat(19, 23, 1),
                 new CinemaSeat(19, 99),
                 new CinemaSeat(19, 99),
                 new CinemaSeat(19, 99),
@@ -695,12 +683,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(20, 11),
                 new CinemaSeat(20, 12),
                 new CinemaSeat(20, 13),
-                new CinemaSeat(20, 14),
+                new CinemaSeat(20, 14, 1),
                 new CinemaSeat(20, 15),
                 new CinemaSeat(20, 16),
                 new CinemaSeat(20, 17),
                 new CinemaSeat(20, 18),
-                new CinemaSeat(20, 19),
+                new CinemaSeat(20, 19, 2),
                 new CinemaSeat(20, 20),
                 new CinemaSeat(20, 21),
                 new CinemaSeat(20, 22),
@@ -732,10 +720,10 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 9),
                 new CinemaSeat(1, 10),
                 new CinemaSeat(1, 11),
-                new CinemaSeat(1, 12),
+                new CinemaSeat(1, 12, 1),
                 new CinemaSeat(1, 13),
                 new CinemaSeat(1, 14),
-                new CinemaSeat(1, 15),
+                new CinemaSeat(1, 15, 2),
                 new CinemaSeat(1, 16),
                 new CinemaSeat(1, 17),
                 new CinemaSeat(1, 99)
@@ -748,12 +736,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 4),
                 new CinemaSeat(2, 5),
                 new CinemaSeat(2, 6),
-                new CinemaSeat(2, 7, "orange"),
+                new CinemaSeat(2, 7, "orange", 1),
                 new CinemaSeat(2, 8, "orange"),
                 new CinemaSeat(2, 9, "orange"),
                 new CinemaSeat(2, 10, "orange"),
                 new CinemaSeat(2, 11, "orange"),
-                new CinemaSeat(2, 12, "orange"),
+                new CinemaSeat(2, 12, "orange", 2),
                 new CinemaSeat(2, 13),
                 new CinemaSeat(2, 14),
                 new CinemaSeat(2, 15),
@@ -765,7 +753,7 @@ public class CinemaReservationSystem
             {
                 new CinemaSeat(3, 0),
                 new CinemaSeat(3, 2),
-                new CinemaSeat(3, 3),
+                new CinemaSeat(3, 3, 1),
                 new CinemaSeat(3, 4),
                 new CinemaSeat(3, 5),
                 new CinemaSeat(3, 6, "orange"),
@@ -778,7 +766,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 13, "orange"),
                 new CinemaSeat(3, 14),
                 new CinemaSeat(3, 15),
-                new CinemaSeat(3, 16),
+                new CinemaSeat(3, 16, 2),
                 new CinemaSeat(3, 17),
                 new CinemaSeat(3, 99)
             },
@@ -787,9 +775,9 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 0),
                 new CinemaSeat(4, 2),
                 new CinemaSeat(4, 3),
-                new CinemaSeat(4, 4),
+                new CinemaSeat(4, 4, 2),
                 new CinemaSeat(4, 5),
-                new CinemaSeat(4, 6, "orange"),
+                new CinemaSeat(4, 6, "orange", 1),
                 new CinemaSeat(4, 7, "orange"),
                 new CinemaSeat(4, 8, "orange"),
                 new CinemaSeat(4, 9, "orange"),
@@ -807,7 +795,7 @@ public class CinemaReservationSystem
             {
                 new CinemaSeat(5, 0),
                 new CinemaSeat(5, 2),
-                new CinemaSeat(5, 3),
+                new CinemaSeat(5, 3, 2),
                 new CinemaSeat(5, 4),
                 new CinemaSeat(5, 5, "orange"),
                 new CinemaSeat(5, 6, "orange"),
@@ -817,7 +805,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(5, 10, "orange"),
                 new CinemaSeat(5, 11, "orange"),
                 new CinemaSeat(5, 12, "orange"),
-                new CinemaSeat(5, 13, "orange"),
+                new CinemaSeat(5, 13, "orange", 1),
                 new CinemaSeat(5, 14, "orange"),
                 new CinemaSeat(5, 15),
                 new CinemaSeat(5, 16),
@@ -834,14 +822,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 6, "orange"),
                 new CinemaSeat(6, 7, "orange"),
                 new CinemaSeat(6, 8, "orange"),
-                new CinemaSeat(6, 9, "red"),
+                new CinemaSeat(6, 9, "red", 1),
                 new CinemaSeat(6, 10, "red"),
                 new CinemaSeat(6, 11, "orange"),
                 new CinemaSeat(6, 12, "orange"),
                 new CinemaSeat(6, 13, "orange"),
                 new CinemaSeat(6, 14, "orange"),
                 new CinemaSeat(6, 15),
-                new CinemaSeat(6, 16),
+                new CinemaSeat(6, 16, 2),
                 new CinemaSeat(6, 17),
                 new CinemaSeat(6, 99)
             },
@@ -850,11 +838,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(7, 1),
                 new CinemaSeat(7, 2),
                 new CinemaSeat(7, 3),
-                new CinemaSeat(7, 4, "orange"),
+                new CinemaSeat(7, 4, "orange", 1),
                 new CinemaSeat(7, 5, "orange"),
                 new CinemaSeat(7, 6, "orange"),
                 new CinemaSeat(7, 7, "orange"),
-                new CinemaSeat(7, 8, "red"),
+                new CinemaSeat(7, 8, "red", 2),
                 new CinemaSeat(7, 9, "red"),
                 new CinemaSeat(7, 10, "red"),
                 new CinemaSeat(7, 11, "red"),
@@ -872,7 +860,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(8, 2),
                 new CinemaSeat(8, 3),
                 new CinemaSeat(8, 4, "orange"),
-                new CinemaSeat(8, 5, "orange"),
+                new CinemaSeat(8, 5, "orange", 1),
                 new CinemaSeat(8, 6, "orange"),
                 new CinemaSeat(8, 7, "red"),
                 new CinemaSeat(8, 8, "red"),
@@ -881,7 +869,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(8, 11, "red"),
                 new CinemaSeat(8, 12, "red"),
                 new CinemaSeat(8, 13, "orange"),
-                new CinemaSeat(8, 14, "orange"),
+                new CinemaSeat(8, 14, "orange", 2),
                 new CinemaSeat(8, 15, "orange"),
                 new CinemaSeat(8, 16),
                 new CinemaSeat(8, 17),
@@ -893,14 +881,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(9, 2),
                 new CinemaSeat(9, 3, "orange"),
                 new CinemaSeat(9, 4, "orange"),
-                new CinemaSeat(9, 5, "orange"),
+                new CinemaSeat(9, 5, "orange", 2),
                 new CinemaSeat(9, 6, "orange"),
                 new CinemaSeat(9, 7, "red"),
                 new CinemaSeat(9, 8, "red"),
                 new CinemaSeat(9, 9, "red"),
                 new CinemaSeat(9, 10, "red"),
                 new CinemaSeat(9, 11, "red"),
-                new CinemaSeat(9, 12, "red"),
+                new CinemaSeat(9, 12, "red", 1),
                 new CinemaSeat(9, 13, "orange"),
                 new CinemaSeat(9, 14, "orange"),
                 new CinemaSeat(9, 15, "orange"),
@@ -911,7 +899,7 @@ public class CinemaReservationSystem
             new List<CinemaSeat>
             {
                 new CinemaSeat(10, 1),
-                new CinemaSeat(10, 2),
+                new CinemaSeat(10, 2, 2),
                 new CinemaSeat(10, 3, "orange"),
                 new CinemaSeat(10, 4, "orange"),
                 new CinemaSeat(10, 5, "orange"),
@@ -924,7 +912,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(10, 12, "red"),
                 new CinemaSeat(10, 13, "orange"),
                 new CinemaSeat(10, 14, "orange"),
-                new CinemaSeat(10, 15, "orange"),
+                new CinemaSeat(10, 15, "orange", 1),
                 new CinemaSeat(10, 16, "orange"),
                 new CinemaSeat(10, 17),
                 new CinemaSeat(10, 18)
@@ -938,14 +926,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(11, 5, "orange"),
                 new CinemaSeat(11, 6, "orange"),
                 new CinemaSeat(11, 7, "red"),
-                new CinemaSeat(11, 8, "red"),
+                new CinemaSeat(11, 8, "red", 2),
                 new CinemaSeat(11, 9, "red"),
                 new CinemaSeat(11, 10, "red"),
                 new CinemaSeat(11, 11, "red"),
                 new CinemaSeat(11, 12, "red"),
                 new CinemaSeat(11, 13, "orange"),
                 new CinemaSeat(11, 14, "orange"),
-                new CinemaSeat(11, 15, "orange"),
+                new CinemaSeat(11, 15, "orange", 1),
                 new CinemaSeat(11, 16, "orange"),
                 new CinemaSeat(11, 17),
                 new CinemaSeat(11, 18)
@@ -963,11 +951,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 9, "red"),
                 new CinemaSeat(12, 10, "red"),
                 new CinemaSeat(12, 11, "red"),
-                new CinemaSeat(12, 12, "orange"),
+                new CinemaSeat(12, 12, "orange", 1),
                 new CinemaSeat(12, 13, "orange"),
                 new CinemaSeat(12, 14, "orange"),
                 new CinemaSeat(12, 15, "orange"),
-                new CinemaSeat(12, 16),
+                new CinemaSeat(12, 16, 2),
                 new CinemaSeat(12, 17),
                 new CinemaSeat(12, 99)
             },
@@ -976,13 +964,13 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 0),
                 new CinemaSeat(13, 2),
                 new CinemaSeat(13, 3),
-                new CinemaSeat(13, 4),
+                new CinemaSeat(13, 4, 1),
                 new CinemaSeat(13, 5, "orange"),
                 new CinemaSeat(13, 6, "orange"),
                 new CinemaSeat(13, 7, "orange"),
                 new CinemaSeat(13, 8, "orange"),
                 new CinemaSeat(13, 9, "red"),
-                new CinemaSeat(13, 10, "red"),
+                new CinemaSeat(13, 10, "red", 2),
                 new CinemaSeat(13, 11, "orange"),
                 new CinemaSeat(13, 12, "orange"),
                 new CinemaSeat(13, 13, "orange"),
@@ -998,7 +986,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 2),
                 new CinemaSeat(14, 3),
                 new CinemaSeat(14, 4),
-                new CinemaSeat(14, 5),
+                new CinemaSeat(14, 5, 1),
                 new CinemaSeat(14, 6, "orange"),
                 new CinemaSeat(14, 7, "orange"),
                 new CinemaSeat(14, 8, "orange"),
@@ -1007,7 +995,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 11, "orange"),
                 new CinemaSeat(14, 12, "orange"),
                 new CinemaSeat(14, 13, "orange"),
-                new CinemaSeat(14, 14),
+                new CinemaSeat(14, 14, 2),
                 new CinemaSeat(14, 15),
                 new CinemaSeat(14, 16),
                 new CinemaSeat(14, 17),
@@ -1023,12 +1011,12 @@ public class CinemaReservationSystem
                 new CinemaSeat(15, 6),
                 new CinemaSeat(15, 7, "orange"),
                 new CinemaSeat(15, 8, "orange"),
-                new CinemaSeat(15, 9, "orange"),
+                new CinemaSeat(15, 9, "orange", 1),
                 new CinemaSeat(15, 10, "orange"),
                 new CinemaSeat(15, 11, "orange"),
                 new CinemaSeat(15, 12, "orange"),
                 new CinemaSeat(15, 13),
-                new CinemaSeat(15, 14),
+                new CinemaSeat(15, 14, 2),
                 new CinemaSeat(15, 15),
                 new CinemaSeat(15, 16),
                 new CinemaSeat(15, 99),
@@ -1039,7 +1027,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(16, 0),
                 new CinemaSeat(16, 0),
                 new CinemaSeat(16, 3),
-                new CinemaSeat(16, 4),
+                new CinemaSeat(16, 4, 2),
                 new CinemaSeat(16, 5),
                 new CinemaSeat(16, 6),
                 new CinemaSeat(16, 7, "orange"),
@@ -1048,7 +1036,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(16, 10, "orange"),
                 new CinemaSeat(16, 11, "orange"),
                 new CinemaSeat(16, 12, "orange"),
-                new CinemaSeat(16, 13),
+                new CinemaSeat(16, 13, 1),
                 new CinemaSeat(16, 14),
                 new CinemaSeat(16, 15),
                 new CinemaSeat(16, 16),
@@ -1064,11 +1052,11 @@ public class CinemaReservationSystem
                 new CinemaSeat(17, 5),
                 new CinemaSeat(17, 6),
                 new CinemaSeat(17, 7),
-                new CinemaSeat(17, 8),
+                new CinemaSeat(17, 8, 1),
                 new CinemaSeat(17, 9),
                 new CinemaSeat(17, 10),
                 new CinemaSeat(17, 11),
-                new CinemaSeat(17, 12),
+                new CinemaSeat(17, 12, 2),
                 new CinemaSeat(17, 13),
                 new CinemaSeat(17, 14),
                 new CinemaSeat(17, 15),
@@ -1085,14 +1073,14 @@ public class CinemaReservationSystem
                 new CinemaSeat(18, 5),
                 new CinemaSeat(18, 6),
                 new CinemaSeat(18, 7),
-                new CinemaSeat(18, 8),
+                new CinemaSeat(18, 8, 1),
                 new CinemaSeat(18, 9),
                 new CinemaSeat(18, 10),
                 new CinemaSeat(18, 11),
                 new CinemaSeat(18, 12),
                 new CinemaSeat(18, 13),
                 new CinemaSeat(18, 14),
-                new CinemaSeat(18, 15),
+                new CinemaSeat(18, 15, 2),
                 new CinemaSeat(18, 99),
                 new CinemaSeat(18, 99),
                 new CinemaSeat(18, 99)
@@ -1106,10 +1094,10 @@ public class CinemaReservationSystem
                 new CinemaSeat(19, 5),
                 new CinemaSeat(19, 6),
                 new CinemaSeat(19, 7),
-                new CinemaSeat(19, 8),
+                new CinemaSeat(19, 8, 2),
                 new CinemaSeat(19, 9),
                 new CinemaSeat(19, 10),
-                new CinemaSeat(19, 11),
+                new CinemaSeat(19, 11, 1),
                 new CinemaSeat(19, 12),
                 new CinemaSeat(19, 13),
                 new CinemaSeat(19, 14),
@@ -1131,7 +1119,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(1, 3),
                 new CinemaSeat(1, 4),
                 new CinemaSeat(1, 5),
-                new CinemaSeat(1, 6),
+                new CinemaSeat(1, 6, 1),
                 new CinemaSeat(1, 7),
                 new CinemaSeat(1, 8),
                 new CinemaSeat(1, 9),
@@ -1144,7 +1132,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(2, 0),
                 new CinemaSeat(2, 2),
                 new CinemaSeat(2, 3),
-                new CinemaSeat(2, 4),
+                new CinemaSeat(2, 4, 2),
                 new CinemaSeat(2, 5),
                 new CinemaSeat(2, 6),
                 new CinemaSeat(2, 7),
@@ -1161,7 +1149,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(3, 3),
                 new CinemaSeat(3, 4),
                 new CinemaSeat(3, 5),
-                new CinemaSeat(3, 6),
+                new CinemaSeat(3, 6, 1),
                 new CinemaSeat(3, 7),
                 new CinemaSeat(3, 8),
                 new CinemaSeat(3, 9),
@@ -1179,7 +1167,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(4, 6, "orange"),
                 new CinemaSeat(4, 7, "orange"),
                 new CinemaSeat(4, 8),
-                new CinemaSeat(4, 9),
+                new CinemaSeat(4, 9, 2),
                 new CinemaSeat(4, 10),
                 new CinemaSeat(4, 11),
                 new CinemaSeat(4, 12)
@@ -1189,7 +1177,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(5, 1),
                 new CinemaSeat(5, 2),
                 new CinemaSeat(5, 3),
-                new CinemaSeat(5, 4),
+                new CinemaSeat(5, 4, 1),
                 new CinemaSeat(5, 5, "orange"),
                 new CinemaSeat(5, 6, "orange"),
                 new CinemaSeat(5, 7, "orange"),
@@ -1208,7 +1196,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(6, 5, "orange"),
                 new CinemaSeat(6, 6, "red"),
                 new CinemaSeat(6, 7, "red"),
-                new CinemaSeat(6, 8, "orange"),
+                new CinemaSeat(6, 8, "orange", 2),
                 new CinemaSeat(6, 9, "orange"),
                 new CinemaSeat(6, 10),
                 new CinemaSeat(6, 11),
@@ -1219,7 +1207,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(7, 1),
                 new CinemaSeat(7, 2),
                 new CinemaSeat(7, 3),
-                new CinemaSeat(7, 4, "orange"),
+                new CinemaSeat(7, 4, "orange", 1),
                 new CinemaSeat(7, 5, "orange"),
                 new CinemaSeat(7, 6, "red"),
                 new CinemaSeat(7, 7, "red"),
@@ -1236,7 +1224,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(8, 3),
                 new CinemaSeat(8, 4, "orange"),
                 new CinemaSeat(8, 5, "orange"),
-                new CinemaSeat(8, 6, "red"),
+                new CinemaSeat(8, 6, "red", 1),
                 new CinemaSeat(8, 7, "red"),
                 new CinemaSeat(8, 8, "orange"),
                 new CinemaSeat(8, 9, "orange"),
@@ -1250,7 +1238,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(9, 2),
                 new CinemaSeat(9, 3),
                 new CinemaSeat(9, 4, "orange"),
-                new CinemaSeat(9, 5, "orange"),
+                new CinemaSeat(9, 5, "orange", 2),
                 new CinemaSeat(9, 6, "red"),
                 new CinemaSeat(9, 7, "red"),
                 new CinemaSeat(9, 8, "orange"),
@@ -1265,7 +1253,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(10, 2),
                 new CinemaSeat(10, 3),
                 new CinemaSeat(10, 4),
-                new CinemaSeat(10, 5, "orange"),
+                new CinemaSeat(10, 5, "orange", 1),
                 new CinemaSeat(10, 6, "orange"),
                 new CinemaSeat(10, 7, "orange"),
                 new CinemaSeat(10, 8, "orange"),
@@ -1280,7 +1268,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(11, 2),
                 new CinemaSeat(11, 3),
                 new CinemaSeat(11, 4),
-                new CinemaSeat(11, 5),
+                new CinemaSeat(11, 5, 2),
                 new CinemaSeat(11, 6, "orange"),
                 new CinemaSeat(11, 7, "orange"),
                 new CinemaSeat(11, 8),
@@ -1301,7 +1289,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(12, 8),
                 new CinemaSeat(12, 9),
                 new CinemaSeat(12, 10),
-                new CinemaSeat(12, 11),
+                new CinemaSeat(12, 11, 1),
                 new CinemaSeat(12, 99)
             },
             new List<CinemaSeat>
@@ -1314,7 +1302,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(13, 6),
                 new CinemaSeat(13, 7),
                 new CinemaSeat(13, 8),
-                new CinemaSeat(13, 9),
+                new CinemaSeat(13, 9, 2),
                 new CinemaSeat(13, 10),
                 new CinemaSeat(13, 99),
                 new CinemaSeat(13, 99)
@@ -1325,7 +1313,7 @@ public class CinemaReservationSystem
                 new CinemaSeat(14, 0),
                 new CinemaSeat(14, 3),
                 new CinemaSeat(14, 4),
-                new CinemaSeat(14, 5),
+                new CinemaSeat(14, 5, 1),
                 new CinemaSeat(14, 6),
                 new CinemaSeat(14, 7),
                 new CinemaSeat(14, 8),
@@ -1392,6 +1380,12 @@ public class CinemaReservationSystem
                 Console.Write(seat.Layout + " ");
                 Console.ResetColor();
             }
+            else if (seat.IsSelected)
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.Write(seat.Layout + " ");
+                Console.ResetColor();
+            }
             else if (seat.Color == "orange")
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -1415,14 +1409,46 @@ public class CinemaReservationSystem
         // Write the additional information
         Console.WriteLine();
         MovieScreenPrint(db, Showtime);
+        Console.Write("X: ");
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.Write("Blauw: 20,-");
+        Console.Write("20,-");
+        Console.ResetColor();
+        Console.Write("/");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.Write("     Oranje: 25,-");
+        Console.Write("25,-");
+        Console.ResetColor();
+        Console.Write("/");
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write("     Rood: 30,-");
+        Console.Write("30,-");
+        Console.ResetColor();
+        Console.Write(" E: ");
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.Write("25,-");
+        Console.ResetColor();
+        Console.Write("/");
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.Write("30,-");
+        Console.ResetColor();
+        Console.Write("/");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write("35,-");
+        Console.ResetColor();
+        Console.Write(" L: ");
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.Write("40,-");
+        Console.ResetColor();
+        Console.Write("/");
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.Write("50,-");
+        Console.ResetColor();
+        Console.Write("/");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write("60,-");
+        Console.ResetColor();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("     Groen: Gereserveerde Stoelen ");
+        Console.Write(" Groen: Gereserveerde Stoelen ");
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(" Grijs: Geselecteerde Stoelen ");
         Console.WriteLine();
         Console.ResetColor();
         Console.WriteLine($"Zaal {Showtime.RoomId}");
@@ -1430,6 +1456,7 @@ public class CinemaReservationSystem
         // Restore the original cursor position
         Console.SetCursorPosition(originalLeft, originalTop);
     }
+
 
 
     public static void ClearConsole()

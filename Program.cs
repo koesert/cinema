@@ -16,10 +16,12 @@ namespace Cinema
         {
             { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
             { InitialStateChoice.Login, "Inloggen" },
+            { InitialStateChoice.reservering, "zie reservering (gast)" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
-        public static void Main()
+        [Obsolete]
+        public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
@@ -28,6 +30,7 @@ namespace Cinema
 
             CinemaContext db = new CinemaContext(connectionString);
             UserExperienceService customerService = new UserExperienceService();
+            Customer loggedInCustomer = null;
 
             Console.Clear();
             InitialStateChoice currentChoice = InitialStateChoice.Login;
@@ -48,19 +51,22 @@ namespace Cinema
                 switch (currentChoice)
                 {
                     case InitialStateChoice.ListMovies:
-                        customerService.ListMoviesWithShowtimes(db);
+                        customerService.ListMoviesWithShowtimes(loggedInCustomer, db);
+                        break;
+                    case InitialStateChoice.reservering:
+                        PresentGuestReservationLogin.Start(db);
                         break;
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
                             new SelectionPrompt<string>()
                                 .Title("Selecteer gebruikerstype:")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker" , "Account aanmaken"})
+                                .AddChoices(new[] { "Admin", "Gebruiker", "Account aanmaken" })
                         );
                         switch (loginChoice)
                         {
                             case "Admin":
-                                PresentAdminLogin.Start(db);                                
+                                PresentAdminLogin.Start(db);
                                 break;
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);

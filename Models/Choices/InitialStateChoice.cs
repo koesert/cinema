@@ -14,6 +14,10 @@ namespace Cinema.Models.Choices
         ListMovies,
         [Description("Inloggen")]
         Login,
+
+        [Description("zie reservering (gast)")]
+        reservering,
+
         [Description("Afsluiten")]
         Exit
     }

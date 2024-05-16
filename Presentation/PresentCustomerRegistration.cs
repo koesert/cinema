@@ -34,7 +34,7 @@ public class PresentCustomerRegistration
                     {
                         registerSuccesful = true;
                         Task.Delay(3000).Wait();
-                        
+
                     });
                 PresentCustomerOptions.Start(newCustomer, db);
             }
