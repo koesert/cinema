@@ -279,6 +279,7 @@ public class UserExperienceService
   [Obsolete]
   private void HandleReservation(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
   {
+    Voucher v = null;
     if (selectedSeats.Count == 0)
     {
       AnsiConsole.MarkupLine("[red]No seats selected.[/]");
@@ -303,6 +304,17 @@ public class UserExperienceService
     AnsiConsole.Render(table);
 
     Console.WriteLine($"Total Price: ${totalSeatPrice}");
+    if (!(loggedInCustomer is null))
+    {
+      v = UseVoucher(db, loggedInCustomer);
+      if (!(v is null))
+      {
+        Console.Clear();
+        AnsiConsole.Render(table);
+
+        Console.WriteLine($"Total Price: ${v.ApplyDiscount((double)totalSeatPrice)}");
+      }
+    }
 
     var reservationKeyInfo = AnsiConsole.Prompt(
     new SelectionPrompt<string>()
@@ -319,7 +331,16 @@ public class UserExperienceService
         seat.IsReserved = true;
       }
 
-      ReserveSeats(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+      if (v is null)
+      {
+        ReserveSeats(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+      }
+      else
+      {
+        ReserveSeats(loggedInCustomer, db, showtime, selectedSeats, ticketNumber, v);
+        v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
+        db.SaveChanges();
+      }
       AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
       Console.WriteLine("Press any key to return to start.");
       Console.ReadKey(true);
@@ -331,11 +352,11 @@ public class UserExperienceService
     }
   }
 
-  private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+  private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
   {
     if (loggedInCustomer != null)
     {
-      CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email);
+      CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
     }
     else
     {
@@ -391,7 +412,7 @@ public class UserExperienceService
     db.Tickets.Add(ticket);
   }
 
-  private void CreateTicket(CinemaContext db, Customer loggedInCustomer, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, string userEmail)
+  private void CreateTicket(CinemaContext db, Customer loggedInCustomer, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, string userEmail, Voucher voucherused = null)
   {
     var ticket = new Ticket
     {
@@ -401,9 +422,55 @@ public class UserExperienceService
       TicketNumber = ticketNumber,
       CustomerEmail = userEmail,
       Seats = selectedSeats.ToList(),
-      PurchaseTotal = selectedSeats.Sum(s => s.Price)
     };
+    if (voucherused is null)
+    {
+      ticket.PurchaseTotal = selectedSeats.Sum(s => s.Price);
+    }
+    else
+    {
+      ticket.PurchaseTotal = (decimal)voucherused.ApplyDiscount((double)selectedSeats.Sum(s => s.Price));
+    }
     db.Tickets.Add(ticket);
+    return;
+  }
+
+  private Voucher UseVoucher(CinemaContext db, Customer loggedInCustomer)
+  {
+    var voucherprompt = AnsiConsole.Prompt(
+    new SelectionPrompt<string>()
+        .PageSize(3)
+        .AddChoices("Yes", "No")
+        .Title("Do you want to enter a vouchercode?")
+        .HighlightStyle(new Style(Color.Blue)));
+    if (voucherprompt.Contains("Yes"))
+    {
+      PresentAdminOptions.UpdateVouchers(db);
+      List<Voucher> availableVouchers = db.Vouchers.Where(x => x.Active == true && x.CustomerEmail == loggedInCustomer.Email).ToList();
+      string voucherCode = AnsiConsole.Prompt(
+        new TextPrompt<string>("Voer je voucher code in (of typ 'stop' om te stoppen):")
+            .PromptStyle("yellow")
+            .Validate(input =>
+            {
+                if (input.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ValidationResult.Success();
+                }
+
+                if (!availableVouchers.Any(x => x.Code == input && x.Active == true))
+                {
+                    return ValidationResult.Error($"Geen geldige voucher voor code: {input}. Probeer opnieuw:");
+                }
+
+                return ValidationResult.Success();
+            }));
+      if (voucherCode.Contains("stop"))
+      {
+        return null;
+      }
+      return availableVouchers.First(x => x.Code == voucherCode);
+    }
+    return null;
   }
 
   private int CalculateLinesUsedForLayout(CinemaContext db, Showtime showtime)
