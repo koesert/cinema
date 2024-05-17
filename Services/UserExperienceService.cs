@@ -58,6 +58,7 @@ public class UserExperienceService
   public void ListMoviesWithShowtimes(Customer loggedInCustomer, CinemaContext db)
   {
     PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+    PresentAdminOptions.UpdateVouchers(db);
     Console.Clear();
 
     var moviesQuery = db.Movies.Include(m => m.Showtimes);
