@@ -8,6 +8,7 @@ public class Voucher
     public string DiscountType { get; set; } = "-";
     public DateTimeOffset ExpirationDate { get; set; }
     public string CustomerEmail { get; set; }
+    public string IsReward { get; set; } = "false";
     public Voucher(string code, double discount, DateTimeOffset expirationDate, string customerEmail)
     {
         Code = code;
@@ -15,6 +16,11 @@ public class Voucher
         ExpirationDate = expirationDate;
         CustomerEmail = customerEmail;
     }
+
+    public Voucher(string code, double discount, DateTimeOffset expirationDate, string customerEmail, string isreward) : this(code, discount, expirationDate, customerEmail)
+    {
+        IsReward = isreward;
+    } 
     public virtual double ApplyDiscount(double price)
     {
         return price - Discount < 0 ? 0 : price - Discount;

@@ -136,7 +136,7 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("CancelledAt")
+                    b.Property<DateTimeOffset?>("CancelledAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerEmail")
@@ -218,6 +218,9 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
@@ -232,6 +235,9 @@ namespace cinema.Migrations
 
                     b.Property<DateTimeOffset>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsReward")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 

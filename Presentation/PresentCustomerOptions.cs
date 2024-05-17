@@ -19,7 +19,7 @@ public static class PresentCustomerOptions
             new SelectionPrompt<string>()
                 .Title("")
                 .PageSize(10)
-                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Account beheren", "Log Uit" })
+                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Reservatie Progress Bekijken", "Account beheren", "Log Uit" })
         );
         switch (optionChoice)
         {
@@ -28,6 +28,9 @@ public static class PresentCustomerOptions
                 break;
             case "Reserveringen bekijken":
                 PresentReservations.Start(loggedInCustomer, db);
+                break;
+            case "Reservatie Progress Bekijken":
+                PresentCustomerReservationProgress.Start(loggedInCustomer, db);
                 break;
             case "Account beheren":
                 AnsiConsole.Clear();
