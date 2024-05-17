@@ -8,14 +8,16 @@ public static class PresentCustomerOptions
     {
         UserExperienceService user = new UserExperienceService();
         AnsiConsole.Clear();
-        var rule = new Rule("[bold blue]Klanten opties[/]");
-        rule.Justification = Justify.Left;
-        rule.Style = Style.Parse("blue");
+        var rule = new Rule("[bold blue]Klanten opties:[/]")
+        {
+            Justification = Justify.Left,
+            Style = Style.Parse("blue")
+        };
         AnsiConsole.Write(rule);
         AnsiConsole.MarkupLine($"[bold blue]Welkom [bold grey93]{loggedInCustomer.Username}[/]![/]");
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Selecteer een optie:")
+                .Title("")
                 .PageSize(10)
                 .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Account beheren", "Log Uit" })
         );

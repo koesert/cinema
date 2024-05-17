@@ -1,35 +1,64 @@
 using Cinema.Data;
 using Spectre.Console;
+using Microsoft.EntityFrameworkCore;
 
 public class PresentReservations
 {
     public static void Start(Customer customer, CinemaContext db)
     {
-        List<Ticket> AllCustomersReservations = db.Ticket.ToList();
-        List<Ticket> ThisCustomerReservations = new List<Ticket>();
-
         AnsiConsole.Clear();
-        var rule = new Rule("[bold blue]Uw reservaties:[/]");
-        rule.Justification = Justify.Left;
-        rule.Style = Style.Parse("blue");
+        var rule = new Rule("[bold blue]Uw reserveringen:[/]")
+        {
+            Justification = Justify.Left,
+            Style = Style.Parse("blue")
+        };
         AnsiConsole.Write(rule);
 
-        foreach (Ticket Reservation in AllCustomersReservations)
+        var customerReservations = db.Ticket
+            .Include(t => t.Showtime)
+            .ThenInclude(s => s.Movie)
+            .Where(t => t.CustomerEmail == customer.Email)
+            .ToList();
+
+        if (!customerReservations.Any())
         {
-            if (Reservation.CustomerEmail == customer.Email)
+            AnsiConsole.MarkupLine($"Geen [blue]reserveringen[/] gevonden voor [bold grey93]{customer.Username}[/].");
+            var navigateChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("")
+                    .AddChoices(new[] { "Terug" }));
+
+            if (navigateChoice == "Terug")
             {
-                ThisCustomerReservations.Add(Reservation);
+                PresentCustomerOptions.Start(customer, db);
             }
-        }
-        if (ThisCustomerReservations.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"Nog geen [blue]reservaties[/] voor [bold grey93]{customer.Username}[/].");
         }
         else
         {
-            foreach (Ticket Reservation in ThisCustomerReservations)
-            { // Dit nog veranderen zodat er movie details getoond worden
-                AnsiConsole.MarkupLine($"Ticket with id: [bold grey93]{Reservation.Id}[/] reserved under email: [bold grey93]{Reservation.CustomerEmail}[/]");
+            var movieOptions = customerReservations
+                .Select((r, index) => new { Index = index, Option = $"Reservering: [bold]{r.Showtime.Movie.Title} - {r.Showtime.StartTime:g} (Reserveringsnummer: {r.TicketNumber})[/]" })
+                .ToDictionary(x => x.Option, x => x.Index);
+
+            var choices = movieOptions.Keys.ToList();
+            choices.Add("Terug");
+
+            var selectedOption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("")
+                    .AddChoices(choices)
+                    .PageSize(10));
+
+            if (selectedOption == "Terug")
+            {
+                PresentCustomerOptions.Start(customer, db);
+            }
+            else
+            {
+                var selectedReservationIndex = movieOptions[selectedOption];
+                var selectedReservation = customerReservations[selectedReservationIndex];
+                var selectedMovie = selectedReservation.Showtime.Movie;
+                var selectedShowtime = selectedReservation.Showtime;
+                PresentDetailedReservation.Start(selectedReservation, selectedMovie, selectedShowtime, db, customer);
             }
         }
     }
