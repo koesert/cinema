@@ -536,7 +536,7 @@ namespace Cinema.Services
 
         public static void DeleteVoucher(CinemaContext db)
         {
-            List<Voucher> vouchers = db.Vouchers.ToList();
+            List<Voucher> vouchers = db.Vouchers.Where(x => x.IsReward == "false").ToList();
             Voucher vouchertodelete = AnsiConsole.Prompt(
                 new SelectionPrompt<Voucher>()
                     .Title("Selecteer een voucher om te verwijderen:")
@@ -570,7 +570,7 @@ namespace Cinema.Services
         {
             string option;
             string code;
-            List<Voucher> vouchers = db.Vouchers.ToList();
+            List<Voucher> vouchers = db.Vouchers.Where(x => x.IsReward == "false").ToList();
             Voucher voucher = AnsiConsole.Prompt(
                 new SelectionPrompt<Voucher>()
                     .Title("Selecteer een voucher om te wijzigen")

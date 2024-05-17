@@ -1,4 +1,5 @@
 using Cinema.Data;
+using Cinema.Services;
 using Spectre.Console;
 
 public static class PresentCustomerOptions
@@ -7,6 +8,7 @@ public static class PresentCustomerOptions
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         UserExperienceService user = new UserExperienceService();
+        PresentAdminOptions.UpdateVouchers(db);
         PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Klanten opties:[/]")
