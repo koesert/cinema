@@ -57,6 +57,7 @@ public class UserExperienceService
   [Obsolete]
   public void ListMoviesWithShowtimes(Customer loggedInCustomer, CinemaContext db)
   {
+    PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
     Console.Clear();
 
     var moviesQuery = db.Movies.Include(m => m.Showtimes);
@@ -444,6 +445,7 @@ public class UserExperienceService
     if (voucherprompt.Contains("Yes"))
     {
       PresentAdminOptions.UpdateVouchers(db);
+      PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       List<Voucher> availableVouchers = db.Vouchers.Where(x => x.Active == true && x.CustomerEmail == loggedInCustomer.Email).ToList();
       string voucherCode = AnsiConsole.Prompt(
         new TextPrompt<string>("Voer je voucher code in (of typ 'stop' om te stoppen):")

@@ -56,19 +56,26 @@ public static class PresentCustomerReservationProgress
         double max = 10;
         RenderProgressBar(amount / max * 100);
         AnsiConsole.MarkupLine($"[green]{amount} van de {max} reserveringen behaald! (tussen {startdate.ToString("dd-MM-yyyy")} en {enddate.ToString("dd-MM-yyyy")})[/]");
+        if (amount < max && db.Vouchers.Any(v => v.IsReward == "true" && v.CustomerEmail == customer.Email))
+        {
+            Voucher revert = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+            revert.Active = false;
+            db.SaveChanges();
+        }
         if (amount >= max)
         {
             Voucher check = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
             if (check != null)
             {
                 v = check;
+                if (v.Active == false && v.ExpirationDate > today) v.Active = true;
             }
             else
             {
                 v = new PercentVoucher(LogicLayerVoucher.GenerateRandomCode(db), 10, DateTimeOffset.UtcNow.AddMonths(6).AddHours(2), customer.Email, "true");
                 db.Vouchers.Add(v);
-                db.SaveChanges();
             }
+            db.SaveChanges();
             if (!v.Active)
             {
                 AnsiConsole.MarkupLine($"[green]Je hebt de verkregen Voucher successvol gebruikt! Tot de volgende campagne![/]");
@@ -99,5 +106,48 @@ public static class PresentCustomerReservationProgress
                 var task = ctx.AddTask(taskDescription);
                 task.Increment(percentage);
             });
+    }
+
+    public static void UpdateTrueProgress(Customer customer, CinemaContext db)
+    {
+        DateTimeOffset today = DateTimeOffset.UtcNow.AddHours(2);
+        DateTimeOffset startdate;
+        Voucher v;
+        if (today.Month % 2 == 1)
+        {
+            startdate = new DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, today.Offset);
+        }
+        else
+        {
+            startdate = new DateTimeOffset(today.Year, today.Month - 1, 1, 0, 0, 0, today.Offset);
+        }
+        DateTimeOffset enddate = startdate.AddMonths(2).AddDays(-1);
+        double amount = db.Tickets.Where(x => x.CustomerEmail == customer.Email && x.PurchasedAt <= enddate && x.PurchasedAt >= startdate && (x.CancelledAt == null || x.CancelledAt == DateTimeOffset.MinValue)).Count();
+        if (amount == 0)
+        {
+           Voucher vouchersWithReward = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+           if (vouchersWithReward != null)
+           {
+                vouchersWithReward.IsReward = "false";
+                db.SaveChanges();
+           }
+
+        }
+        double max = 10;
+        if (amount < max && db.Vouchers.Any(v => v.IsReward == "true" && v.CustomerEmail == customer.Email))
+        {
+            Voucher revert = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+            revert.Active = false;
+            db.SaveChanges();
+        }
+        if (amount >= max)
+        {
+            Voucher check = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+            if (check != null)
+            {
+                v = check;
+                if (v.Active == false && v.ExpirationDate > today) v.Active = true;
+            }
+        }
     }
 }
