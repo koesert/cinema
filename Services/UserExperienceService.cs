@@ -309,7 +309,7 @@ public class UserExperienceService
     }
     AnsiConsole.Render(table);
 
-    Console.WriteLine($"Total Price: ${totalSeatPrice}");
+    Console.WriteLine($"Totaal Prijs: ${totalSeatPrice}");
     if (!(loggedInCustomer is null))
     {
       v = UseVoucher(db, loggedInCustomer);
@@ -318,11 +318,11 @@ public class UserExperienceService
         Console.Clear();
         AnsiConsole.Render(table);
 
-        Console.WriteLine($"Oude Totaal Price: ${totalSeatPrice}");
+        Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
         if (v is PercentVoucher) Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}% korting");
         else Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor -{v.Discount},- korting");
 
-        Console.WriteLine($"Nieuwe Totaal Price: ${v.ApplyDiscount((double)totalSeatPrice)}");
+        Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
       }
     }
 
@@ -353,8 +353,8 @@ public class UserExperienceService
       }
       AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
       Console.WriteLine("Press any key to return to start.");
-      PresentAdminOptions.UpdateVouchers(db);
       if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+      PresentAdminOptions.UpdateVouchers(db);
       Console.ReadKey(true);
       Console.Clear();
     }
@@ -447,12 +447,12 @@ public class UserExperienceService
     new SelectionPrompt<string>()
         .PageSize(3)
         .AddChoices("Yes", "No")
-        .Title("Do you want to enter a vouchercode?")
+        .Title("Wilt u een vouchercode invoeren?")
         .HighlightStyle(new Style(Color.Blue)));
     if (voucherprompt.Contains("Yes"))
     {
-      PresentAdminOptions.UpdateVouchers(db);
       PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+      PresentAdminOptions.UpdateVouchers(db);
       List<Voucher> availableVouchers = db.Vouchers.Where(x => x.Active == true && x.CustomerEmail == loggedInCustomer.Email).ToList();
       string voucherCode = AnsiConsole.Prompt(
         new TextPrompt<string>("Voer je voucher code in (of typ 'stop' om te stoppen):")

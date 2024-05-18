@@ -8,8 +8,8 @@ public static class PresentCustomerOptions
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         UserExperienceService user = new UserExperienceService();
-        PresentAdminOptions.UpdateVouchers(db);
         PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+        PresentAdminOptions.UpdateVouchers(db);
         AnsiConsole.Clear();
         var rule = new Rule("[bold blue]Klanten opties:[/]")
         {

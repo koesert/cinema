@@ -129,6 +129,7 @@ public static class PresentCustomerReservationProgress
            if (vouchersWithReward != null)
            {
                 vouchersWithReward.IsReward = "false";
+                vouchersWithReward.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
                 db.SaveChanges();
            }
 
