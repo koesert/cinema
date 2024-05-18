@@ -624,8 +624,10 @@ namespace Cinema.Services
                     .PromptStyle("yellow")
                 );
                 double discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
+                int id = voucher.Id;
                 db.Vouchers.Remove(voucher);
                 voucher = discountType.Contains("%") ? new PercentVoucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail) : new Voucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                voucher.Id = id;
                 db.Vouchers.Add(voucher);
             }
             else if (option.Contains("datum"))
