@@ -354,7 +354,7 @@ public class UserExperienceService
       AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
       Console.WriteLine("Press any key to return to start.");
       PresentAdminOptions.UpdateVouchers(db);
-      PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+      if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       Console.ReadKey(true);
       Console.Clear();
     }
