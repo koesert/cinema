@@ -57,7 +57,7 @@ public class UserExperienceService
   [Obsolete]
   public void ListMoviesWithShowtimes(Customer loggedInCustomer, CinemaContext db)
   {
-    PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
+    if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
     PresentAdminOptions.UpdateVouchers(db);
     Console.Clear();
 
@@ -74,6 +74,7 @@ public class UserExperienceService
       var moviesWithUpcomingShowtimes = moviesQuery
           .Where(m => m.Showtimes != null && m.Showtimes
           .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
+          .OrderBy(x => x.Title)
           .ToList();
 
       var options = new List<string> { "Filter door films" };
@@ -120,8 +121,11 @@ public class UserExperienceService
       else if (selectedOption == "Filter door films")
       {
         var result = ApplyFilters(db);
-        moviesQuery = result.Item1.Include(m => m.Showtimes);
-        filterDescription = result.Item2;
+        if (!(result.Item1 == null))
+        {
+          moviesQuery = result.Item1.Include(m => m.Showtimes);
+          filterDescription = result.Item2;
+        }
         Console.Clear();
         continue;
       }
@@ -349,6 +353,8 @@ public class UserExperienceService
       }
       AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
       Console.WriteLine("Press any key to return to start.");
+      PresentAdminOptions.UpdateVouchers(db);
+      PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       Console.ReadKey(true);
       Console.Clear();
     }

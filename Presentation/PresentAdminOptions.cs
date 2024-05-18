@@ -86,7 +86,7 @@ namespace Cinema.Services
             Console.Clear();
 
             var movies = db.Movies.ToList();
-            var options = movies.Select(movie => movie.Title).ToList();
+            var options = movies.Select(movie => movie.Title).OrderBy(x => x).ToList();
             options.Insert(0, "Terug");
 
             var selectedOption = AnsiConsole.Prompt(
@@ -624,7 +624,9 @@ namespace Cinema.Services
                     .PromptStyle("yellow")
                 );
                 double discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
-                voucher.Discount = discount;
+                db.Vouchers.Remove(voucher);
+                voucher = discountType.Contains("%") ? new PercentVoucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail) : new Voucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                db.Vouchers.Add(voucher);
             }
             else if (option.Contains("datum"))
             {
@@ -674,6 +676,7 @@ namespace Cinema.Services
                 return;
 
             db.SaveChanges();
+            UpdateVouchers(db);
             AnsiConsole.Markup("[green]Voucher succesvol opgeslagen![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
