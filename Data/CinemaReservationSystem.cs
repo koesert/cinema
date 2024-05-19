@@ -1532,19 +1532,6 @@ public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, C
         }
 
         seatToReserve.IsReserved = true;
-        seatToReserve.ReservedBy = userName;
-
-        // Save changes to the database
-        db.SaveChanges();
-
-        // Send confirmation email
-        var seatNumbers = $"{row}{seatNumber}";
-        var screenNumber = showtime.RoomId; // Assuming RoomId is used as screen number
-        var movieTitle = "The Matrix"; // Replace with actual movie title from Showtime
-
-        var senderEmail = new SenderEmail();
-        senderEmail.SendMessage(userEmail, userName, movieTitle, date, time, seatNumbers, screenNumber);
-
         return true;
     }
 

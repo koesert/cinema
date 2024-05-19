@@ -15,7 +15,6 @@ public class CinemaSeat
     public Ticket? Ticket { get; set; }
     public bool IsSelected { get; set; } = false;
     public int Type { get; set; } = 0;
-    public string ReservedBy { get; internal set; }
     public CinemaSeat() { }
     public CinemaSeat(char row, int seatnumber, string color)
     {

@@ -36,7 +36,7 @@ Dear {userName},
 
 I am pleased to confirm your reservation for cinema seats at Your Eyes. Below are the details of your reservation:
 
-Movie Title: 
+Movie Title: {movieTitle}
 Date: {date}
 Time: {time}
 Seat Numbers: {seatNumbers}
