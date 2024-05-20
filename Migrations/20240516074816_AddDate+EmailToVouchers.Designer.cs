@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cinema.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    partial class CinemaContextModelSnapshot : ModelSnapshot
+    [Migration("20240516074816_AddDate+EmailToVouchers")]
+    partial class AddDateEmailToVouchers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,7 +139,7 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CancelledAt")
+                    b.Property<DateTimeOffset>("CancelledAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerEmail")
@@ -218,9 +221,6 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
@@ -235,9 +235,6 @@ namespace cinema.Migrations
 
                     b.Property<DateTimeOffset>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsReward")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 

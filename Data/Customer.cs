@@ -71,5 +71,10 @@ namespace Cinema.Data
 			db.Customers.Remove(customer);
 			db.SaveChanges();
 		}
+
+		public override string ToString()
+		{
+			return $"Username: {Username}, Email: {Email}";
+		}
 	}
 }
