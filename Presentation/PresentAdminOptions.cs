@@ -545,6 +545,7 @@ namespace Cinema.Services
             );
             if (stringvouchertodelete == "Terug")
             {
+                Voucherpanel(db);
                 return;
             }
             Console.Clear();
@@ -583,6 +584,7 @@ namespace Cinema.Services
             );
             if (stringvoucher == "Terug")
             {
+                Voucherpanel(db);
                 return;
             }
 
@@ -598,6 +600,8 @@ namespace Cinema.Services
             );
             if (option == "Terug")
             {
+                Console.Clear(); 
+                ChangeExistingVoucher(db);
                 return;
             }
             Console.Clear();  
@@ -696,6 +700,7 @@ namespace Cinema.Services
             AnsiConsole.Markup("[green]Voucher succesvol opgeslagen![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
+            Voucherpanel(db);
         }
     }
 }
