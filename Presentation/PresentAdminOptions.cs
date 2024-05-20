@@ -536,15 +536,19 @@ namespace Cinema.Services
 
         public static void DeleteVoucher(CinemaContext db)
         {
-            List<Voucher> vouchers = db.Vouchers.Where(x => x.IsReward == "false").ToList();
-            Voucher vouchertodelete = AnsiConsole.Prompt(
-                new SelectionPrompt<Voucher>()
+            List<string> vouchers = db.Vouchers.Where(x => x.IsReward == "false").Select(x => $"{x}").ToList();
+            vouchers.Add("Terug");
+            string stringvouchertodelete = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
                     .Title("Selecteer een voucher om te verwijderen:")
                     .AddChoices(vouchers)
             );
-
+            if (stringvouchertodelete == "Terug")
+            {
+                return;
+            }
             Console.Clear();
-
+            Voucher vouchertodelete = db.Vouchers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringvouchertodelete);
             AnsiConsole.Markup($"[blue]Gekozen Voucher: {vouchertodelete.ToString()}[/]\n");
             bool ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt verwijderen?");
             if (!ready)
@@ -570,22 +574,32 @@ namespace Cinema.Services
         {
             string option;
             string code;
-            List<Voucher> vouchers = db.Vouchers.Where(x => x.IsReward == "false").ToList();
-            Voucher voucher = AnsiConsole.Prompt(
-                new SelectionPrompt<Voucher>()
-                    .Title("Selecteer een voucher om te wijzigen")
+            List<string> vouchers = db.Vouchers.Where(x => x.IsReward == "false").Select(x => $"{x}").ToList();
+            vouchers.Add("Terug");
+            string stringvoucher = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een voucher om te verwijderen:")
                     .AddChoices(vouchers)
             );
+            if (stringvoucher == "Terug")
+            {
+                return;
+            }
 
             Console.Clear();
+            Voucher voucher = db.Vouchers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringvoucher);
 
             AnsiConsole.Markup($"[blue]Gekozen Voucher: {voucher.ToString()}[/]\n");
 
             option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer wat u wilt wijzigen aan deze voucher:")
-                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant"})
+                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant", "Terug"})
             );
+            if (option == "Terug")
+            {
+                return;
+            }
             Console.Clear();  
             if (option.Contains("Code"))
             {
