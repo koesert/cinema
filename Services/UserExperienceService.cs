@@ -206,6 +206,10 @@ public class UserExperienceService
 
       Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
       Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+      Console.WriteLine();
+      AnsiConsole.MarkupLine("[grey](Press <Enter> to select seats)[/]");
+      AnsiConsole.MarkupLine("[grey](Press <Space> to reserve seats) [/]");
+      AnsiConsole.MarkupLine("[grey](Press <Escape> to return) [/]");
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -658,7 +662,6 @@ public class UserExperienceService
       currentRow = firstAvailableSeat.Row - 'A';
       currentSeatNumber = firstAvailableSeat.SeatNumber - 1;
     }
-
     CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
     while (true)
@@ -669,6 +672,10 @@ public class UserExperienceService
 
       Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
       Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+      Console.WriteLine();
+      AnsiConsole.MarkupLine("[grey](Press <Enter> to select seats)[/]");
+      AnsiConsole.MarkupLine("[grey](Press <Space> to reserve seats) [/]");
+      AnsiConsole.MarkupLine("[grey](Press <Escape> to return) [/]");
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -732,7 +739,6 @@ public class UserExperienceService
       }
       else if (keyInfo.Key == ConsoleKey.Spacebar)
       {
-        // Call a method to handle reservation
         HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
         break;
       }
