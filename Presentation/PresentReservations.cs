@@ -15,6 +15,7 @@ public class PresentReservations
         AnsiConsole.Write(rule);
 
         var customerReservations = db.Ticket
+            .OrderBy(r => r.PurchasedAt)
             .Include(t => t.Showtime)
             .ThenInclude(s => s.Movie)
             .Where(t => t.CustomerEmail == customer.Email)
@@ -36,6 +37,7 @@ public class PresentReservations
         else
         {
             var movieOptions = customerReservations
+                 .OrderBy(r => r.PurchasedAt)
                 .Select((r, index) => new { Index = index, Option = $"Reservering: [bold]{r.Showtime.Movie.Title} - {r.Showtime.StartTime:g} (Reserveringsnummer: {r.TicketNumber})[/]" })
                 .ToDictionary(x => x.Option, x => x.Index);
 
