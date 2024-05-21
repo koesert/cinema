@@ -319,8 +319,7 @@ public class UserExperienceService
         AnsiConsole.Render(table);
 
         Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
-        if (v is PercentVoucher) Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}% korting");
-        else Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor -{v.Discount},- korting");
+        Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
 
         Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
       }
