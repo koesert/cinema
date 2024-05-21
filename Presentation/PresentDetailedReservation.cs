@@ -9,7 +9,7 @@ public class PresentDetailedReservation
         var seatList = db.CinemaSeats
                     .Where(t => t.Ticket.Id == reservation.Id)
                     .ToList();
-        string seats =" ";
+        string seats = " ";
         foreach (var item in seatList)
         {
             seats += $"Soort:{item.Layout} {item.Row}{item.SeatNumber}\n ";
@@ -23,6 +23,17 @@ public class PresentDetailedReservation
             Style = Style.Parse("blue")
         };
         AnsiConsole.Write(rule);
+        var now = DateTimeOffset.UtcNow.AddHours(2);
+        var halfHourBeforeShowtime = reservation.Showtime.StartTime.AddMinutes(-30);
+        if (reservation.CancelledAt.HasValue)
+        {
+            AnsiConsole.MarkupLine("[red]Ticket is geannuleerd.[/]");
+
+        }
+        else if (now > halfHourBeforeShowtime)
+        {
+            AnsiConsole.MarkupLine("[red]De vertoning is al begonnen of geweest.[/]");
+        }
 
         var table = new Table
         {
@@ -39,14 +50,56 @@ public class PresentDetailedReservation
         table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), seats, startDatum, KoopDatum, $"{reservation.PurchaseTotal} euro");
         AnsiConsole.Write(table);
 
-        var navigateChoice = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("")
-                    .AddChoices(new[] { "Terug" }));
+        var choices = new List<string>();
 
-        if (navigateChoice == "Terug")
+        if (!reservation.CancelledAt.HasValue && now < halfHourBeforeShowtime)
         {
-            PresentReservations.Start(customer, db);
+            choices.Add("Cancel ticket");
+        }
+
+        choices.Add("Terug");
+
+        var optionChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Selecteer een optie:")
+                .PageSize(10)
+                .AddChoices(choices.ToArray())
+        );
+        switch (optionChoice)
+        {
+            case "Cancel ticket":
+                AnsiConsole.Clear();
+                var deleteTicketRule = new Rule("[red]Ticket verwijderen[/]")
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("red dim")
+                };
+                AnsiConsole.Write(deleteTicketRule);
+                if (AnsiConsole.Confirm($"Weet u zeker dat u uw ticket wilt [red]verwijderen[/]?"))
+                {
+                    AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("red"))
+                        .Start("[red]Ticket verwijderen...[/]", ctx =>
+                        {
+                            Ticket.CancelTicket(reservation, db);
+                            Thread.Sleep(2500);
+                        });
+                    AnsiConsole.MarkupLine("[red]Ticket verwijderd.[/]");
+                    Thread.Sleep(2500);
+                    AnsiConsole.Clear();
+                    PresentReservations.Start(customer, db);
+                    break;
+                }
+                else
+                {
+                    PresentReservations.Start(customer, db);
+                }
+                break;
+
+            case "Terug":
+                PresentReservations.Start(customer, db);
+                break;
         }
     }
 }
