@@ -204,12 +204,13 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
-      Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
-      Console.WriteLine();
-      AnsiConsole.MarkupLine("[grey](Press <Enter> to select seats)[/]");
-      AnsiConsole.MarkupLine("[grey](Press <Space> to reserve seats) [/]");
-      AnsiConsole.MarkupLine("[grey](Press <Escape> to return) [/]");
+      // Combine and space out the outputs with AnsiConsole
+      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -670,12 +671,13 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
-      Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
-      Console.WriteLine();
-      AnsiConsole.MarkupLine("[grey](Press <Enter> to select seats)[/]");
-      AnsiConsole.MarkupLine("[grey](Press <Space> to reserve seats) [/]");
-      AnsiConsole.MarkupLine("[grey](Press <Escape> to return) [/]");
+      // Combine and space out the outputs with AnsiConsole
+      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
