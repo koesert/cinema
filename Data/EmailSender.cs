@@ -10,7 +10,7 @@ namespace Cinema.Data
 
     public class SenderEmail
     {
-       internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber)
+       internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
         {
             // SMTP server settings for Mail.ru
             string smtpServer = "smtp.gmail.com";
@@ -36,6 +36,7 @@ Dear {userName},
 
 I am pleased to confirm your reservation for cinema seats at Your Eyes. Below are the details of your reservation:
 
+Ticket: {ticketnumber}
 Movie Title: {movieTitle}
 Date: {date}
 Time: {time}
