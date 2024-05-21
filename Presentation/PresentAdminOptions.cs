@@ -38,7 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
-        { CinemaManagementChoice.Exit, "Terug" }
+        { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
         {
@@ -598,15 +598,15 @@ namespace Cinema.Services
             option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer wat u wilt wijzigen aan deze voucher:")
-                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant", "Terug"})
+                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant", "Terug" })
             );
             if (option == "Terug")
             {
-                Console.Clear(); 
+                Console.Clear();
                 ChangeExistingVoucher(db);
                 return;
             }
-            Console.Clear();  
+            Console.Clear();
             if (option.Contains("Code"))
             {
                 AnsiConsole.Markup($"[blue]Oude Code: {voucher.Code}[/]\n");
@@ -626,7 +626,7 @@ namespace Cinema.Services
                         .PromptStyle("yellow")
                     );
                     code = LogicLayerVoucher.CodeCheck(db, stringcode);
-                    
+
                 }
                 voucher.Code = code;
             }
