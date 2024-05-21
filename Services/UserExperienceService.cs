@@ -359,6 +359,7 @@ public class UserExperienceService
     }
     else
     {
+      Console.Clear();
       ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
     }
   }
@@ -458,17 +459,17 @@ public class UserExperienceService
             .PromptStyle("yellow")
             .Validate(input =>
             {
-                if (input.Equals("stop", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ValidationResult.Success();
-                }
-
-                if (!availableVouchers.Any(x => x.Code == input && x.Active == true))
-                {
-                    return ValidationResult.Error($"Geen geldige voucher voor code: {input}. Probeer opnieuw:");
-                }
-
+              if (input.Equals("stop", StringComparison.OrdinalIgnoreCase))
+              {
                 return ValidationResult.Success();
+              }
+
+              if (!availableVouchers.Any(x => x.Code == input && x.Active == true))
+              {
+                return ValidationResult.Error($"Geen geldige voucher voor code: {input}. Probeer opnieuw:");
+              }
+
+              return ValidationResult.Success();
             }));
       if (voucherCode.Contains("stop"))
       {
