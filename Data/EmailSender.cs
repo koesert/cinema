@@ -44,12 +44,12 @@ Hall: {screenNumber}
 
 Please arrive at least 15 minutes before the screening to ensure a smooth entry. Present this confirmation at the ticket counter to receive your tickets.
 
-Should you have any questions or need to make changes to your reservation, feel free to contact us at spyrabv@gmail.com.
+If you need to cancel your reservation, you can do so up to 24 hours before the screening. Should you have any questions or need to make changes to your reservation, feel free to contact us at spyrabv@gmail.com.
 
 Thank you for choosing Your Eyes. We look forward to welcoming you.
 
 Best regards,
-Marcel 
+Marcel
 Your Eyes Team
 spyrabv@gmail.com
 ";
