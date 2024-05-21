@@ -23,12 +23,7 @@ public class Voucher
     } 
     public virtual double ApplyDiscount(double price)
     {
-        if (DiscountType == "-") return price - Discount < 0 ? 0 : price - Discount;
-        double olddiscount = Discount;
-        Discount = price * (Discount / 100);
-        double returnvalue = price - Discount < 0 ? 0 : price - Discount;
-        Discount = olddiscount;
-        return returnvalue;
+        return price - Discount < 0 ? 0 : price - Discount;
     }
-    public override string ToString() => DiscountType == "-" ? $"Code: '{Code}', Korting {Discount},-, Vervaldatum: '{ExpirationDate.ToString("dd-MM-yyyy HH:mm")}, Gebonden aan Klant met Email: '{CustomerEmail}'" : $"Code: '{Code}', Korting {Discount}%, Vervaldatum: '{ExpirationDate.ToString("dd-MM-yyyy HH:mm")}, Gebonden aan Klant met Email: '{CustomerEmail}'";
+    public override string ToString() => $"Code: '{Code}', Korting {Discount},-, Vervaldatum: '{ExpirationDate.ToString("dd-MM-yyyy HH:mm")}, Gebonden aan Klant met Email: '{CustomerEmail}'";
 }

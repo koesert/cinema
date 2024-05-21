@@ -706,5 +706,17 @@ namespace Cinema.Services
             Console.ReadKey();
             Voucherpanel(db);
         }
+        public static void ConvertPercentVouchers(CinemaContext db)
+        {
+            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%").ToList();
+            foreach (var voucher in percentVouchers)
+            {
+                var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                percentVoucher.Id = voucher.Id;
+                db.Vouchers.Remove(voucher);
+                db.Vouchers.Add(percentVoucher);
+            }
+            db.SaveChanges();
+        }
     }
 }
