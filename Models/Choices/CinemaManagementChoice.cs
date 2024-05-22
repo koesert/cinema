@@ -18,6 +18,9 @@ namespace Cinema.Models.Choices
         [Display(Name = "Beheer Vouchers")]
         VoucherPanel,
 
+        [Display(Name = "Bioscoop Instellingen")]
+        Settings,
+
         [Display(Name = "Terug")]
         Exit
     }

@@ -38,6 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
+        { CinemaManagementChoice.Settings, "Bioscoop Instellingen"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -74,6 +75,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.VoucherPanel:
                         Voucherpanel(db);
+                        break;
+                    case CinemaManagementChoice.Settings:
+                        SettingsPanel(db);
                         break;
                     default:
                         break;
@@ -717,6 +721,71 @@ namespace Cinema.Services
                 db.Vouchers.Add(percentVoucher);
             }
             db.SaveChanges();
+        }
+        public static void SettingsPanel(CinemaContext db)
+        {
+            var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Wat wilt u aanpassen?")
+                        .PageSize(10)
+                        .AddChoices(new List<string>{ "Wijzig basisprijs voor periode", "Terug"})
+                );
+            if (choice.Contains("basisprijs"))
+            {
+                ChangeSeatPrice(db);
+                return;
+            }
+            return;
+        }
+
+        public static void ChangeSeatPrice(CinemaContext db)
+        {
+            DateTimeOffset startdate;
+            DateTimeOffset enddate;
+            Administrator admin = db.Administrators.First();
+            string firstDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out _))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            string lastDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out _))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        if (DateTimeOffset.TryParseExact(input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output) &&  output >= startdate)
+                            {
+                                return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet groter zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                            }
+                        return ValidationResult.Success();
+                    }));
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
         }
         public static void ConfigureSeatPrices(CinemaContext db)
         {
