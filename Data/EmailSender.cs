@@ -32,24 +32,24 @@ namespace Cinema.Data
                     mailMessage.Subject = "Reservation Confirmation";
 
                     mailMessage.Body = $@"
-Dear {userName},
+Beste {userName},
 
-I am pleased to confirm your reservation for cinema seats at Your Eyes. Below are the details of your reservation:
+Ik ben verheugd om uw reservering voor bioscoopstoelen bij Your Eyes te bevestigen. Hieronder vindt u de details van uw reservering:
 
 Ticket: {ticketnumber}
-Movie Title: {movieTitle}
-Date: {date}
-Time: {time}
-Seat Numbers: {seatNumbers}
-Hall: {screenNumber}
+Filmtitel: {movieTitle}
+Datum: {date}
+Tijd: {time}
+Stoelnummers: {seatNumbers}
+Zaal: {screenNumber}
 
-Please arrive at least 15 minutes before the screening to ensure a smooth entry. Present this confirmation at the ticket counter to receive your tickets.
+Kom alstublieft minstens 15 minuten voor de voorstelling aan om een soepele toegang te garanderen. Toon deze bevestiging aan de kassa om uw tickets te ontvangen.
 
-If you need to cancel your reservation, you can do so up to 24 hours before the screening. Should you have any questions or need to make changes to your reservation, feel free to contact us at spyrabv@gmail.com.
+Als u uw reservering wilt annuleren, kunt u dit tot 24 uur voor de voorstelling doen. Mocht u vragen hebben of wijzigingen in uw reservering willen aanbrengen, neem dan gerust contact met ons op via spyrabv@gmail.com.
 
-Thank you for choosing Your Eyes. We look forward to welcoming you.
+Bedankt dat u voor Your Eyes heeft gekozen. We kijken ernaar uit u te verwelkomen.
 
-Best regards,
+Met vriendelijke groet,
 Marcel
 Your Eyes Team
 spyrabv@gmail.com
