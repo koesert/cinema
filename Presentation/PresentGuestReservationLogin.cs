@@ -63,7 +63,6 @@ public class PresentGuestReservationLogin
         return AnsiConsole.Prompt(
             new TextPrompt<string>("Voer uw [bold blue]ticket nummer[/] in:")
                 .PromptStyle("blue")
-                .Secret()
                 .Validate(TicketNumber =>
                 {
                     if (string.IsNullOrWhiteSpace(TicketNumber))
