@@ -743,6 +743,30 @@ namespace Cinema.Services
             DateTimeOffset startdate;
             DateTimeOffset enddate;
             Administrator admin = db.Administrators.First();
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            Console.Clear();
+            double basisprijs = 0;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
+            {
+                Console.WriteLine($"Huidige basisprijs van {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
+                basisprijs = admin.TempPrice;
+
+            }
+            else
+            {
+                Console.WriteLine($"Huidige basisprijs (standaard) = 25");
+                basisprijs = 25.0;
+            }
+            Console.WriteLine("Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {basisprijs - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {basisprijs},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {basisprijs + 5},- (basisprijs + 5)");
+            Console.ResetColor();
             string firstDate = AnsiConsole.Prompt(
                 new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
                     .PromptStyle("yellow")
@@ -786,19 +810,29 @@ namespace Cinema.Services
                         return ValidationResult.Success();
                     }));
             enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            Console.Clear();
+            AnsiConsole.Markup($"[blue]Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            double newvalue = AnsiConsole.Prompt(
+                new TextPrompt<double>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input < 0)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Mag geen negatief getal zijn");
+                        }
+                        return ValidationResult.Success();
+                    }));
         }
         public static void ConfigureSeatPrices(CinemaContext db)
         {
             Administrator admin = db.Administrators.First();
-            DateTimeOffset today = DateTimeOffset.UtcNow.AddHours(2);
-            int baseprice = 25;
-            if (DateTimeOffset.UtcNow > today)
-            {
-                baseprice = 30;
-            }
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            double baseprice = 25;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now) baseprice = admin.TempPrice;
             foreach (CinemaSeat s in db.CinemaSeats)
             {
-                s.Price = baseprice;
+                s.Price = (decimal)baseprice;
                 s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
                 if (s.Type == 1) s.Price += 5;
                 if (s.Type == 2) s.Price = s.Price*2;
