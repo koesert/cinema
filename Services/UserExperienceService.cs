@@ -204,8 +204,13 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
-      Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+      // Combine and space out the outputs with AnsiConsole
+      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -275,6 +280,10 @@ public class UserExperienceService
       }
       else if (keyInfo.Key == ConsoleKey.Escape)
       {
+        foreach (var seat in selectedSeats)
+        {
+          seat.IsSelected = false;
+        }
         Console.Clear();
         break;
       }
@@ -319,8 +328,7 @@ public class UserExperienceService
         AnsiConsole.Render(table);
 
         Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
-        if (v is PercentVoucher) Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}% korting");
-        else Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor -{v.Discount},- korting");
+        Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
 
         Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
       }
@@ -360,6 +368,7 @@ public class UserExperienceService
     }
     else
     {
+      Console.Clear();
       ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
     }
   }
@@ -462,17 +471,17 @@ public class UserExperienceService
             .PromptStyle("yellow")
             .Validate(input =>
             {
-                if (input.Equals("stop", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ValidationResult.Success();
-                }
-
-                if (!availableVouchers.Any(x => x.Code == input && x.Active == true))
-                {
-                    return ValidationResult.Error($"Geen geldige voucher voor code: {input}. Probeer opnieuw:");
-                }
-
+              if (input.Equals("stop", StringComparison.OrdinalIgnoreCase))
+              {
                 return ValidationResult.Success();
+              }
+
+              if (!availableVouchers.Any(x => x.Code == input && x.Active == true))
+              {
+                return ValidationResult.Error($"Geen geldige voucher voor code: {input}. Probeer opnieuw:");
+              }
+
+              return ValidationResult.Success();
             }));
       if (voucherCode.Contains("stop"))
       {
@@ -657,7 +666,6 @@ public class UserExperienceService
       currentRow = firstAvailableSeat.Row - 'A';
       currentSeatNumber = firstAvailableSeat.SeatNumber - 1;
     }
-
     CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
     while (true)
@@ -666,8 +674,13 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      Console.WriteLine($"Selected Seat Price: ${selectedSeatPrice}");
-      Console.WriteLine($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')}");
+      // Combine and space out the outputs with AnsiConsole
+      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
+      AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -731,7 +744,6 @@ public class UserExperienceService
       }
       else if (keyInfo.Key == ConsoleKey.Spacebar)
       {
-        // Call a method to handle reservation
         HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
         break;
       }

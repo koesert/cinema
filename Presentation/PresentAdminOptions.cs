@@ -24,7 +24,7 @@ namespace Cinema.Services
             { CinemaManagementMovieChoice.ListShowtimes, "Lijst met aankomende vertoningen voor deze film" },
             { CinemaManagementMovieChoice.DeleteMovie, "Verwijder deze film" },
             { CinemaManagementMovieChoice.AddShowtime, "Voeg een vertoningstijd toe voor deze film" },
-            { CinemaManagementMovieChoice.Exit, "Uitloggen" }
+            { CinemaManagementMovieChoice.Exit, "Terug" }
         };
 
         private static readonly Dictionary<CinemaManagementAddMovieChoice, string> AddMovieChoiceDescriptions = new Dictionary<CinemaManagementAddMovieChoice, string>
@@ -38,7 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
-        { CinemaManagementChoice.Exit, "Terug" }
+        { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
         {
@@ -579,7 +579,7 @@ namespace Cinema.Services
             vouchers.Add("Terug");
             string stringvoucher = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("Selecteer een voucher om te verwijderen:")
+                    .Title("Selecteer een voucher om te wijzigen:")
                     .AddChoices(vouchers)
             );
             if (stringvoucher == "Terug")
@@ -589,22 +589,24 @@ namespace Cinema.Services
             }
 
             Console.Clear();
-            Voucher voucher = db.Vouchers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringvoucher);
+            Voucher originalVoucher = db.Vouchers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringvoucher);
+            Voucher voucher = originalVoucher.DiscountType.Contains("%") ? new PercentVoucher(originalVoucher.Code, originalVoucher.Discount, originalVoucher.ExpirationDate, originalVoucher.CustomerEmail) : new Voucher(originalVoucher.Code, originalVoucher.Discount, originalVoucher.ExpirationDate, originalVoucher.CustomerEmail);
+            voucher.Id = originalVoucher.Id;
 
             AnsiConsole.Markup($"[blue]Gekozen Voucher: {voucher.ToString()}[/]\n");
 
             option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer wat u wilt wijzigen aan deze voucher:")
-                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant", "Terug"})
+                    .AddChoices(new[] { "Code", "Korting(prijs en type)", "Vervaldatum", "Klant", "Terug" })
             );
             if (option == "Terug")
             {
-                Console.Clear(); 
+                Console.Clear();
                 ChangeExistingVoucher(db);
                 return;
             }
-            Console.Clear();  
+            Console.Clear();
             if (option.Contains("Code"))
             {
                 AnsiConsole.Markup($"[blue]Oude Code: {voucher.Code}[/]\n");
@@ -619,13 +621,12 @@ namespace Cinema.Services
                 }
                 else
                 {
-                    AnsiConsole.Markup($"[blue]Oude Code: {voucher.Code}[/]\n");
                     string stringcode = AnsiConsole.Prompt(
                     new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
                         .PromptStyle("yellow")
                     );
                     code = LogicLayerVoucher.CodeCheck(db, stringcode);
-                    
+
                 }
                 voucher.Code = code;
             }
@@ -643,10 +644,8 @@ namespace Cinema.Services
                 );
                 double discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
                 int id = voucher.Id;
-                db.Vouchers.Remove(voucher);
                 voucher = discountType.Contains("%") ? new PercentVoucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail) : new Voucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail);
                 voucher.Id = id;
-                db.Vouchers.Add(voucher);
             }
             else if (option.Contains("datum"))
             {
@@ -693,14 +692,31 @@ namespace Cinema.Services
             AnsiConsole.Markup($"[blue]Gewijzigde Voucher: {voucher.ToString()}[/]\n");
             bool ready = AnsiConsole.Confirm("Weet je zeker dat je deze voucher wilt opslaan?");
             if (!ready)
+            {
+                voucher = originalVoucher;
+                db.SaveChanges();
                 return;
-
+            }
+            db.Vouchers.Remove(originalVoucher);
+            db.Vouchers.Add(voucher);
             db.SaveChanges();
             UpdateVouchers(db);
             AnsiConsole.Markup("[green]Voucher succesvol opgeslagen![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
             Voucherpanel(db);
+        }
+        public static void ConvertPercentVouchers(CinemaContext db)
+        {
+            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%").ToList();
+            foreach (var voucher in percentVouchers)
+            {
+                var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                percentVoucher.Id = voucher.Id;
+                db.Vouchers.Remove(voucher);
+                db.Vouchers.Add(percentVoucher);
+            }
+            db.SaveChanges();
         }
     }
 }
