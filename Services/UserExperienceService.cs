@@ -375,9 +375,11 @@ public class UserExperienceService
 
   private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
   {
+    SenderEmail sender = new SenderEmail();
     if (loggedInCustomer != null)
     {
       CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
+      sender.SendMessage(loggedInCustomer.Email, loggedInCustomer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
     }
     else
     {
@@ -408,6 +410,7 @@ public class UserExperienceService
       }
 
       CreateTicket(db, showtime, selectedSeats, ticketNumber, userEmail);
+      sender.SendMessage(userEmail, "Guest", showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
     }
     db.SaveChanges();
   }
