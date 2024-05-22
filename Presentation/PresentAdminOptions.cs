@@ -718,5 +718,23 @@ namespace Cinema.Services
             }
             db.SaveChanges();
         }
+        public static void ConfigureSeatPrices(CinemaContext db)
+        {
+            Administrator admin = db.Administrators.First();
+            DateTimeOffset today = DateTimeOffset.UtcNow.AddHours(2);
+            int baseprice = 25;
+            if (DateTimeOffset.UtcNow > today)
+            {
+                baseprice = 30;
+            }
+            foreach (CinemaSeat s in db.CinemaSeats)
+            {
+                s.Price = baseprice;
+                s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                if (s.Type == 1) s.Price += 5;
+                if (s.Type == 2) s.Price = s.Price*2;
+            }
+            db.SaveChanges();
+        }
     }
 }

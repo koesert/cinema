@@ -29,6 +29,7 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
+            PresentAdminOptions.ConfigureSeatPrices(db);
             PresentAdminOptions.ConvertPercentVouchers(db);
             UserExperienceService customerService = new UserExperienceService();
             Customer loggedInCustomer = null;
