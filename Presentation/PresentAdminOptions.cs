@@ -743,6 +743,7 @@ namespace Cinema.Services
             DateTimeOffset startdate;
             DateTimeOffset enddate;
             Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
             DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
             Console.Clear();
             double basisprijs = 0;
@@ -879,6 +880,7 @@ namespace Cinema.Services
         public static void ConfigureSeatPrices(CinemaContext db)
         {
             Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
             DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
             double baseprice = 25;
             if (admin.PriceEndTime >= now && admin.PriceStartTime <= now) baseprice = admin.TempPrice;
