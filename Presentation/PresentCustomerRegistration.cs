@@ -10,6 +10,8 @@ public class PresentCustomerRegistration
 
         List<Customer> existingCustomers = db.Customers.ToList();
 
+        List<Ticket> existingTicekts = db.Ticket.ToList();
+
         bool registerSuccesful = false;
 
         while (!registerSuccesful)
@@ -22,7 +24,7 @@ public class PresentCustomerRegistration
             AnsiConsole.Write(rule);
 
             string username = AskUsername(existingCustomers);
-            string email = AskEmail(existingCustomers);
+            string email = AskEmail(existingCustomers, existingTicekts);
             string password = AskPassword();
 
             Customer newCustomer = Customer.CreateCustomer(db, username, password, email);
@@ -74,31 +76,63 @@ public class PresentCustomerRegistration
         );
     }
 
-    private static string AskEmail(List<Customer> existingCustomers)
+    private static string AskEmail(List<Customer> existingCustomers, List<Ticket> existingTickets)
     {
-        return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
-                .PromptStyle("blue")
-                .Validate(email =>
+        string email = "";
+        bool isValidEmail = false;
+
+        while (!isValidEmail)
+        {
+            email = AnsiConsole.Prompt(
+                new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
+                    .PromptStyle("blue")
+                    .Validate(input =>
+                    {
+                        if (string.IsNullOrWhiteSpace(input))
+                            return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
+
+                        if (!RegisterValidity.CheckEmail(input))
+                            return ValidationResult.Error("[red]Email voldoet niet aan de eisen[/]");
+
+                        return ValidationResult.Success();
+                    })
+            );
+
+            if (existingCustomers.Any(c => c.Email.ToLower() == email.ToLower()))
+                AnsiConsole.MarkupLine("[red]Deze email is al in gebruik[/]");
+            else
+            {
+                Ticket existingTicket = existingTickets.FirstOrDefault(t => t.CustomerEmail.ToLower() == email.ToLower());
+
+                if (existingTicket != null)
                 {
-                    if (string.IsNullOrWhiteSpace(email))
+                    AnsiConsole.MarkupLine("[red]Deze email word al gebruikt voor een reservering als gast[/]");
+                    bool validTicketNumber = false;
+
+                    while (!validTicketNumber)
                     {
-                        return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
-                    }
-                    foreach (Customer existingCustomer in existingCustomers)
-                    {
-                        if (existingCustomer.Email.ToLower() == email.ToLower())
+                        string ticketNumber = AnsiConsole.Ask<string>("Om verder te gaan, voer het [bold blue]ticketnummer[/] in van de laatst gemaakte reservering met deze email:");
+
+                        if (existingTicket.TicketNumber == ticketNumber)
                         {
-                            return ValidationResult.Error("[red]Deze email is al in gebruik[/]");
+                            AnsiConsole.MarkupLine("[green]Ticketreservering geverifieerd, je kunt doorgaan met de registratie[/]");
+                            isValidEmail = true;
+                            validTicketNumber = true;
+                        }
+                        else
+                        {
+                            AnsiConsole.MarkupLine("[red]Ongeldige ticketnummer voor deze email[/]");
                         }
                     }
-                    if (!RegisterValidity.CheckEmail(email))
-                    {
-                        return ValidationResult.Error("[red]Email is ongeldig[/]");
-                    }
-                    return ValidationResult.Success();
-                })
-        );
+                }
+                else
+                {
+                    isValidEmail = true;
+                }
+            }
+        }
+
+        return email;
     }
 
     private static string AskPassword()
