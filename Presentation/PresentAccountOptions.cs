@@ -11,7 +11,7 @@ public static class PresentAccountOptions
         var rule = new Rule("[bold blue]Account opties:[/]")
         {
             Justification = Justify.Left,
-            Style = Style.Parse("blue dim")
+            Style = Style.Parse("blue")
         };
         AnsiConsole.Write(rule);
         
@@ -19,7 +19,7 @@ public static class PresentAccountOptions
             new SelectionPrompt<string>()
                 .Title("")
                 .PageSize(10)
-                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen", "Wachtwoord aanpassen", "[red]Account verwijderen[/]", "Terug" })
+                .AddChoices(new[] { "Email aanpassen", "Gebruikersnaam aanpassen", "Wachtwoord aanpassen", "[hotpink2]Nieuwsbrief voorkeur[/]", "[red]Account verwijderen[/]", "[blueviolet]Terug[/]" })
         );
 
         List<Customer> existingCustomers = db.Customers.ToList();
@@ -31,7 +31,7 @@ public static class PresentAccountOptions
                 var emailRule = new Rule("[blue]Email aanpassen[/]")
                 {
                     Justification = Justify.Left,
-                    Style = Style.Parse("blue dim")
+                    Style = Style.Parse("blue")
                 };
                 AnsiConsole.Write(emailRule);
 
@@ -91,7 +91,7 @@ public static class PresentAccountOptions
                 var usernameRule = new Rule("[blue]Gebruikersnaam aanpassen[/]")
                 {
                     Justification = Justify.Left,
-                    Style = Style.Parse("blue dim")
+                    Style = Style.Parse("blue")
                 };
                 AnsiConsole.Write(usernameRule);
 
@@ -154,7 +154,7 @@ public static class PresentAccountOptions
                 var passwordRule = new Rule("[blue]Wachtwoord aanpassen[/]")
                 {
                     Justification = Justify.Left,
-                    Style = Style.Parse("blue dim")
+                    Style = Style.Parse("blue")
                 };
                 AnsiConsole.Write(passwordRule);
 
@@ -215,12 +215,55 @@ public static class PresentAccountOptions
                     Start(loggedInCustomer, db);
                 }
                 break;
+            case "[hotpink2]Nieuwsbrief voorkeur[/]":
+                AnsiConsole.Clear();
+                var newsletterRule = new Rule("[hotpink2]Nieuwsbrief voorkeur[/]")
+                {
+                    Justification = Justify.Left,
+                    Style = Style.Parse("hotpink2")
+                };
+                AnsiConsole.Write(newsletterRule);
+
+                if (loggedInCustomer.Subscribed == true)
+                {
+                    if (AnsiConsole.Confirm("Wilt u zich afmelden van onze [hotpink2]nieuwsbrief[/]?"))
+                    {
+                        AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("hotpink2"))
+                        .Start("[hotpink2]Voorkeur opslaan...[/]", ctx =>
+                        {
+                            Customer.UpdatePreference(loggedInCustomer, db);
+                            Thread.Sleep(2500);
+                        });
+                        AnsiConsole.MarkupLine("[hotpink2]Voorkeur opgeslagen![/]");
+                        Thread.Sleep(2500);
+                    }
+                }
+                else
+                {
+                    if (AnsiConsole.Confirm("U bent niet aangemeld voor onze [hotpink2]nieuwsbrief[/]. Wilt u zich aanmelden?"))
+                    {
+                        AnsiConsole.Status()
+                        .Spinner(Spinner.Known.Aesthetic)
+                        .SpinnerStyle(Style.Parse("hotpink2"))
+                        .Start("[hotpink2]Voorkeur opslaan...[/]", ctx =>
+                        {
+                            Customer.UpdatePreference(loggedInCustomer, db);
+                            Thread.Sleep(2500);
+                        });
+                        AnsiConsole.MarkupLine("[hotpink2]Voorkeur opgeslagen![/]");
+                        Thread.Sleep(2500);
+                    }
+                }
+                Start(loggedInCustomer, db);
+                break;
             case "[red]Account verwijderen[/]":
                 AnsiConsole.Clear();
                 var deleteAccountRule = new Rule("[red]Account verwijderen[/]")
                 {
                     Justification = Justify.Left,
-                    Style = Style.Parse("red dim")
+                    Style = Style.Parse("red")
                 };
                 AnsiConsole.Write(deleteAccountRule);
                 if (AnsiConsole.Confirm($"Weet u zeker dat u uw account wilt [red]verwijderen[/]?"))
@@ -243,7 +286,7 @@ public static class PresentAccountOptions
                     Start(loggedInCustomer, db);
                 }
                 break;
-            case "Terug":
+            case "[blueviolet]Terug[/]":
                 AnsiConsole.Clear();
                 PresentCustomerOptions.Start(loggedInCustomer, db);
                 break;
