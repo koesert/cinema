@@ -767,6 +767,17 @@ namespace Cinema.Services
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Rood: {basisprijs + 5},- (basisprijs + 5)");
             Console.ResetColor();
+            string random = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wilt u de basisprijs en tijdsperiode aanpassen?")
+                    .AddChoices(new[] { "Ja", "Nee" })
+                );
+                if (random.Contains("Nee"))
+                {
+                    Console.Clear();
+                    SettingsPanel(db);
+                    return;
+                }
             string firstDate = AnsiConsole.Prompt(
                 new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
                     .PromptStyle("yellow")
@@ -777,9 +788,13 @@ namespace Cinema.Services
                             "dd-MM-yyyy HH:mm",
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeUniversal,
-                            out _))
+                            out DateTimeOffset output))
                         {
                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
                         }
                         return ValidationResult.Success();
                     }));
@@ -795,34 +810,71 @@ namespace Cinema.Services
                             "dd-MM-yyyy HH:mm",
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeUniversal,
-                            out _))
+                            out DateTimeOffset output))
                         {
                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
                         }
-                        if (DateTimeOffset.TryParseExact(input,
-                            "dd-MM-yyyy HH:mm",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal,
-                            out DateTimeOffset output) &&  output >= startdate)
-                            {
-                                return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet groter zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
-                            }
+
+                        if (startdate >= output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                        }
+
                         return ValidationResult.Success();
                     }));
             enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
             Console.Clear();
             AnsiConsole.Markup($"[blue]Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
             double newvalue = AnsiConsole.Prompt(
-                new TextPrompt<double>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                new TextPrompt<double>("Nieuwe basisprijs voor de tijdperiode (10-50) (moet een heel getal zijn):")
                     .PromptStyle("yellow")
                     .Validate(input =>
                     {
+                        if (input % 1 != 0)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Moet een heel getal zijn.");
+                        }
                         if (input < 0)
                         {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Mag geen negatief getal zijn");
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Mag geen negatief getal zijn.");
+                        }
+                        if (input < 10 || input > 50)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Overschrijdt grenswaarden (10-50).");
                         }
                         return ValidationResult.Success();
                     }));
+            Console.Clear();
+            AnsiConsole.Markup($"[blue]Basisprijs: {newvalue} voor Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            Console.WriteLine("Nieuwe Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {newvalue - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {newvalue},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {newvalue + 5},- (basisprijs + 5)");
+            Console.ResetColor();
+            bool ready = AnsiConsole.Confirm("Weet je zeker dat je dit nieuwe waarde en tijdsperiode wilt opslaan?");
+            if (!ready)
+            {
+                SettingsPanel(db);
+                return;
+            }
+            admin.PriceStartTime = startdate;
+            admin.PriceEndTime = enddate;
+            admin.TempPrice = newvalue;
+            db.SaveChanges();
+            ConfigureSeatPrices(db);
+            AnsiConsole.Markup("[green]Basisprijs succesvol opgeslagen![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+            SettingsPanel(db);
         }
         public static void ConfigureSeatPrices(CinemaContext db)
         {

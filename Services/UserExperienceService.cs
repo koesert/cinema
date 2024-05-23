@@ -168,6 +168,7 @@ public class UserExperienceService
           }
         }
         Console.Clear();
+        PresentAdminOptions.ConfigureSeatPrices(db);
         ShowCinemaHall(loggedInCustomer, db, selectedShowtime);
       }
     }
