@@ -749,13 +749,13 @@ namespace Cinema.Services
             double basisprijs = 0;
             if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
             {
-                Console.WriteLine($"Huidige basisprijs van {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
+                Console.WriteLine($"Huidige basisprijs van elke vertoning die in periode {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} begint = {admin.TempPrice}");
                 basisprijs = admin.TempPrice;
 
             }
             else
             {
-                Console.WriteLine($"Huidige basisprijs (standaard) = 25");
+                Console.WriteLine($"Huidige basisprijs voor alle vertoningen (standaard) = 25");
                 basisprijs = 25.0;
             }
             Console.WriteLine("Prijsverhouding stoelen:");
@@ -850,7 +850,7 @@ namespace Cinema.Services
                         return ValidationResult.Success();
                     }));
             Console.Clear();
-            AnsiConsole.Markup($"[blue]Basisprijs: {newvalue} voor Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            AnsiConsole.Markup($"[blue]Basisprijs: {newvalue} voor alle vertoningen in Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
             Console.WriteLine("Nieuwe Prijsverhouding stoelen:");
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine($"Blauw: {newvalue - 5},- (basisprijs - 5)");
@@ -875,6 +875,7 @@ namespace Cinema.Services
             AnsiConsole.Markup("[green]Basisprijs succesvol opgeslagen![/]");
             AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
             Console.ReadKey();
+            Console.Clear();
             SettingsPanel(db);
         }
         public static void ConfigureSeatPrices(CinemaContext db)
@@ -883,13 +884,26 @@ namespace Cinema.Services
             db.Entry(admin).Reload();
             DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
             double baseprice = 25;
-            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now) baseprice = admin.TempPrice;
-            foreach (CinemaSeat s in db.CinemaSeats)
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
             {
-                s.Price = (decimal)baseprice;
-                s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
-                if (s.Type == 1) s.Price += 5;
-                if (s.Type == 2) s.Price = s.Price*2;
+                baseprice = admin.TempPrice;
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime >= s.Showtime.StartTime && admin.PriceStartTime <= s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
+            }
+            else
+            {
+                foreach (CinemaSeat s in db.CinemaSeats)
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
             }
             db.SaveChanges();
         }
