@@ -756,6 +756,10 @@ namespace Cinema.Services
             else
             {
                 Console.WriteLine($"Huidige basisprijs voor alle vertoningen (standaard) = 25");
+                if (admin.PriceEndTime >= now && admin.PriceStartTime >= now)
+                {
+                    Console.WriteLine($"Huidige Ingeplande periode en basisprijs {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
+                }
                 basisprijs = 25.0;
             }
             Console.WriteLine("Prijsverhouding stoelen:");
