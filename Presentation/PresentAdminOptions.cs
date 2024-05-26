@@ -38,6 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
+        { CinemaManagementChoice.Uitgaven, "Bekijk uitgaven"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -74,6 +75,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.VoucherPanel:
                         Voucherpanel(db);
+                        break;
+                    case CinemaManagementChoice.Uitgaven:
+                        ShowExpenses(db);
                         break;
                     default:
                         break;
@@ -718,5 +722,98 @@ namespace Cinema.Services
             }
             db.SaveChanges();
         }
+
+        public static void ShowExpenses(CinemaContext db)
+        {
+            bool exit = false;
+            List<dynamic> customerTotals = new List<dynamic>();
+            var filePath = "../../../Expenses.csv"; // Default file path
+
+            // Modified table to focus on customer and their total expenditure
+            var table = new Table()
+                .Border(TableBorder.Rounded)
+                .AddColumn(new TableColumn("[blue]Customer Email[/]").Centered())
+                .AddColumn(new TableColumn("[green]Total Purchased ($)[/]").Centered());
+
+            while (!exit)
+            {
+                AnsiConsole.Live(table)
+                    .AutoClear(false)
+                    .Overflow(VerticalOverflow.Ellipsis)
+                    .Cropping(VerticalOverflowCropping.Top)
+                    .Start(ctx =>
+                    {
+                        ctx.Refresh();
+                        var tickets = db.Tickets.ToList();
+
+                        // Group by Customer Email and sum their purchases
+                        var customerTotals = tickets.GroupBy(t => t.CustomerEmail)
+                            .Select(group => new
+                            {
+                                CustomerEmail = group.Key,
+                                TotalPurchase = group.Sum(t => t.PurchaseTotal)
+                            }).ToList();
+
+                        table.Rows.Clear();
+
+                        foreach (var customer in customerTotals)
+                        {
+                            table.AddRow(
+                                customer.CustomerEmail,
+                                $"${customer.TotalPurchase:N2}"
+                            );
+                        }
+
+                        ctx.Refresh();
+                        Thread.Sleep(1000);  // Update every second
+                    });
+
+                if (AnsiConsole.Confirm("Export to CSV?"))
+                {
+                    if (AnsiConsole.Confirm("Are you sure you want to export this?"))
+                    {
+                        ExportCustomerTotalsToCsv(customerTotals, filePath);
+                        AnsiConsole.MarkupLine("[green]Data exported successfully.[/]");
+                    }
+                }
+
+                exit = !AnsiConsole.Confirm("Continue monitoring expenses?");
+            }
+        }
+
+        private static void ExportCustomerTotalsToCsv(List<dynamic> customerTotals, string filePath)
+        {
+            // Check and create directory
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            // Attempt to write to the file
+            try
+            {
+                using (var writer = new StreamWriter(filePath))
+                {
+                    writer.WriteLine("Customer Email,Total Purchases ($)");
+                    if (customerTotals == null || !customerTotals.Any())
+                    {
+                        Console.WriteLine("No data to export.");
+                    }
+
+                    foreach (var customer in customerTotals)
+                    {
+                        Console.WriteLine($"Exporting: {customer.CustomerEmail}, ${customer.TotalPurchase:N2}");
+                        writer.WriteLine($"{customer.CustomerEmail},{customer.TotalPurchase:N2}");
+                    }
+                }
+                Console.WriteLine($"Data successfully written to {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to write to file: {ex.Message}");
+            }
+        }
+
     }
 }
