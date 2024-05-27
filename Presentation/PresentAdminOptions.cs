@@ -796,7 +796,7 @@ namespace Cinema.Services
                         .ToList())
                     {
                         List<CinemaSeat> reservedseats = db.CinemaSeats
-                            .Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.IsReserved)
+                            .Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.IsReserved == true)
                             .ToList();
                         
                         // Updating the live table
@@ -807,7 +807,7 @@ namespace Cinema.Services
                             $"[magenta]{reservedseats.Count(x => x.Type == 0)}[/]",
                             $"[blue]{reservedseats.Count(x => x.Type == 1)}[/]",
                             $"[red]{reservedseats.Count(x => x.Type == 2)}[/]",
-                            $"[purple]{reservedseats.Select(x => x.Price).Sum()}[/]"
+                            $"[purple]{db.Tickets.Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.CancelledAt == null).Select(x => x.PurchaseTotal).Sum()}[/]"
                         );
 
                         // Refresh the live display
