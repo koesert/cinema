@@ -86,6 +86,8 @@ public class PresentDetailedReservation
                             Thread.Sleep(2500);
                         });
                     AnsiConsole.MarkupLine("[red]Ticket verwijderd.[/]");
+                    CancellationEmails sender = new CancellationEmails();
+                    sender.SendMessageCancel(reservation.CustomerEmail, customer.Username, reservation.Showtime.Movie.Title, reservation.Showtime.StartTime.ToString("dd-MM-yyyy"), reservation.Showtime.StartTime.ToString("HH:mm"), string.Join(", ", db.CinemaSeats.Where(x => x.TicketId == reservation.Id).ToList().Select(x => $"{x.Row}{x.SeatNumber}")), reservation.Showtime.RoomId, reservation.TicketNumber);
                     Thread.Sleep(2500);
                     AnsiConsole.Clear();
                     PresentReservations.Start(customer, db);
