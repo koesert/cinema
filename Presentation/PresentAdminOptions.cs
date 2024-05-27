@@ -760,6 +760,10 @@ namespace Cinema.Services
                 {
                     Console.WriteLine($"Huidige Ingeplande periode en basisprijs {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
                 }
+                else
+                {
+                    Console.WriteLine("Geen periode en basisprijs ingepland op dit moment.");
+                }
                 basisprijs = 25.0;
             }
             Console.WriteLine("Prijsverhouding stoelen:");
