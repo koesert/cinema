@@ -17,6 +17,8 @@ namespace Cinema.Models.Choices
 
         [Display(Name = "Beheer Vouchers")]
         VoucherPanel,
+        [Display(Name = "Bekijk opbrengsten per periode")]
+        ViewStats,
 
         [Display(Name = "Terug")]
         Exit

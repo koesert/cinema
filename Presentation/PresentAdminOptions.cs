@@ -38,6 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
+        { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -74,6 +75,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.VoucherPanel:
                         Voucherpanel(db);
+                        break;
+                    case CinemaManagementChoice.ViewStats:
+                        ViewStats(db);
                         break;
                     default:
                         break;
@@ -717,6 +721,112 @@ namespace Cinema.Services
                 db.Vouchers.Add(percentVoucher);
             }
             db.SaveChanges();
+        }
+
+        public static void ViewStats(CinemaContext db)
+        {
+            DateTimeOffset startdate;
+            DateTimeOffset enddate;
+            Console.Clear();
+            string firstDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            string lastDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+
+                        if (startdate >= output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            Console.Clear();
+            var table = new Table
+            {
+                Border = TableBorder.Rounded
+            };
+
+            // Adding columns with different colors
+            table.AddColumn(new TableColumn("[yellow]Film[/]").Centered());
+            table.AddColumn(new TableColumn("[green]Aantal vertoningen[/]").Centered());
+            table.AddColumn(new TableColumn("[cyan]Aantal stoelen totaal verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[magenta]Aantal reguliere stoelen verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[blue]Aantal stoelen met extra beenruimte verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[red]Aantal loveseats verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[purple]Totale omzet[/]").Centered());
+
+            AnsiConsole.Markup($"[blue]Alle statistieken van {startdate:dd-MM-yyyy HH:mm} tot {enddate:dd-MM-yyyy HH:mm}[/]\n");
+
+            AnsiConsole.Live(table)
+                .Start(ctx =>
+                {
+                    foreach (var movie in db.Showtimes
+                        .Where(x => x.StartTime <= enddate && x.StartTime >= startdate)
+                        .Select(x => x.Movie)
+                        .Distinct()
+                        .ToList())
+                    {
+                        List<CinemaSeat> reservedseats = db.CinemaSeats
+                            .Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.IsReserved)
+                            .ToList();
+                        
+                        // Updating the live table
+                        table.AddRow(
+                            $"[yellow]{movie.Title}[/]",
+                            $"[green]{db.Showtimes.Count(x => x.StartTime <= enddate && x.StartTime >= startdate && x.Movie == movie)}[/]",
+                            $"[cyan]{reservedseats.Count}[/]",
+                            $"[magenta]{reservedseats.Count(x => x.Type == 0)}[/]",
+                            $"[blue]{reservedseats.Count(x => x.Type == 1)}[/]",
+                            $"[red]{reservedseats.Count(x => x.Type == 2)}[/]",
+                            $"[purple]{reservedseats.Select(x => x.Price).Sum()}[/]"
+                        );
+
+                        // Refresh the live display
+                        ctx.Refresh();
+                    }
+                });
+
+            // AnsiConsole.Write(table);
+
+            string dateoption = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("")
+                    .AddChoices(new[] { "Exporteer naar apart bestand", "Terug" })
+                );
+            if (dateoption.Contains("Terug"))
+            {
+                PresentAdminOptions.Start(db.Administrators.First(), db);
+                return;
+            }
         }
     }
 }
