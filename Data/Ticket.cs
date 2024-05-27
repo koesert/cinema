@@ -53,6 +53,7 @@ namespace Cinema.Data
             foreach (var seat in seats)
             {
                 seat.IsReserved = false;
+                seat.IsSelected = false;
             }
 
             db.SaveChanges();
