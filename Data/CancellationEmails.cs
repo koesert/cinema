@@ -32,26 +32,26 @@ namespace Cinema.Data
                     mailMessage.Subject = "Reservation Cancellation";
 
                     mailMessage.Body = $@"
-                Beste {userName},
+Beste {userName},
 
-                Uw annulering van de reservering voor bioscoopstoelen bij Your Eyes is succesvol verwerkt. Hieronder vindt u de details van uw geannuleerde reservering:
+Uw annulering van de reservering voor bioscoopstoelen bij Your Eyes is succesvol verwerkt. Hieronder vindt u de details van uw geannuleerde reservering:
 
-                Ticket: {ticketnumber}
-                Filmtitel: {movieTitle}
-                Datum: {date}
-                Tijd: {time}
-                Stoelnummers: {seatNumbers}
-                Zaal: {screenNumber}
+Ticket: {ticketnumber}
+Filmtitel: {movieTitle}
+Datum: {date}
+Tijd: {time}
+Stoelnummers: {seatNumbers}
+Zaal: {screenNumber}
 
-                We hopen u in de toekomst weer te mogen verwelkomen bij Your Eyes. Mocht u vragen hebben of een nieuwe reservering willen maken, neem dan gerust contact met ons op via spyrabv@gmail.com.
+We hopen u in de toekomst weer te mogen verwelkomen bij Your Eyes. Mocht u vragen hebben of een nieuwe reservering willen maken, neem dan gerust contact met ons op via spyrabv@gmail.com.
 
-                Bedankt voor uw begrip.
+Bedankt voor uw begrip.
 
-                Met vriendelijke groet,
-                Marcel
-                Your Eyes Team
-                spyrabv@gmail.com
-                ";
+Met vriendelijke groet,
+Marcel
+Your Eyes Team
+spyrabv@gmail.com
+";
 
                 try
                 {
