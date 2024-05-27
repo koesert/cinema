@@ -902,6 +902,13 @@ namespace Cinema.Services
                     if (s.Type == 1) s.Price += 5;
                     if (s.Type == 2) s.Price = s.Price*2;
                 }
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime < s.Showtime.StartTime || admin.PriceStartTime > s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)25;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
             }
             else
             {
