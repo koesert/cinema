@@ -8,7 +8,7 @@ namespace Cinema.Data
 
     using SmtpClient = System.Net.Mail.SmtpClient;
 
-    public class SenderEmail
+    public class ConfirmationEmail
     {
        internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
         {

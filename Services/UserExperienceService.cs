@@ -375,7 +375,7 @@ public class UserExperienceService
 
   private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
   {
-    SenderEmail sender = new SenderEmail();
+    ConfirmationEmail sender = new ConfirmationEmail();
     if (loggedInCustomer != null)
     {
       CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
@@ -452,6 +452,8 @@ public class UserExperienceService
     db.Tickets.Add(ticket);
     return;
   }
+
+
 
   private Voucher UseVoucher(CinemaContext db, Customer loggedInCustomer)
   {

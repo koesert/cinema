@@ -101,6 +101,8 @@ public static class PresentGuestReservationOptions
                             Thread.Sleep(2500);
                         });
                     AnsiConsole.MarkupLine("[red]Ticket verwijderd. Tot ziens![/]");
+                    CancellationEmails sender = new CancellationEmails();
+                    sender.SendMessageCancel(ticket.CustomerEmail, "Guest", ticket.Showtime.Movie.Title, ticket.Showtime.StartTime.ToString("dd-MM-yyyy"), ticket.Showtime.StartTime.ToString("HH:mm"), string.Join(", ", db.CinemaSeats.Where(x => x.TicketId == ticket.Id).ToList().Select(x => $"{x.Row}{x.SeatNumber}")), ticket.Showtime.RoomId, ticket.TicketNumber);
                     Thread.Sleep(2500);
                     AnsiConsole.Clear();
                     break;
