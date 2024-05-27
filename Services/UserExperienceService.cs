@@ -216,6 +216,7 @@ public class UserExperienceService
       AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+      if (basepriceseat.Price != 25) Console.WriteLine();
 
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
       if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)
