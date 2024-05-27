@@ -725,25 +725,26 @@ namespace Cinema.Services
 
         public static void ViewStats(CinemaContext db)
         {
+
             DateTimeOffset startdate;
             DateTimeOffset enddate;
             Console.Clear();
             string firstDate = AnsiConsole.Prompt(
-                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
-                    .PromptStyle("yellow")
-                    .Validate(input =>
-                    {
-                        if (!DateTimeOffset.TryParseExact(
-                            input,
-                            "dd-MM-yyyy HH:mm",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal,
-                            out DateTimeOffset output))
-                        {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
-                        }
-                        return ValidationResult.Success();
-                    }));
+                            new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                                .PromptStyle("yellow")
+                                .Validate(input =>
+                                {
+                                    if (!DateTimeOffset.TryParseExact(
+                                        input,
+                                        "dd-MM-yyyy HH:mm",
+                                        CultureInfo.InvariantCulture,
+                                        DateTimeStyles.AssumeUniversal,
+                                        out DateTimeOffset output))
+                                    {
+                                        return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                                    }
+                                    return ValidationResult.Success();
+                                }));
             startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
             string lastDate = AnsiConsole.Prompt(
@@ -769,13 +770,23 @@ namespace Cinema.Services
                         return ValidationResult.Success();
                     }));
             enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-            Console.Clear();
-            var table = new Table
-            {
-                Border = TableBorder.Rounded
-            };
+            var movieStats = db.Showtimes
+                .Where(x => x.StartTime >= startdate && x.StartTime <= enddate)
+                .Select(x => x.Movie)
+                .Distinct()
+                .ToList()
+                .Select(movie => (
+                    MovieTitle: movie.Title,
+                    ShowingsCount: db.Showtimes.Count(x => x.Movie == movie && x.StartTime >= startdate && x.StartTime <= enddate),
+                    TotalSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.IsReserved && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
+                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
+                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
+                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
+                    TotalRevenue: db.Tickets.Where(x => x.Showtime.Movie == movie && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.CancelledAt == null).Sum(x => x.PurchaseTotal)
+                ))
+                .ToList();
 
-            // Adding columns with different colors
+            var table = new Table().Border(TableBorder.Rounded);
             table.AddColumn(new TableColumn("[yellow]Film[/]").Centered());
             table.AddColumn(new TableColumn("[green]Aantal vertoningen[/]").Centered());
             table.AddColumn(new TableColumn("[cyan]Aantal stoelen totaal verkocht[/]").Centered());
@@ -784,48 +795,53 @@ namespace Cinema.Services
             table.AddColumn(new TableColumn("[red]Aantal loveseats verkocht[/]").Centered());
             table.AddColumn(new TableColumn("[purple]Totale omzet[/]").Centered());
 
-            AnsiConsole.Markup($"[blue]Alle statistieken van {startdate:dd-MM-yyyy HH:mm} tot {enddate:dd-MM-yyyy HH:mm}[/]\n");
-
-            AnsiConsole.Live(table)
-                .Start(ctx =>
-                {
-                    foreach (var movie in db.Showtimes
-                        .Where(x => x.StartTime <= enddate && x.StartTime >= startdate)
-                        .Select(x => x.Movie)
-                        .Distinct()
-                        .ToList())
-                    {
-                        List<CinemaSeat> reservedseats = db.CinemaSeats
-                            .Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.IsReserved == true)
-                            .ToList();
-                        
-                        // Updating the live table
-                        table.AddRow(
-                            $"[yellow]{movie.Title}[/]",
-                            $"[green]{db.Showtimes.Count(x => x.StartTime <= enddate && x.StartTime >= startdate && x.Movie == movie)}[/]",
-                            $"[cyan]{reservedseats.Count}[/]",
-                            $"[magenta]{reservedseats.Count(x => x.Type == 0)}[/]",
-                            $"[blue]{reservedseats.Count(x => x.Type == 1)}[/]",
-                            $"[red]{reservedseats.Count(x => x.Type == 2)}[/]",
-                            $"[purple]{db.Tickets.Where(x => x.Showtime.StartTime <= enddate && x.Showtime.StartTime >= startdate && x.Showtime.Movie == movie && x.CancelledAt == null).Select(x => x.PurchaseTotal).Sum()}[/]"
-                        );
-
-                        // Refresh the live display
-                        ctx.Refresh();
-                    }
-                });
-
-            // AnsiConsole.Write(table);
-
-            string dateoption = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("")
-                    .AddChoices(new[] { "Exporteer naar apart bestand", "Terug" })
+            foreach (var stat in movieStats)
+            {
+                table.AddRow(
+                    stat.MovieTitle,
+                    stat.ShowingsCount.ToString(),
+                    stat.TotalSeatsSold.ToString(),
+                    stat.RegularSeatsSold.ToString(),
+                    stat.ExtraLegroomSeatsSold.ToString(),
+                    stat.LoveseatsSold.ToString(),
+                    $"${stat.TotalRevenue:N2}"
                 );
-            if (dateoption.Contains("Terug"))
+            }
+
+            AnsiConsole.Write(table);
+
+            var option = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een optie:")
+                    .AddChoices(new[] { "Exporteer naar apart bestand", "Terug" })
+            );
+            if (option == "Exporteer naar apart bestand")
+            {
+                {
+                    string formattedStartDate = startdate.ToString("yyyyMMdd_HH");
+                    string formattedEndDate = enddate.ToString("yyyyMMdd_HH");
+                    string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
+                    ExportStatsToCsv(movieStats, filePath);
+                    AnsiConsole.MarkupLine("[green]Press any key to return...[/]");
+                    Console.ReadKey();
+                }
+            }
+            else if (option == "Terug")
             {
                 PresentAdminOptions.Start(db.Administrators.First(), db);
-                return;
+            }
+        }
+
+
+        private static void ExportStatsToCsv(List<(string MovieTitle, int ShowingsCount, int TotalSeatsSold, int RegularSeatsSold, int ExtraLegroomSeatsSold, int LoveseatsSold, decimal TotalRevenue)> movieStats, string filePath)
+        {
+            using (var writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine("Film, Aantal vertoningen, Totaal verkochte stoelen, Reguliere stoelen, Extra beenruimte stoelen, Loveseats, Totale omzet");
+                foreach (var stat in movieStats)
+                {
+                    writer.WriteLine($"\"{stat.MovieTitle}\", {stat.ShowingsCount}, {stat.TotalSeatsSold}, {stat.RegularSeatsSold}, {stat.ExtraLegroomSeatsSold}, {stat.LoveseatsSold}, {stat.TotalRevenue:N2}");
+                }
             }
         }
     }
