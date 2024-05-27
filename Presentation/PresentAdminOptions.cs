@@ -801,7 +801,7 @@ namespace Cinema.Services
                         {
                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
                         }
-                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        if (DateTimeOffset.UtcNow.AddHours(2).AddMinutes(-1) > output)
                         {
                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
                         }
