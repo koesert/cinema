@@ -823,6 +823,8 @@ namespace Cinema.Services
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
                     ExportStatsToCsv(movieStats, filePath);
                     AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
+                    EmailCSVFile sender = new EmailCSVFile();
+                    sender.SendCSVFile("Guest", filePath);
                     Console.ReadKey();
                 }
             }
