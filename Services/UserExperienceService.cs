@@ -206,6 +206,7 @@ public class UserExperienceService
 			// Combine and space out the outputs with AnsiConsole
 			CinemaSeat basepriceseat = db.CinemaSeats.First(x => x.Showtime == showtime && x.Color == "orange" && x.Type == 0);
 			if (basepriceseat.Price != 25) Console.WriteLine();
+			AnsiConsole.WriteLine();
 			AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
 			AnsiConsole.WriteLine(); // Ensures newline
 			AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
