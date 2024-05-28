@@ -779,9 +779,9 @@ namespace Cinema.Services
                     MovieTitle: movie.Title,
                     ShowingsCount: db.Showtimes.Count(x => x.Movie == movie && x.StartTime >= startdate && x.StartTime <= enddate),
                     TotalSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.IsReserved && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
-                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
-                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
-                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
+                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
+                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
+                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
                     TotalRevenue: db.Tickets.Where(x => x.Showtime.Movie == movie && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.CancelledAt == null).Sum(x => x.PurchaseTotal)
                 ))
                 .ToList();
