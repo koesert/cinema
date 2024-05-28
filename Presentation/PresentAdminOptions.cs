@@ -88,16 +88,16 @@ namespace Cinema.Services
         public static void ListMovies(CinemaContext db)
         {
             Console.Clear();
-
             var movies = db.Movies.ToList();
-            var options = movies.Select(movie => movie.Title).OrderBy(x => x).ToList();
-            options.Insert(0, "Terug");
+
+            var choices = new List<string> { "Terug" };
+            choices.AddRange(movies.Select(movie => movie.Title).OrderBy(x => x));
 
             var selectedOption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een film")
                     .PageSize(10)
-                    .AddChoices(options)
+                    .AddChoices(choices)
             );
 
             if (selectedOption == "Terug")
