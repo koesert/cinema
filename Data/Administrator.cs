@@ -5,6 +5,9 @@
         public int Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public DateTimeOffset PriceStartTime { get; set; }
+        public DateTimeOffset PriceEndTime { get; set; }
+        public double TempPrice { get; set; }
         public static List<Administrator> AllAdministrators = new List<Administrator>();
 
         private static void RetrieveAdministrators(CinemaContext db)

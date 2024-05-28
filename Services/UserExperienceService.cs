@@ -168,6 +168,7 @@ public class UserExperienceService
           }
         }
         Console.Clear();
+        PresentAdminOptions.ConfigureSeatPrices(db);
         ShowCinemaHall(loggedInCustomer, db, selectedShowtime);
       }
     }
@@ -205,6 +206,8 @@ public class UserExperienceService
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
       // Combine and space out the outputs with AnsiConsole
+      CinemaSeat basepriceseat = db.CinemaSeats.First(x => x.Showtime == showtime && x.Color == "orange" && x.Type == 0);
+      if (basepriceseat.Price != 25) Console.WriteLine();
       AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
       AnsiConsole.WriteLine(); // Ensures newline
       AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
@@ -213,6 +216,7 @@ public class UserExperienceService
       AnsiConsole.WriteLine(); // Ensures newline
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+      if (basepriceseat.Price != 25) Console.WriteLine();
 
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
       if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)

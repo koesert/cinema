@@ -38,6 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
+        { CinemaManagementChoice.Settings, "Bioscoop Instellingen"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -74,6 +75,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.VoucherPanel:
                         Voucherpanel(db);
+                        break;
+                    case CinemaManagementChoice.Settings:
+                        SettingsPanel(db);
                         break;
                     default:
                         break;
@@ -715,6 +719,206 @@ namespace Cinema.Services
                 percentVoucher.Id = voucher.Id;
                 db.Vouchers.Remove(voucher);
                 db.Vouchers.Add(percentVoucher);
+            }
+            db.SaveChanges();
+        }
+        public static void SettingsPanel(CinemaContext db)
+        {
+            var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Wat wilt u aanpassen?")
+                        .PageSize(10)
+                        .AddChoices(new List<string>{ "Wijzig basisprijs voor periode", "Terug"})
+                );
+            if (choice.Contains("basisprijs"))
+            {
+                ChangeSeatPrice(db);
+                return;
+            }
+            return;
+        }
+
+        public static void ChangeSeatPrice(CinemaContext db)
+        {
+            DateTimeOffset startdate;
+            DateTimeOffset enddate;
+            Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            Console.Clear();
+            double basisprijs = 0;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
+            {
+                Console.WriteLine($"Huidige basisprijs van elke vertoning die in periode {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} begint = {admin.TempPrice}");
+                basisprijs = admin.TempPrice;
+
+            }
+            else
+            {
+                Console.WriteLine($"Huidige basisprijs voor alle vertoningen (standaard) = 25");
+                if (admin.PriceEndTime >= now && admin.PriceStartTime >= now)
+                {
+                    Console.WriteLine($"Huidige Ingeplande periode en basisprijs {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
+                }
+                else
+                {
+                    Console.WriteLine("Geen periode en basisprijs ingepland op dit moment.");
+                }
+                basisprijs = 25.0;
+            }
+            Console.WriteLine("Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {basisprijs - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {basisprijs},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {basisprijs + 5},- (basisprijs + 5)");
+            Console.ResetColor();
+            string random = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wilt u de basisprijs en tijdsperiode aanpassen?")
+                    .AddChoices(new[] { "Ja", "Nee" })
+                );
+                if (random.Contains("Nee"))
+                {
+                    Console.Clear();
+                    SettingsPanel(db);
+                    return;
+                }
+            string firstDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2).AddMinutes(-1) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            string lastDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+
+                        if (startdate >= output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            Console.Clear();
+            AnsiConsole.Markup($"[blue]Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            double newvalue = AnsiConsole.Prompt(
+                new TextPrompt<double>("Nieuwe basisprijs voor de tijdperiode (10-50) (moet een heel getal zijn):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input % 1 != 0)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Moet een heel getal zijn.");
+                        }
+                        if (input < 0)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Mag geen negatief getal zijn.");
+                        }
+                        if (input < 10 || input > 50)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde. Overschrijdt grenswaarden (10-50).");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            Console.Clear();
+            AnsiConsole.Markup($"[blue]Basisprijs: {newvalue} voor alle vertoningen in Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            Console.WriteLine("Nieuwe Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {newvalue - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {newvalue},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {newvalue + 5},- (basisprijs + 5)");
+            Console.ResetColor();
+            bool ready = AnsiConsole.Confirm("Weet je zeker dat je dit nieuwe waarde en tijdsperiode wilt opslaan?");
+            if (!ready)
+            {
+                SettingsPanel(db);
+                return;
+            }
+            admin.PriceStartTime = startdate;
+            admin.PriceEndTime = enddate;
+            admin.TempPrice = newvalue;
+            db.SaveChanges();
+            ConfigureSeatPrices(db);
+            AnsiConsole.Markup("[green]Basisprijs succesvol opgeslagen![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+            Console.Clear();
+            SettingsPanel(db);
+        }
+        public static void ConfigureSeatPrices(CinemaContext db)
+        {
+            Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            double baseprice = 25;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
+            {
+                baseprice = admin.TempPrice;
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime >= s.Showtime.StartTime && admin.PriceStartTime <= s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime < s.Showtime.StartTime || admin.PriceStartTime > s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)25;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
+            }
+            else
+            {
+                foreach (CinemaSeat s in db.CinemaSeats)
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price*2;
+                }
             }
             db.SaveChanges();
         }
