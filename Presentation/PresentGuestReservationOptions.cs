@@ -84,13 +84,13 @@ public static class PresentGuestReservationOptions
         {
             case "Cancel ticket":
                 AnsiConsole.Clear();
-                var deleteTicketRule = new Rule("[red]Ticket verwijderen[/]")
+                var deleteTicketRule = new Rule("[red]Ticket annuleren[/]")
                 {
                     Justification = Justify.Left,
                     Style = Style.Parse("red dim")
                 };
                 AnsiConsole.Write(deleteTicketRule);
-                if (AnsiConsole.Confirm($"Weet u zeker dat u uw ticket wilt [red]verwijderen[/]?"))
+                if (AnsiConsole.Confirm($"Weet u zeker dat u uw ticket wilt [red]annuleren[/]?"))
                 {
                     AnsiConsole.Status()
                         .Spinner(Spinner.Known.Aesthetic)
@@ -100,7 +100,7 @@ public static class PresentGuestReservationOptions
                             Ticket.CancelTicket(ticket, db);
                             Thread.Sleep(2500);
                         });
-                    AnsiConsole.MarkupLine("[red]Ticket verwijderd. Tot ziens![/]");
+                    AnsiConsole.MarkupLine("[red]Ticket geannuleerd. Tot ziens![/]");
                     CancellationEmails sender = new CancellationEmails();
                     sender.SendMessageCancel(ticket.CustomerEmail, "Guest", ticket.Showtime.Movie.Title, ticket.Showtime.StartTime.ToString("dd-MM-yyyy"), ticket.Showtime.StartTime.ToString("HH:mm"), string.Join(", ", db.CinemaSeats.Where(x => x.TicketId == ticket.Id).ToList().Select(x => $"{x.Row}{x.SeatNumber}")), ticket.Showtime.RoomId, ticket.TicketNumber);
                     Thread.Sleep(2500);
