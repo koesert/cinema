@@ -6,6 +6,7 @@ namespace Cinema.Data
 		public string Username { get; set; }
 		public string Password { get; set; }
 		public string Email { get; set; }
+		public bool Subscribed { get; set; }
 		public static List<Customer> AllCustomers = new List<Customer>();
 
 		private Customer(string username, string password, string email)
@@ -70,6 +71,25 @@ namespace Cinema.Data
 		{
 			db.Customers.Remove(customer);
 			db.SaveChanges();
+		}
+
+		public static bool UpdatePreference(Customer customer, CinemaContext db)
+		{
+			RetrieveCustomers(db);
+			if (customer.Subscribed == false)
+			{
+				customer.Subscribed = true;
+				db.Customers.Update(customer);
+				db.SaveChanges();
+				return true;
+			}
+			else
+			{
+				customer.Subscribed = false;
+				db.Customers.Update(customer);
+				db.SaveChanges();
+				return false;
+			}
 		}
 
 		public override string ToString()

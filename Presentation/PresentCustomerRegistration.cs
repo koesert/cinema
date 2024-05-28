@@ -40,6 +40,10 @@ public class PresentCustomerRegistration
                         Task.Delay(3000).Wait();
 
                     });
+                if (newCustomer.Subscribed == false && AnsiConsole.Confirm("Zou u zich willen aanmelden voor onze [blue]nieuwsbrief[/]?"))
+                {
+                    Customer.UpdatePreference(newCustomer, db);
+                }
                 PresentCustomerOptions.Start(newCustomer, db);
             }
         }
