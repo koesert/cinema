@@ -39,6 +39,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.Settings, "Bioscoop Instellingen"},
+        { CinemaManagementChoice.ViewSubscribers, "Bekijk nieuwsbrief abbonees"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -78,6 +79,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.Settings:
                         SettingsPanel(db);
+                        break;
+                    case CinemaManagementChoice.ViewSubscribers:
+                        PresentViewSubscribers.Start(db, admin);
                         break;
                     default:
                         break;
