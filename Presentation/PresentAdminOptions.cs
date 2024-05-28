@@ -150,7 +150,7 @@ namespace Cinema.Services
             {
                 foreach (var showtime in showtimes)
                 {
-                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime}");
+                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime:dd-MM-yyyy HH:mm}");
 
                 }
             }
@@ -728,7 +728,7 @@ namespace Cinema.Services
                     new SelectionPrompt<string>()
                         .Title($"Wat wilt u aanpassen?")
                         .PageSize(10)
-                        .AddChoices(new List<string>{ "Wijzig basisprijs voor periode", "Terug"})
+                        .AddChoices(new List<string> { "Wijzig basisprijs voor periode", "Terug" })
                 );
             if (choice.Contains("basisprijs"))
             {
@@ -781,12 +781,12 @@ namespace Cinema.Services
                     .Title("Wilt u de basisprijs en tijdsperiode aanpassen?")
                     .AddChoices(new[] { "Ja", "Nee" })
                 );
-                if (random.Contains("Nee"))
-                {
-                    Console.Clear();
-                    SettingsPanel(db);
-                    return;
-                }
+            if (random.Contains("Nee"))
+            {
+                Console.Clear();
+                SettingsPanel(db);
+                return;
+            }
             string firstDate = AnsiConsole.Prompt(
                 new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
                     .PromptStyle("yellow")
@@ -900,14 +900,14 @@ namespace Cinema.Services
                     s.Price = (decimal)baseprice;
                     s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
                     if (s.Type == 1) s.Price += 5;
-                    if (s.Type == 2) s.Price = s.Price*2;
+                    if (s.Type == 2) s.Price = s.Price * 2;
                 }
                 foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime < s.Showtime.StartTime || admin.PriceStartTime > s.Showtime.StartTime))
                 {
                     s.Price = (decimal)25;
                     s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
                     if (s.Type == 1) s.Price += 5;
-                    if (s.Type == 2) s.Price = s.Price*2;
+                    if (s.Type == 2) s.Price = s.Price * 2;
                 }
             }
             else
@@ -917,7 +917,7 @@ namespace Cinema.Services
                     s.Price = (decimal)baseprice;
                     s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
                     if (s.Type == 1) s.Price += 5;
-                    if (s.Type == 2) s.Price = s.Price*2;
+                    if (s.Type == 2) s.Price = s.Price * 2;
                 }
             }
             db.SaveChanges();
