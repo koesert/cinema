@@ -818,11 +818,11 @@ namespace Cinema.Services
             if (option == "Exporteer naar apart bestand")
             {
                 {
-                    string formattedStartDate = startdate.ToString("yyyyMMdd_HH");
-                    string formattedEndDate = enddate.ToString("yyyyMMdd_HH");
+                    string formattedStartDate = startdate.ToString("yyyyMMdd");
+                    string formattedEndDate = enddate.ToString("yyyyMMdd");
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
                     ExportStatsToCsv(movieStats, filePath);
-                    AnsiConsole.MarkupLine("[green]Press any key to return...[/]");
+                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     Console.ReadKey();
                 }
             }

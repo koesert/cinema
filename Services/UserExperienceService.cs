@@ -28,11 +28,12 @@ public class UserExperienceService
 
       // Prompt the user for their choice
       var choice = AnsiConsole.Prompt(
-          new SelectionPrompt<string>()
-              .Title($"Welcome {customer.Username}! What would you like to do?")
-              .PageSize(10)
-              .AddChoices(UserExperienceChoiceDescriptions.Select(kv => kv.Value))
+      new SelectionPrompt<string>()
+          .Title($"Welkom {customer.Username}! Wat wilt u doen?")
+          .PageSize(10)
+          .AddChoices(UserExperienceChoiceDescriptions.Select(kv => kv.Value))
       );
+
 
       // Retrieve the enum value based on the selected description
       currentUserChoice = UserExperienceChoiceDescriptions.FirstOrDefault(kv => kv.Value == choice).Key;
@@ -204,13 +205,13 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      // Combine and space out the outputs with AnsiConsole
-      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
-      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
-      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
+      // Combineer en ruim de uitvoer op met AnsiConsole
+      AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
+      AnsiConsole.Markup($"Geselecteerde Stoel: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Druk op <Space> om stoelen te reserveren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Druk op <Escape> om terug te keren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 
@@ -297,18 +298,18 @@ public class UserExperienceService
     Voucher v = null;
     if (selectedSeats.Count == 0)
     {
-      AnsiConsole.MarkupLine("[red]No seats selected.[/]");
+      AnsiConsole.MarkupLine("[red]Geen stoelen geselecteerd.[/]");
       ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
       return;
     }
 
     Console.Clear();
-    Console.WriteLine("Selected Seats:");
+    Console.WriteLine("Geselecteerde Stoelen:");
     var table = new Table();
     table.Border = TableBorder.Rounded;
-    table.AddColumn("Row");
-    table.AddColumn("Seat Number");
-    table.AddColumn("Price");
+    table.AddColumn("Rij");
+    table.AddColumn("Stoelnummer");
+    table.AddColumn("Prijs");
 
     decimal totalSeatPrice = 0;
     foreach (var seat in selectedSeats)
@@ -337,11 +338,12 @@ public class UserExperienceService
     var reservationKeyInfo = AnsiConsole.Prompt(
     new SelectionPrompt<string>()
         .PageSize(3)
-        .AddChoices("Yes", "No")
-        .Title("Do you want to reserve these seats?")
+        .AddChoices("Ja", "Nee")
+        .Title("Wilt u deze stoelen reserveren?")
         .HighlightStyle(new Style(Color.Blue)));
 
-    if (reservationKeyInfo == "Yes")
+
+    if (reservationKeyInfo == "Ja")
     {
 
       foreach (var seat in selectedSeats)
@@ -359,8 +361,8 @@ public class UserExperienceService
         v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
         db.SaveChanges();
       }
-      AnsiConsole.MarkupLine("[green]Seats successfully reserved.[/]");
-      Console.WriteLine("Press any key to return to start.");
+      AnsiConsole.MarkupLine("[green]Stoelen succesvol gereserveerd.[/]");
+      Console.WriteLine("Druk op een willekeurige toets om terug te keren naar het begin.");
       if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       PresentAdminOptions.UpdateVouchers(db);
       Console.ReadKey(true);
@@ -460,10 +462,10 @@ public class UserExperienceService
     var voucherprompt = AnsiConsole.Prompt(
     new SelectionPrompt<string>()
         .PageSize(3)
-        .AddChoices("Yes", "No")
+        .AddChoices("Ja", "Nee")
         .Title("Wilt u een vouchercode invoeren?")
         .HighlightStyle(new Style(Color.Blue)));
-    if (voucherprompt.Contains("Yes"))
+    if (voucherprompt.Contains("Ja"))
     {
       PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       PresentAdminOptions.UpdateVouchers(db);
@@ -526,7 +528,7 @@ public class UserExperienceService
   {
     var allMovies = db.Movies.ToList();
     var moviesQuery = allMovies.AsQueryable();
-    string activeFilters = "Active Filters: ";
+    string activeFilters = "Actieve Filters: ";
 
     var filterOption = AnsiConsole.Prompt(
         new SelectionPrompt<CinemaFilterChoice>()
@@ -630,17 +632,17 @@ public class UserExperienceService
     {
       foreach (var ticket in tickets)
       {
-        // Display ticket information
-        Console.WriteLine($"Ticket Number: {ticket.TicketNumber}");
-        Console.WriteLine($"Showtime: {ticket.Showtime.StartTime}");
-        Console.WriteLine($"Purchased At: {ticket.PurchasedAt}");
-        Console.WriteLine($"Total Price: {ticket.PurchaseTotal}");
+        // Toon ticketinformatie
+        Console.WriteLine($"Ticketnummer: {ticket.TicketNumber}");
+        Console.WriteLine($"Voorstelling: {ticket.Showtime.StartTime}");
+        Console.WriteLine($"Gekocht op: {ticket.PurchasedAt}");
+        Console.WriteLine($"Totale prijs: {ticket.PurchaseTotal}");
         Console.WriteLine();
       }
     }
     else
     {
-      Console.WriteLine("You have no tickets.");
+      Console.WriteLine("U heeft geen tickets.");
     }
 
     Console.WriteLine("Press any key to continue...");
@@ -676,13 +678,14 @@ public class UserExperienceService
       var selectedSeatPrice = db.CinemaSeats
           .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      // Combine and space out the outputs with AnsiConsole
-      AnsiConsole.Markup($"Selected Seat Price: ${selectedSeatPrice} [grey]{new string(' ', 50)}(Press <Enter> to select seats)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
-      AnsiConsole.Markup($"Selected Seat: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Press <Space> to reserve seats)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
-      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Press <Escape> to return)[/]");
-      AnsiConsole.WriteLine(); // Ensures newline
+      // Combineer en ruim de uitvoer op met AnsiConsole
+      AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
+      AnsiConsole.Markup($"Geselecteerde Stoel: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Druk op <Space> om stoelen te reserveren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
+      AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Druk op <Escape> om terug te keren)[/]");
+      AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
+
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
 

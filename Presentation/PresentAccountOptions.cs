@@ -14,7 +14,7 @@ public static class PresentAccountOptions
             Style = Style.Parse("blue dim")
         };
         AnsiConsole.Write(rule);
-        
+
         var optionChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("")
