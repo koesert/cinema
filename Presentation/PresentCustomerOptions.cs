@@ -4,7 +4,6 @@ using Spectre.Console;
 
 public static class PresentCustomerOptions
 {
-    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         UserExperienceService user = new UserExperienceService();
