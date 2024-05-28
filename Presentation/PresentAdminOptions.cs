@@ -786,6 +786,13 @@ namespace Cinema.Services
                 ))
                 .ToList();
 
+            var totalShowings = movieStats.Sum(x => x.ShowingsCount);
+            var totalSeatsSold = movieStats.Sum(x => x.TotalSeatsSold);
+            var totalRegularSeatsSold = movieStats.Sum(x => x.RegularSeatsSold);
+            var totalExtraLegroomSeatsSold = movieStats.Sum(x => x.ExtraLegroomSeatsSold);
+            var totalLoveseatsSold = movieStats.Sum(x => x.LoveseatsSold);
+            var totalRevenue = movieStats.Sum(x => x.TotalRevenue);
+
             var table = new Table().Border(TableBorder.Rounded);
             table.AddColumn(new TableColumn("[yellow]Film[/]").Centered());
             table.AddColumn(new TableColumn("[green]Aantal vertoningen[/]").Centered());
@@ -808,7 +815,25 @@ namespace Cinema.Services
                 );
             }
 
+            var summaryTable = new Table().Border(TableBorder.Rounded);
+            summaryTable.AddColumn(new TableColumn("[green]Totale vertoningen[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[cyan]Totaal aantal stoelen verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[magenta]Totaal aantal reguliere stoelen verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[blue]Totaal aantal stoelen met extra beenruimte verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[red]Totaal aantal loveseats verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[purple]Totale omzet[/]").Centered());
+
+            summaryTable.AddRow(
+                totalShowings.ToString(),
+                totalSeatsSold.ToString(),
+                totalRegularSeatsSold.ToString(),
+                totalExtraLegroomSeatsSold.ToString(),
+                totalLoveseatsSold.ToString(),
+                $"${totalRevenue:N2}"
+            );
+
             AnsiConsole.Write(table);
+            AnsiConsole.Write(summaryTable);
 
             var option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -821,7 +846,7 @@ namespace Cinema.Services
                     string formattedStartDate = startdate.ToString("yyyyMMdd");
                     string formattedEndDate = enddate.ToString("yyyyMMdd");
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
-                    ExportStatsToCsv(movieStats, filePath);
+                    ExportStatsToCsv(movieStats, filePath, totalShowings, totalSeatsSold, totalRegularSeatsSold, totalExtraLegroomSeatsSold, totalLoveseatsSold, totalRevenue);
                     AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     EmailCSVFile sender = new EmailCSVFile();
                     sender.SendCSVFile("Guest", filePath);
@@ -835,15 +860,17 @@ namespace Cinema.Services
         }
 
 
-        private static void ExportStatsToCsv(List<(string MovieTitle, int ShowingsCount, int TotalSeatsSold, int RegularSeatsSold, int ExtraLegroomSeatsSold, int LoveseatsSold, decimal TotalRevenue)> movieStats, string filePath)
+        private static void ExportStatsToCsv(List<(string MovieTitle, int ShowingsCount, int TotalSeatsSold, int RegularSeatsSold, int ExtraLegroomSeatsSold, int LoveseatsSold, decimal TotalRevenue)> movieStats, string filePath, int totalShowings, int totalSeatsSold, int totalRegularSeatsSold, int totalExtraLegroomSeatsSold, int totalLoveseatsSold, decimal totalRevenue)
         {
             using (var writer = new StreamWriter(filePath))
             {
                 writer.WriteLine("Film, Aantal vertoningen, Totaal verkochte stoelen, Reguliere stoelen, Extra beenruimte stoelen, Loveseats, Totale omzet");
                 foreach (var stat in movieStats)
                 {
-                    writer.WriteLine($"\"{stat.MovieTitle}\", {stat.ShowingsCount}, {stat.TotalSeatsSold}, {stat.RegularSeatsSold}, {stat.ExtraLegroomSeatsSold}, {stat.LoveseatsSold}, {stat.TotalRevenue:N2}");
+                    writer.WriteLine($"\"{stat.MovieTitle}\", {stat.ShowingsCount}, {stat.TotalSeatsSold}, {stat.RegularSeatsSold}, {stat.ExtraLegroomSeatsSold}, {stat.LoveseatsSold}, \"{stat.TotalRevenue:N2}\"");
                 }
+                writer.WriteLine("\nTotals, Totale vertoningen, Totaal aantal stoelen verkocht, Totaal aantal reguliere stoelen verkocht, Totaal aantal stoelen met extra beenruimte verkocht, Totaal aantal loveseats verkocht, Totale omzet");
+                writer.WriteLine($"\"All Films\", {totalShowings}, {totalSeatsSold}, {totalRegularSeatsSold}, {totalExtraLegroomSeatsSold}, {totalLoveseatsSold}, \"{totalRevenue:N2}\"");
             }
         }
     }

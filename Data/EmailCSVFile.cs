@@ -6,7 +6,7 @@ using System.Text;
 using Cinema.Services;
 public class EmailCSVFile
 {
-    public void SendCSVFile( string userName, string filePath)
+    public void SendCSVFile(string userName, string filePath)
     {
         // SMTP server settings
         string smtpServer = "smtp.gmail.com";
@@ -24,7 +24,7 @@ public class EmailCSVFile
             using (MailMessage mailMessage = new MailMessage())
             {
                 mailMessage.From = new MailAddress(smtpUsername);
-                mailMessage.To.Add(" "); // Specify the recipient's email address
+                mailMessage.To.Add(""); // Specify the recipient's email address (Hier komt waarschijnlijk de email van Marcel te staan)
                 mailMessage.Subject = "CSVFileSender";
 
                 // Create the body of the email
