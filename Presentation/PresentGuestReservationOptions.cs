@@ -54,11 +54,11 @@ public static class PresentGuestReservationOptions
         var table = new Table();
         table.Border = TableBorder.Rounded;
         table.AddColumn("Film");
-        table.AddColumn("duur");
-        table.AddColumn("zaal");
-        table.AddColumn("stoel");
-        table.AddColumn("start tijd");
-        table.AddColumn("gekocht op");
+        table.AddColumn("Duur");
+        table.AddColumn("Zaal");
+        table.AddColumn("Stoel");
+        table.AddColumn("Start tijd");
+        table.AddColumn("Gekocht op");
         table.AddColumn("Totale prijs");
 
         table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), seats, startDatum, KoopDatum, $"{ticket.PurchaseTotal} euro");
