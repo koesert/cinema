@@ -15,7 +15,10 @@ namespace Cinema.Models.Choices
         [Description("Inloggen")]
         Login,
 
-        [Description("zie reservering (gast)")]
+        [Description("Registreren")]
+        Register,
+
+        [Description("Gast-reservering bekijken")]
         reservering,
 
         [Description("Afsluiten")]

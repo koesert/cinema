@@ -16,7 +16,8 @@ namespace Cinema
         {
             { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
             { InitialStateChoice.Login, "Inloggen" },
-            { InitialStateChoice.reservering, "zie reservering (gast)" },
+            { InitialStateChoice.Register, "Registreren" },
+            { InitialStateChoice.reservering, "Gast-reservering bekijken" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
@@ -63,7 +64,7 @@ namespace Cinema
                             new SelectionPrompt<string>()
                                 .Title("Selecteer gebruikerstype:")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker", "Account aanmaken" })
+                                .AddChoices(new[] { "Admin", "Gebruiker"})
                         );
                         switch (loginChoice)
                         {
@@ -73,10 +74,10 @@ namespace Cinema
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);
                                 break;
-                            case "Account aanmaken":
-                                PresentCustomerRegistration.Start(db);
-                                break;
                         }
+                        break;
+                    case InitialStateChoice.Register:
+                        PresentCustomerRegistration.Start(db);
                         break;
                 }
             }
