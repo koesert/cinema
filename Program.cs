@@ -21,7 +21,6 @@ namespace Cinema
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
-        [Obsolete]
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()

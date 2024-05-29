@@ -3,7 +3,6 @@ using Spectre.Console;
 
 public class PresentGuestReservationLogin
 {
-    [Obsolete]
     public static void Start(CinemaContext db)
     {
         AnsiConsole.Clear();

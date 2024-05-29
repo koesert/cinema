@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 public static class PresentGuestReservationOptions
 {
-    [Obsolete]
     public static void Start(Ticket ticket, CinemaContext db)
     {
         UserExperienceService user = new UserExperienceService();
@@ -63,7 +62,7 @@ public static class PresentGuestReservationOptions
         table.AddColumn("Totale prijs");
 
         table.AddRow(movie.Title, $"{movie.Duration} min", showtime.RoomId.ToString(), seats, startDatum, KoopDatum, $"{ticket.PurchaseTotal} euro");
-        AnsiConsole.Render(table);
+        AnsiConsole.Write(table);
 
         var choices = new List<string>();
 
