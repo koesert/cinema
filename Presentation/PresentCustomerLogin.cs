@@ -10,7 +10,7 @@ public class PresentCustomerLogin
 
         while (!loginSuccessful)
         {
-            var rule = new Rule("[bold blue]Klanten login:[/]")
+            var rule = new Rule("[bold blue]Login:[/]")
             {
                 Justification = Justify.Left,
                 Style = Style.Parse("blue")

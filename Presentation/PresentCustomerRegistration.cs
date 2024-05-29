@@ -16,7 +16,7 @@ public class PresentCustomerRegistration
 
         while (!registerSuccesful)
         {
-            var rule = new Rule("[bold blue]Klanten registratie:[/]")
+            var rule = new Rule("[bold blue]Registreren:[/]")
             {
                 Justification = Justify.Left,
                 Style = Style.Parse("blue")

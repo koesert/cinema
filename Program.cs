@@ -39,6 +39,7 @@ namespace Cinema
 
             while (currentChoice != InitialStateChoice.Exit)
             {
+                AnsiConsole.Clear();
                 AnsiConsole.Write(new FigletText("Your Eyes").Centered().Color(Color.Blue));
                 AnsiConsole.Write(new FigletText("---------------").Centered().Color(Color.Blue));
 
@@ -61,9 +62,9 @@ namespace Cinema
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
                             new SelectionPrompt<string>()
-                                .Title("Selecteer gebruikerstype:")
+                                .Title("Wat voor [blue]gebruiker[/] ben je?")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker"})
+                                .AddChoices(new[] { "Admin", "Gebruiker", "Terug"})
                         );
                         switch (loginChoice)
                         {
@@ -72,6 +73,8 @@ namespace Cinema
                                 break;
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);
+                                break;
+                            case "Terug":
                                 break;
                         }
                         break;
