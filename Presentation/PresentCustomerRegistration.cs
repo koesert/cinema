@@ -37,7 +37,7 @@ public class PresentCustomerRegistration
                     .Start($"Account voor [bold blue]{username}[/] is succesvol aangemaakt!", ctx =>
                     {
                         registerSuccesful = true;
-                        Task.Delay(3000).Wait();
+                        Task.Delay(2500).Wait();
 
                     });
                 PresentCustomerOptions.Start(newCustomer, db);

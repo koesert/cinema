@@ -11,24 +11,40 @@ public class PresentAdminLogin
 
         while (!loginSuccessful)
         {
-            var rule = new Rule("[bold blue]Administrator login[/]");
-            rule.Justification = Justify.Left;
-            rule.Style = Style.Parse("blue");
+            var rule = new Rule("[green]Administrator login:[/]")
+            {
+                Justification = Justify.Left,
+                Style = Style.Parse("darkgreen")
+            };
             AnsiConsole.Write(rule);
 
             string username = AskUsername();
+            if (username.ToLower() == "terug")
+            {
+                return;
+            }
             string password = AskPassword();
+            if (password.ToLower() == "terug")
+            {
+                return;
+            }
 
             loginSuccessful = Administrator.FindAdministrator(db, username, password);
 
             if (!loginSuccessful)
             {
                 AnsiConsole.MarkupLine("[red]Ongeldige gebruikersnaam of wachtwoord. Probeer het opnieuw.[/]");
-                AnsiConsole.WriteLine();
             }
             else
             {
-                AnsiConsole.MarkupLine("[green]Inloggen succesvol! Welkom, Administrator.[/]");
+                AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Aesthetic)
+                    .SpinnerStyle(Style.Parse("green"))
+                    .Start($"[green]Inloggen succesvol! Welkom [bold grey93]{username}[/]![/]", ctx =>
+                    {
+                        loginSuccessful = true;
+                        Task.Delay(2500).Wait();
+                    });
                 PresentAdminOptions.Start(db.Administrators.FirstOrDefault(x => x.Username == username && x.Password == password), db);
                 break;
             }
@@ -38,13 +54,17 @@ public class PresentAdminLogin
     private static string AskUsername()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold green]gebruikersnaam[/] in:")
-                .PromptStyle("blue")
+            new TextPrompt<string>("[grey]Voer 'terug' in terug te gaan.[/]\nVoer uw [bold green]gebruikersnaam[/] in:")
+                .PromptStyle("darkgreen")
                 .Validate(username =>
                 {
                     if (string.IsNullOrWhiteSpace(username))
                     {
                         return ValidationResult.Error("[red]Gebruikersnaam mag niet leeg zijn[/]");
+                    }
+                    if (username.ToLower() == "terug")
+                    {
+                        return ValidationResult.Success();
                     }
                     return ValidationResult.Success();
                 })
@@ -55,13 +75,17 @@ public class PresentAdminLogin
     {
         return AnsiConsole.Prompt(
             new TextPrompt<string>("Voer uw [bold green]wachtwoord[/] in:")
-                .PromptStyle("blue")
+                .PromptStyle("darkgreen")
                 .Secret()
                 .Validate(password =>
                 {
                     if (string.IsNullOrWhiteSpace(password))
                     {
                         return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
+                    }
+                    if (password.ToLower() == "terug")
+                    {
+                        return ValidationResult.Success();
                     }
                     return ValidationResult.Success();
                 })
