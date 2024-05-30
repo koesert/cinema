@@ -59,7 +59,7 @@ public class PresentCustomerLogin
     private static string AskEmail()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("[grey]Voer 'terug' in terug te gaan.[/]\nVoer uw [bold blue]email[/] in:")
+            new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nVoer uw [bold blue]email[/] in:")
                 .PromptStyle("blue")
                 .Validate(email =>
                 {
