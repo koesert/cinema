@@ -14,7 +14,7 @@ namespace Cinema
     {
         private static readonly Dictionary<InitialStateChoice, string> ChoiceDescriptions = new Dictionary<InitialStateChoice, string>
         {
-            { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
+            { InitialStateChoice.ListMovies, "Bladeren door films" },
             { InitialStateChoice.Login, "Inloggen" },
             { InitialStateChoice.Register, "Registreren" },
             { InitialStateChoice.reservering, "Gast-reservering bekijken" },

@@ -10,7 +10,7 @@ namespace Cinema.Models.Choices
 {
     public enum InitialStateChoice
     {
-        [Description("Blader door films & vertoningen")]
+        [Description("Bladeren door films")]
         ListMovies,
         [Description("Inloggen")]
         Login,
