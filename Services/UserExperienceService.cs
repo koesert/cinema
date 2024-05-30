@@ -180,7 +180,7 @@ public class UserExperienceService
 		int currentSeatNumber = 0;
 		int layoutLinesUsed = CalculateLinesUsedForLayout(db, showtime);
 		int selectedSeatLine = layoutLinesUsed + 1;
-		string ticketNumber = LogicLayerVoucher.GenerateRandomCode(db);
+		string ticketNumber = Ticket.GenerateRandomCode(db);
 		List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
 
 		var firstAvailableSeat = db.CinemaSeats
