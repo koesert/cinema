@@ -586,13 +586,11 @@ namespace Cinema.Services
 
         public static void DeleteVoucher(CinemaContext db)
         {
-            List<string> vouchers = db.Vouchers.Where(x => x.IsReward == "false").Select(x => $"{x}").ToList();
-            vouchers.Add("Terug");
             string stringvouchertodelete = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een voucher om te verwijderen:")
-                    .AddChoices(vouchers)
-            );
+                    .AddChoices(new List<string> { "Terug" }.Concat(db.Vouchers.Select(x => $"{x}").ToList())
+            ));
             if (stringvouchertodelete == "Terug")
             {
                 Voucherpanel(db);
