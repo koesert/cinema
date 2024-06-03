@@ -6,6 +6,7 @@ namespace Cinema.Data
 		public string Username { get; set; }
 		public string Password { get; set; }
 		public string Email { get; set; }
+		public bool Subscribed { get; set; }
 		public static List<Customer> AllCustomers = new List<Customer>();
 
 		private Customer(string username, string password, string email)
@@ -24,18 +25,28 @@ namespace Cinema.Data
 			AllCustomers = db.Customers.ToList();
 		}
 
-		public static Customer FindCustomer(CinemaContext db, string email, string password)
+		public static int FindCustomer(CinemaContext db, string email, string password)
 		{
 			RetrieveCustomers(db);
 
 			foreach (Customer existingCustomer in AllCustomers)
 			{
-				if (existingCustomer.Email == email && existingCustomer.Password == password)
+				if (existingCustomer.Email == email.ToLower())
 				{
-					return existingCustomer;
+					if (existingCustomer.Password == password)
+					{
+						// Credentials matched
+						return 1;
+					}
+					else
+					{
+						// Email found but password didn't match
+						return 2;
+					}
 				}
 			}
-			return null;
+			// No account found with the provided email
+			return 0;
 		}
 
 		public static bool CheckEmailCustomer(CinemaContext db, string email)
@@ -70,6 +81,25 @@ namespace Cinema.Data
 		{
 			db.Customers.Remove(customer);
 			db.SaveChanges();
+		}
+
+		public static bool UpdatePreference(Customer customer, CinemaContext db)
+		{
+			RetrieveCustomers(db);
+			if (customer.Subscribed == false)
+			{
+				customer.Subscribed = true;
+				db.Customers.Update(customer);
+				db.SaveChanges();
+				return true;
+			}
+			else
+			{
+				customer.Subscribed = false;
+				db.Customers.Update(customer);
+				db.SaveChanges();
+				return false;
+			}
 		}
 
 		public override string ToString()

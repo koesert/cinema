@@ -14,13 +14,13 @@ namespace Cinema
     {
         private static readonly Dictionary<InitialStateChoice, string> ChoiceDescriptions = new Dictionary<InitialStateChoice, string>
         {
-            { InitialStateChoice.ListMovies, "Blader door films & vertoningen" },
+            { InitialStateChoice.ListMovies, "Bladeren door films" },
             { InitialStateChoice.Login, "Inloggen" },
-            { InitialStateChoice.reservering, "zie reservering (gast)" },
+            { InitialStateChoice.Register, "Registreren" },
+            { InitialStateChoice.reservering, "Gast-reservering bekijken" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
-        [Obsolete]
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -29,6 +29,7 @@ namespace Cinema
             string connectionString = configuration.GetConnectionString("Main");
 
             CinemaContext db = new CinemaContext(connectionString);
+            PresentAdminOptions.ConfigureSeatPrices(db);
             PresentAdminOptions.ConvertPercentVouchers(db);
             UserExperienceService customerService = new UserExperienceService();
             Customer loggedInCustomer = null;
@@ -38,6 +39,7 @@ namespace Cinema
 
             while (currentChoice != InitialStateChoice.Exit)
             {
+                AnsiConsole.Clear();
                 AnsiConsole.Write(new FigletText("Your Eyes").Centered().Color(Color.Blue));
                 AnsiConsole.Write(new FigletText("---------------").Centered().Color(Color.Blue));
 
@@ -60,9 +62,9 @@ namespace Cinema
                     case InitialStateChoice.Login:
                         var loginChoice = AnsiConsole.Prompt(
                             new SelectionPrompt<string>()
-                                .Title("Selecteer gebruikerstype:")
+                                .Title("Wat voor [blue]gebruiker[/] ben je?")
                                 .PageSize(10)
-                                .AddChoices(new[] { "Admin", "Gebruiker", "Account aanmaken" })
+                                .AddChoices(new[] { "Admin", "Gebruiker", "Terug"})
                         );
                         switch (loginChoice)
                         {
@@ -72,10 +74,12 @@ namespace Cinema
                             case "Gebruiker":
                                 PresentCustomerLogin.Start(db);
                                 break;
-                            case "Account aanmaken":
-                                PresentCustomerRegistration.Start(db);
+                            case "Terug":
                                 break;
                         }
+                        break;
+                    case InitialStateChoice.Register:
+                        PresentCustomerRegistration.Start(db);
                         break;
                 }
             }

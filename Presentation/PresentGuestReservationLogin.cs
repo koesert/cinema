@@ -3,7 +3,6 @@ using Spectre.Console;
 
 public class PresentGuestReservationLogin
 {
-    [Obsolete]
     public static void Start(CinemaContext db)
     {
         AnsiConsole.Clear();
@@ -17,6 +16,10 @@ public class PresentGuestReservationLogin
             AnsiConsole.Write(rule);
 
             string email = AskEmail();
+            if (email.ToLower() == "terug")
+            {
+                return;
+            }
             string TicketNumber = AskTicketNumber();
 
             bool EmailGuest = Customer.CheckEmailCustomer(db, email);
@@ -45,13 +48,17 @@ public class PresentGuestReservationLogin
     private static string AskEmail()
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
+            new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nVoer uw [bold blue]email[/] in:")
                 .PromptStyle("blue")
                 .Validate(email =>
                 {
                     if (string.IsNullOrWhiteSpace(email))
                     {
                         return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
+                    }
+                    if (email.ToLower() == "terug")
+                    {
+                        return ValidationResult.Success();
                     }
                     return ValidationResult.Success();
                 })

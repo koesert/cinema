@@ -10,9 +10,9 @@ public class UserExperienceService
 
   private static readonly Dictionary<UserExperienceChoice, string> UserExperienceChoiceDescriptions = new Dictionary<UserExperienceChoice, string>
   {
-      { UserExperienceChoice.ListMovies, "Blader door films & vertoningen" },
-      { UserExperienceChoice.ViewTickets, "Bekijk uw tickets" },
-      { UserExperienceChoice.Logout, "Uitloggen" }
+    { UserExperienceChoice.ListMovies, "Blader door films & vertoningen" },
+    { UserExperienceChoice.ViewTickets, "Bekijk uw tickets" },
+    { UserExperienceChoice.Logout, "Uitloggen" }
   };
 
   [Obsolete]
@@ -55,7 +55,6 @@ public class UserExperienceService
     }
   }
 
-  [Obsolete]
   public void ListMoviesWithShowtimes(Customer loggedInCustomer, CinemaContext db)
   {
     if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
@@ -73,10 +72,10 @@ public class UserExperienceService
       DateTime endOfWeek = startOfWeek.AddDays(8).Date;
 
       var moviesWithUpcomingShowtimes = moviesQuery
-          .Where(m => m.Showtimes != null && m.Showtimes
-          .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
-          .OrderBy(x => x.Title)
-          .ToList();
+        .Where(m => m.Showtimes != null && m.Showtimes
+        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
+        .OrderBy(x => x.Title)
+        .ToList();
 
       var options = new List<string> { "Filter door films" };
 
@@ -88,10 +87,10 @@ public class UserExperienceService
       options.Add("Terug");
 
       var selectedOption = AnsiConsole.Prompt(
-          new SelectionPrompt<string>()
-              .Title($"Week van {startOfWeek:dd-MM} tot {endOfWeek.AddDays(-1):dd-MM}")
-              .AddChoices(options)
-              .PageSize(10)
+        new SelectionPrompt<string>()
+          .Title($"Week van {startOfWeek:dd-MM} tot {endOfWeek.AddDays(-1):dd-MM}")
+          .AddChoices(options)
+          .PageSize(10)
       );
 
       if (selectedOption == "Volgende week")
@@ -138,28 +137,31 @@ public class UserExperienceService
       AnsiConsole.MarkupLine("");
 
       var showtimesThisWeek = selectedMovie.Showtimes
-          .Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2))
-          .OrderBy(s => s.StartTime)
-          .ToList();
+        .Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2))
+        .OrderBy(s => s.StartTime)
+        .ToList();
 
       if (showtimesThisWeek.Any())
       {
-        var selectedShowtime = AnsiConsole.Prompt(
-            new SelectionPrompt<Showtime>()
-                .Title("Selecteer een voorstellingstijd")
-                .AddChoices(showtimesThisWeek)
-                .UseConverter(showtime => showtime.StartTime.ToString("ddd, MMMM d hh:mm tt"))
-                .PageSize(10)
-        );
-
+        string stringselectedShowtime = AnsiConsole.Prompt(
+          new SelectionPrompt<string>()
+            .Title("Selecteer een voorstellingstijd")
+            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie).Select(x => $"{x}").ToList())
+        ));
+        if (stringselectedShowtime == "Terug")
+        {
+          ListMoviesWithShowtimes(loggedInCustomer, db);
+          return;
+        }
+        Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
         if (selectedMovie.MinAgeRating >= 16)
         {
           AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
           AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
 
           var confirmation = AnsiConsole.Prompt(
-              new SelectionPrompt<string>()
-                  .AddChoices("Ja", "Nee")
+            new SelectionPrompt<string>()
+              .AddChoices("Ja", "Nee")
           );
 
           if (confirmation.ToLower() != "ja")
@@ -169,12 +171,12 @@ public class UserExperienceService
           }
         }
         Console.Clear();
+        PresentAdminOptions.ConfigureSeatPrices(db);
         ShowCinemaHall(loggedInCustomer, db, selectedShowtime);
       }
     }
   }
 
-  [Obsolete]
   public void ShowCinemaHall(Customer loggedInCustomer, CinemaContext db, Showtime showtime)
   {
     Console.CursorVisible = false;
@@ -182,14 +184,14 @@ public class UserExperienceService
     int currentSeatNumber = 0;
     int layoutLinesUsed = CalculateLinesUsedForLayout(db, showtime);
     int selectedSeatLine = layoutLinesUsed + 1;
-    string ticketNumber = LogicLayerVoucher.GenerateRandomCode(db);
+    string ticketNumber = Ticket.GenerateRandomCode(db);
     List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
 
     var firstAvailableSeat = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
-        .OrderBy(s => s.Row)
-        .ThenBy(s => s.SeatNumber)
-        .FirstOrDefault();
+      .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
+      .OrderBy(s => s.Row)
+      .ThenBy(s => s.SeatNumber)
+      .FirstOrDefault();
 
     if (firstAvailableSeat != null)
     {
@@ -203,9 +205,12 @@ public class UserExperienceService
     {
       Console.SetCursorPosition(0, selectedSeatLine);
       var selectedSeatPrice = db.CinemaSeats
-          .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
+        .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
-      // Combineer en ruim de uitvoer op met AnsiConsole
+      // Combine and space out the outputs with AnsiConsole
+      CinemaSeat basepriceseat = db.CinemaSeats.First(x => x.Showtime == showtime && x.Color == "orange" && x.Type == 0);
+      if (basepriceseat.Price != 25) Console.WriteLine();
+      AnsiConsole.WriteLine();
       AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
       AnsiConsole.Markup($"Geselecteerde Stoel: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Druk op <Space> om stoelen te reserveren)[/]");
@@ -214,6 +219,7 @@ public class UserExperienceService
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
 
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+      if (basepriceseat.Price != 25) Console.WriteLine();
 
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
       if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)
@@ -238,17 +244,17 @@ public class UserExperienceService
       else if (keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.A)
       {
         var minSeatNumberForRow = db.CinemaSeats
-            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
-            .Where(s => s.SeatNumber != 0)
-            .Min(s => (int?)s.SeatNumber);
+          .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
+          .Where(s => s.SeatNumber != 0)
+          .Min(s => (int?)s.SeatNumber);
 
         currentSeatNumber = Math.Max(minSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber - 1);
       }
       else if (keyInfo.Key == ConsoleKey.RightArrow || keyInfo.Key == ConsoleKey.D)
       {
         var maxSeatNumberForRow = db.CinemaSeats
-            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
-            .Max(s => (int?)s.SeatNumber);
+          .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
+          .Max(s => (int?)s.SeatNumber);
 
         currentSeatNumber = Math.Min(maxSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber + 1);
       }
@@ -317,7 +323,7 @@ public class UserExperienceService
       table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"${seat.Price}");
       totalSeatPrice += seat.Price;
     }
-    AnsiConsole.Render(table);
+    AnsiConsole.Write(table);
 
     Console.WriteLine($"Totaal Prijs: ${totalSeatPrice}");
     if (!(loggedInCustomer is null))
@@ -326,7 +332,7 @@ public class UserExperienceService
       if (!(v is null))
       {
         Console.Clear();
-        AnsiConsole.Render(table);
+        AnsiConsole.Write(table);
 
         Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
         Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
@@ -502,10 +508,10 @@ public class UserExperienceService
 
     // Calculate the number of rows in the cinema hall layout
     var showtimes = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id)
-        .OrderBy(s => s.Row)
-        .ThenBy(s => s.SeatNumber)
-        .ToList();
+      .Where(s => s.Showtime.Id == showtime.Id)
+      .OrderBy(s => s.Row)
+      .ThenBy(s => s.SeatNumber)
+      .ToList();
 
     char previousRowChar = '\0';
     foreach (var seat in showtimes)
@@ -531,65 +537,65 @@ public class UserExperienceService
     string activeFilters = "Actieve Filters: ";
 
     var filterOption = AnsiConsole.Prompt(
-        new SelectionPrompt<CinemaFilterChoice>()
-            .Title("Selecteer een optie om films te filteren")
-            .PageSize(4)
-            .AddChoices(new[]
-            {
-                CinemaFilterChoice.Genres,
-                CinemaFilterChoice.Directeuren,
-                CinemaFilterChoice.Acteurs,
-                CinemaFilterChoice.Terug
-            })
+      new SelectionPrompt<CinemaFilterChoice>()
+        .Title("Selecteer een optie om films te filteren")
+        .PageSize(4)
+        .AddChoices(new[]
+        {
+        CinemaFilterChoice.Genres,
+        CinemaFilterChoice.Directeuren,
+        CinemaFilterChoice.Acteurs,
+        CinemaFilterChoice.Terug
+        })
     );
 
     switch (filterOption)
     {
       case CinemaFilterChoice.Genres:
         var allGenres = allMovies.SelectMany(movie => movie.Genres ?? Enumerable.Empty<string>())
-                                .Distinct()
-                                .ToList();
+                    .Distinct()
+                    .ToList();
         var selectedGenres = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("Selecteer genres om films te filteren")
-                .PageSize(10)
-                .AddChoices(allGenres)
+          new MultiSelectionPrompt<string>()
+            .Title("Selecteer genres om films te filteren")
+            .PageSize(10)
+            .AddChoices(allGenres)
         );
         moviesQuery = allMovies.Where(movie => movie.Genres != null &&
-            movie.Genres.Intersect(selectedGenres).Any())
-            .AsQueryable();
+          movie.Genres.Intersect(selectedGenres).Any())
+          .AsQueryable();
         activeFilters += "Genres: " + string.Join(", ", selectedGenres);
         break;
 
       case CinemaFilterChoice.Acteurs:
         var allActors = allMovies.SelectMany(movie => movie.Cast ?? Enumerable.Empty<string>())
-                                .Distinct()
-                                .ToList();
+                    .Distinct()
+                    .ToList();
         var selectedActors = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("Selecteer acteurs om films te filteren")
-                .PageSize(10)
-                .AddChoices(allActors)
+          new MultiSelectionPrompt<string>()
+            .Title("Selecteer acteurs om films te filteren")
+            .PageSize(10)
+            .AddChoices(allActors)
         );
         moviesQuery = allMovies.Where(movie => movie.Cast != null &&
-            movie.Cast.Intersect(selectedActors).Any())
-            .AsQueryable();
+          movie.Cast.Intersect(selectedActors).Any())
+          .AsQueryable();
         activeFilters += "Acteurs: " + string.Join(", ", selectedActors);
         break;
 
       case CinemaFilterChoice.Directeuren:
         var allDirectors = allMovies.SelectMany(movie => movie.Directors ?? Enumerable.Empty<string>())
-                                    .Distinct()
-                                    .ToList();
+                      .Distinct()
+                      .ToList();
         var selectedDirectors = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-                .Title("Selecteer regisseurs om films te filteren")
-                .PageSize(10)
-                .AddChoices(allDirectors)
+          new MultiSelectionPrompt<string>()
+            .Title("Selecteer regisseurs om films te filteren")
+            .PageSize(10)
+            .AddChoices(allDirectors)
         );
         moviesQuery = allMovies.Where(movie => movie.Directors != null &&
-            movie.Directors.Intersect(selectedDirectors).Any())
-            .AsQueryable();
+          movie.Directors.Intersect(selectedDirectors).Any())
+          .AsQueryable();
         activeFilters += "Directeuren: " + string.Join(", ", selectedDirectors);
         break;
 
@@ -601,7 +607,6 @@ public class UserExperienceService
   }
 
 
-  [Obsolete]
   private void DisplayMovieDetails(Movie movie)
   {
     var table = new Table();
@@ -617,16 +622,16 @@ public class UserExperienceService
     table.AddRow("Beschrijving", movie.Description);
     table.AddRow("Minimum leeftijdsbeoordeling", movie.MinAgeRating.ToString());
 
-    AnsiConsole.Render(table);
+    AnsiConsole.Write(table);
   }
 
   private void ViewTickets(CinemaContext db, Customer customer)
   {
     Console.Clear();
     var tickets = db.Tickets
-        .Include(t => t.Showtime)
-        .Where(t => t.Customer.Id == customer.Id)
-        .ToList();
+      .Include(t => t.Showtime)
+      .Where(t => t.Customer.Id == customer.Id)
+      .ToList();
 
     if (tickets.Any())
     {
@@ -660,10 +665,10 @@ public class UserExperienceService
     // List<CinemaSeat> selectedSeats = new List<CinemaSeat>();
 
     var firstAvailableSeat = db.CinemaSeats
-        .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
-        .OrderBy(s => s.Row)
-        .ThenBy(s => s.SeatNumber)
-        .FirstOrDefault();
+      .Where(s => s.Showtime.Id == showtime.Id && s.SeatNumber != 0)
+      .OrderBy(s => s.Row)
+      .ThenBy(s => s.SeatNumber)
+      .FirstOrDefault();
 
     if (firstAvailableSeat != null)
     {
@@ -676,7 +681,7 @@ public class UserExperienceService
     {
       Console.SetCursorPosition(0, selectedSeatLine);
       var selectedSeatPrice = db.CinemaSeats
-          .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
+        .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
       // Combineer en ruim de uitvoer op met AnsiConsole
       AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
@@ -712,17 +717,17 @@ public class UserExperienceService
       else if (keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.A)
       {
         var minSeatNumberForRow = db.CinemaSeats
-            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
-            .Where(s => s.SeatNumber != 0)
-            .Min(s => (int?)s.SeatNumber);
+          .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow))
+          .Where(s => s.SeatNumber != 0)
+          .Min(s => (int?)s.SeatNumber);
 
         currentSeatNumber = Math.Max(minSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber - 1);
       }
       else if (keyInfo.Key == ConsoleKey.RightArrow || keyInfo.Key == ConsoleKey.D)
       {
         var maxSeatNumberForRow = db.CinemaSeats
-            .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
-            .Max(s => (int?)s.SeatNumber);
+          .Where(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber != 99)
+          .Max(s => (int?)s.SeatNumber);
 
         currentSeatNumber = Math.Min(maxSeatNumberForRow.GetValueOrDefault(1) - 1, currentSeatNumber + 1);
       }

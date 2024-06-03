@@ -10,5 +10,7 @@ namespace Cinema.Data
         public Movie Movie { get; set; }
         public double Prices { get; set; }
         public virtual ICollection<CinemaSeat> CinemaSeats { get; set; }
+
+        public override string ToString() => $"Zaal: {RoomId}, Starttijd: {StartTime.ToString("ddd, MMMM d hh:mm tt")}";
     }
 }

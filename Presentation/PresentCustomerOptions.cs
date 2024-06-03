@@ -4,7 +4,6 @@ using Spectre.Console;
 
 public static class PresentCustomerOptions
 {
-    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         UserExperienceService user = new UserExperienceService();
@@ -22,7 +21,7 @@ public static class PresentCustomerOptions
             new SelectionPrompt<string>()
                 .Title("")
                 .PageSize(10)
-                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Reservatie Progress Bekijken", "Account beheren", "Log Uit" })
+                .AddChoices(new[] { "Bladeren door films", "Reserveringen bekijken", "Reservatie Progress Bekijken", "Account beheren", "Uitloggen" })
         );
         switch (optionChoice)
         {
@@ -39,7 +38,7 @@ public static class PresentCustomerOptions
                 AnsiConsole.Clear();
                 PresentAccountOptions.Start(loggedInCustomer, db);
                 break;
-            case "Log Uit":
+            case "Uitloggen":
                 AnsiConsole.Clear();
                 break;
         }

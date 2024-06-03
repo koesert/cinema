@@ -39,6 +39,8 @@ namespace Cinema.Services
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
+        { CinemaManagementChoice.Settings, "Bioscoop Instellingen"},
+        { CinemaManagementChoice.ViewSubscribers, "Bekijk nieuwsbrief abbonees"},
         { CinemaManagementChoice.Exit, "Log Uit" }
     };
         private static readonly Dictionary<CinemaManagementVoucherChoice, string> VoucherChoiceDescriptions = new Dictionary<CinemaManagementVoucherChoice, string>
@@ -79,6 +81,12 @@ namespace Cinema.Services
                     case CinemaManagementChoice.ViewStats:
                         ViewStats(db);
                         break;
+                    case CinemaManagementChoice.Settings:
+                        SettingsPanel(db);
+                        break;
+                    case CinemaManagementChoice.ViewSubscribers:
+                        PresentViewSubscribers.Start(db, admin);
+                        break;
                     default:
                         break;
                 }
@@ -88,16 +96,16 @@ namespace Cinema.Services
         public static void ListMovies(CinemaContext db)
         {
             Console.Clear();
-
             var movies = db.Movies.ToList();
-            var options = movies.Select(movie => movie.Title).OrderBy(x => x).ToList();
-            options.Insert(0, "Terug");
+
+            var choices = new List<string> { "Terug" };
+            choices.AddRange(movies.Select(movie => movie.Title).OrderBy(x => x));
 
             var selectedOption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een film")
                     .PageSize(10)
-                    .AddChoices(options)
+                    .AddChoices(choices)
             );
 
             if (selectedOption == "Terug")
@@ -150,7 +158,7 @@ namespace Cinema.Services
             {
                 foreach (var showtime in showtimes)
                 {
-                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime}");
+                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime:dd-MM-yyyy HH:mm}");
 
                 }
             }
@@ -463,13 +471,25 @@ namespace Cinema.Services
             discountType = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een kortingstype:")
-                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug" })
             );
+            if (discountType == "Terug")
+            {
+                Console.Clear();
+                Voucherpanel(db);
+                return;
+            }
             random = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer Code Invoer:")
-                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken" })
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug" })
             );
+            if (random == "Terug")
+            {
+                Console.Clear();
+                MakeVoucher(db);
+                return;
+            }
             if (random.Contains("Genereer"))
             {
                 code = LogicLayerVoucher.GenerateRandomCode(db);
@@ -477,52 +497,86 @@ namespace Cinema.Services
             else
             {
                 string stringcode = AnsiConsole.Prompt(
-                new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
+                new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nCode voor de voucher (5-15 letters en/of nummers): ")
                     .PromptStyle("yellow")
                 );
+                if (stringcode.ToLower().Contains("terug"))
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
                 code = LogicLayerVoucher.CodeCheck(db, stringcode);
             }
 
             dateoption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer VervalDatum invoer:")
-                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken" })
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug" })
             );
+            if (dateoption == "Terug")
+            {
+                Console.Clear();
+                Voucherpanel(db);
+                return;
+            }
             if (dateoption.Contains("aanmaken"))
             {
                 expDate = AnsiConsole.Prompt(
-                new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ HH:mm):")
                     .PromptStyle("yellow")
                     .Validate(input =>
                     {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
                         if (!DateTimeOffset.TryParseExact(
                             input,
                             "dd-MM-yyyy HH:mm",
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeUniversal,
-                            out _))
+                            out DateTimeOffset output))
                         {
                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
                         }
                         return ValidationResult.Success();
                     }));
             }
-
+            if (expDate.ToLower().Contains("terug"))
+            {
+                Console.Clear();
+                Voucherpanel(db);
+                return;
+            }
             date = DateTimeOffset.ParseExact(expDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
-            Customer customer = AnsiConsole.Prompt(
-                new SelectionPrompt<Customer>()
+            string stringcustomer = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
                     .Title("Selecteer de klant aan wie u een voucher wilt binden:")
-                    .AddChoices(db.Customers.ToList())
+                    .AddChoices(new List<string> { "Terug" }.Concat(db.Customers.Select(x => $"{x}").ToList()))
             );
-
+            if (stringcustomer == "Terug")
+            {
+                Console.Clear();
+                Voucherpanel(db);
+                return;
+            }
+            Customer customer = db.Customers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringcustomer);
             Console.Clear();
             AnsiConsole.Markup($"[blue]Code: {code}, VervalDatum: {expDate}, Klant: {customer.Email}[/]\n");
 
             string stringdiscount = AnsiConsole.Prompt(
-            new TextPrompt<string>($"Voeg {discountType} korting: ")
+            new TextPrompt<string>($"[grey]Voer 'terug' in om terug te gaan.[/]\nVoeg {discountType} korting: ")
                 .PromptStyle("yellow")
             );
+            if (stringdiscount.ToLower().Contains("terug"))
+            {
+                Console.Clear();
+                Voucherpanel(db);
+                return;
+            }
             discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
             Voucher voucher = discountType.Contains("%") ? new PercentVoucher(code, discount, date, customer.Email) : new Voucher(code, discount, date, customer.Email);
 
@@ -540,13 +594,11 @@ namespace Cinema.Services
 
         public static void DeleteVoucher(CinemaContext db)
         {
-            List<string> vouchers = db.Vouchers.Where(x => x.IsReward == "false").Select(x => $"{x}").ToList();
-            vouchers.Add("Terug");
             string stringvouchertodelete = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een voucher om te verwijderen:")
-                    .AddChoices(vouchers)
-            );
+                    .AddChoices(new List<string> { "Terug" }.Concat(db.Vouchers.Select(x => $"{x}").ToList())
+            ));
             if (stringvouchertodelete == "Terug")
             {
                 Voucherpanel(db);
@@ -579,12 +631,10 @@ namespace Cinema.Services
         {
             string option;
             string code;
-            List<string> vouchers = db.Vouchers.Where(x => x.IsReward == "false").Select(x => $"{x}").ToList();
-            vouchers.Add("Terug");
             string stringvoucher = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een voucher om te wijzigen:")
-                    .AddChoices(vouchers)
+                    .AddChoices(new List<string> { "Terug" }.Concat(db.Vouchers.Select(x => $"{x}").ToList()))
             );
             if (stringvoucher == "Terug")
             {
@@ -617,8 +667,14 @@ namespace Cinema.Services
                 string random = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer Code Invoer:")
-                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken" })
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug" })
                 );
+                if (random == "Terug")
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
                 if (random.Contains("Genereer"))
                 {
                     code = LogicLayerVoucher.GenerateRandomCode(db);
@@ -626,9 +682,15 @@ namespace Cinema.Services
                 else
                 {
                     string stringcode = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Code voor de voucher (5-15 letters en/of nummers): ")
+                    new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nCode voor de voucher (5-15 letters en/of nummers): ")
                         .PromptStyle("yellow")
                     );
+                    if (stringcode.ToLower().Contains("terug"))
+                    {
+                        Console.Clear();
+                        Voucherpanel(db);
+                        return;
+                    }
                     code = LogicLayerVoucher.CodeCheck(db, stringcode);
 
                 }
@@ -640,12 +702,24 @@ namespace Cinema.Services
                 string discountType = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een kortingstype:")
-                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)" })
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug" })
                 );
+                if (discountType == "Terug")
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
                 string stringdiscount = AnsiConsole.Prompt(
-                new TextPrompt<string>($"Voeg {discountType} korting: ")
+                new TextPrompt<string>($"[grey]Voer 'terug' in om terug te gaan.[/]\nVoeg {discountType} korting: ")
                     .PromptStyle("yellow")
                 );
+                if (stringdiscount.ToLower().Contains("terug"))
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
                 double discount = discountType.Contains("%") ? LogicLayerVoucher.CheckPercentDiscount(stringdiscount) : LogicLayerVoucher.CheckDiscount(stringdiscount);
                 int id = voucher.Id;
                 voucher = discountType.Contains("%") ? new PercentVoucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail) : new Voucher(voucher.Code, discount, voucher.ExpirationDate, voucher.CustomerEmail);
@@ -658,26 +732,43 @@ namespace Cinema.Services
                 string dateoption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer VervalDatum invoer:")
-                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken" })
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug" })
                 );
+                if (dateoption == "Terug")
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
                 if (dateoption.Contains("aanmaken"))
                 {
                     expDate = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
-                        .PromptStyle("yellow")
-                        .Validate(input =>
-                        {
-                            if (!DateTimeOffset.TryParseExact(
-                                input,
-                                "dd-MM-yyyy HH:mm",
-                                CultureInfo.InvariantCulture,
-                                DateTimeStyles.AssumeUniversal,
-                                out _))
-                            {
-                                return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
-                            }
-                            return ValidationResult.Success();
-                        }));
+                     new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ HH:mm):")
+                     .PromptStyle("yellow")
+                     .Validate(input =>
+                     {
+                         if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                         if (!DateTimeOffset.TryParseExact(
+                             input,
+                             "dd-MM-yyyy HH:mm",
+                             CultureInfo.InvariantCulture,
+                             DateTimeStyles.AssumeUniversal,
+                             out DateTimeOffset output))
+                         {
+                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                         }
+                         if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                         {
+                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                         }
+                         return ValidationResult.Success();
+                     }));
+                }
+                if (expDate.ToLower().Contains("terug"))
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
                 }
                 voucher.ExpirationDate = DateTimeOffset.ParseExact(expDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
             }
@@ -685,11 +776,18 @@ namespace Cinema.Services
             {
                 Customer oldcustomer = db.Customers.FirstOrDefault(c => c.Email == voucher.CustomerEmail);
                 AnsiConsole.Markup($"[blue]Oude Klant: {oldcustomer}[/]\n");
-                Customer customer = AnsiConsole.Prompt(
-                new SelectionPrompt<Customer>()
+                string stringcustomer = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
                     .Title("Selecteer de klant aan wie u een voucher wilt binden:")
-                    .AddChoices(db.Customers.ToList())
+                    .AddChoices(new List<string> { "Terug" }.Concat(db.Customers.Select(x => $"{x}").ToList()))
                 );
+                if (stringcustomer == "Terug")
+                {
+                    Console.Clear();
+                    Voucherpanel(db);
+                    return;
+                }
+                Customer customer = db.Customers.AsEnumerable().FirstOrDefault(x => x.ToString() == stringcustomer);
                 voucher.CustomerEmail = customer.Email;
             }
 
@@ -871,6 +969,232 @@ namespace Cinema.Services
                 writer.WriteLine("\nTotals, Totale vertoningen, Totaal aantal stoelen verkocht, Totaal aantal reguliere stoelen verkocht, Totaal aantal stoelen met extra beenruimte verkocht, Totaal aantal loveseats verkocht, Totale omzet");
                 writer.WriteLine($"\"All Films\", {totalShowings}, {totalSeatsSold}, {totalRegularSeatsSold}, {totalExtraLegroomSeatsSold}, {totalLoveseatsSold}, \"{totalRevenue:N2}\"");
             }
+        }
+        public static void SettingsPanel(CinemaContext db)
+        {
+            var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"Wat wilt u aanpassen?")
+                        .PageSize(10)
+                        .AddChoices(new List<string> { "Wijzig basisprijs voor periode", "Terug" })
+                );
+            if (choice.Contains("basisprijs"))
+            {
+                ChangeSeatPrice(db);
+                return;
+            }
+            return;
+        }
+
+        public static void ChangeSeatPrice(CinemaContext db)
+        {
+            DateTimeOffset startdate;
+            DateTimeOffset enddate;
+            Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            Console.Clear();
+            double basisprijs = 0;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
+            {
+                Console.WriteLine($"Huidige basisprijs van elke vertoning die in periode {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} begint = {admin.TempPrice}");
+                basisprijs = admin.TempPrice;
+
+            }
+            else
+            {
+                Console.WriteLine($"Huidige basisprijs voor alle vertoningen (standaard) = 25");
+                if (admin.PriceEndTime >= now && admin.PriceStartTime >= now)
+                {
+                    Console.WriteLine($"Huidige Ingeplande periode en basisprijs {admin.PriceStartTime.ToString("dd-MM-yyyy HH:mm")} - {admin.PriceEndTime.ToString("dd-MM-yyyy HH:mm")} = {admin.TempPrice}");
+                }
+                else
+                {
+                    Console.WriteLine("Geen periode en basisprijs ingepland op dit moment.");
+                }
+                basisprijs = 25.0;
+            }
+            Console.WriteLine("Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {basisprijs - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {basisprijs},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {basisprijs + 5},- (basisprijs + 5)");
+            Console.ResetColor();
+            string random = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wilt u de basisprijs en tijdsperiode aanpassen?")
+                    .AddChoices(new[] { "Ja", "Nee" })
+                );
+            if (random.Contains("Nee"))
+            {
+                Console.Clear();
+                SettingsPanel(db);
+                return;
+            }
+            string firstDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2).AddMinutes(-1) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            if (firstDate.ToLower().Contains("terug"))
+            {
+                Console.Clear();
+                SettingsPanel(db);
+                return;
+            }
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            string lastDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                        }
+
+                        if (startdate >= output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                        }
+                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+            if (lastDate.ToLower().Contains("terug"))
+            {
+                Console.Clear();
+                SettingsPanel(db);
+                return;
+            }
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            Console.Clear();
+            AnsiConsole.Markup($"[blue]Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            string newvalue2 = AnsiConsole.Prompt(
+                new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nNieuwe basisprijs voor de tijdperiode (10-50) (moet een heel getal zijn):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                        if (!double.TryParse(input, out double output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige waarde als getal.");
+                        }
+                        if (output % 1 != 0)
+                        {
+                            return ValidationResult.Error($"\"{output}\" is geen geldige waarde. Moet een heel getal zijn.");
+                        }
+                        if (output < 0)
+                        {
+                            return ValidationResult.Error($"\"{output}\" is geen geldige waarde. Mag geen negatief getal zijn.");
+                        }
+                        if (output < 10 || output > 50)
+                        {
+                            return ValidationResult.Error($"\"{output}\" is geen geldige waarde. Overschrijdt grenswaarden (10-50).");
+                        }
+                        return ValidationResult.Success();
+                    }));
+            Console.Clear();
+            if (newvalue2.ToLower().Contains("terug"))
+            {
+                SettingsPanel(db);
+                return;
+            }
+            double newvalue = double.Parse(newvalue2);
+            AnsiConsole.Markup($"[blue]Basisprijs: {newvalue} voor alle vertoningen in Gekozen tijdperiode: {startdate.ToString("dd-MM-yyyy HH:mm")} - {enddate.ToString("dd-MM-yyyy HH:mm")}[/]\n");
+            Console.WriteLine("Nieuwe Prijsverhouding stoelen:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Blauw: {newvalue - 5},- (basisprijs - 5)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Geel: {newvalue},- (basisprijs)");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Rood: {newvalue + 5},- (basisprijs + 5)");
+            Console.ResetColor();
+            bool ready = AnsiConsole.Confirm("Weet je zeker dat je dit nieuwe waarde en tijdsperiode wilt opslaan?");
+            if (!ready)
+            {
+                Console.Clear();
+                SettingsPanel(db);
+                return;
+            }
+            admin.PriceStartTime = startdate;
+            admin.PriceEndTime = enddate;
+            admin.TempPrice = newvalue;
+            db.SaveChanges();
+            ConfigureSeatPrices(db);
+            AnsiConsole.Markup("[green]Basisprijs succesvol opgeslagen![/]");
+            AnsiConsole.WriteLine("\nDruk op een toets om terug te gaan....");
+            Console.ReadKey();
+            Console.Clear();
+            SettingsPanel(db);
+        }
+        public static void ConfigureSeatPrices(CinemaContext db)
+        {
+            Administrator admin = db.Administrators.First();
+            db.Entry(admin).Reload();
+            DateTimeOffset now = DateTimeOffset.UtcNow.AddHours(2);
+            double baseprice = 25;
+            if (admin.PriceEndTime >= now && admin.PriceStartTime <= now)
+            {
+                baseprice = admin.TempPrice;
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime >= s.Showtime.StartTime && admin.PriceStartTime <= s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price * 2;
+                }
+                foreach (CinemaSeat s in db.CinemaSeats.Where(s => admin.PriceEndTime < s.Showtime.StartTime || admin.PriceStartTime > s.Showtime.StartTime))
+                {
+                    s.Price = (decimal)25;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price * 2;
+                }
+            }
+            else
+            {
+                foreach (CinemaSeat s in db.CinemaSeats)
+                {
+                    s.Price = (decimal)baseprice;
+                    s.Price += s.Color == "red" ? 5 : s.Color == "blue" ? -5 : 0;
+                    if (s.Type == 1) s.Price += 5;
+                    if (s.Type == 2) s.Price = s.Price * 2;
+                }
+            }
+            db.SaveChanges();
         }
     }
 }

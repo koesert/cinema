@@ -17,10 +17,22 @@ namespace Cinema.Data
         public ICollection<CinemaSeat> Seats { get; set; } = new List<CinemaSeat>();
         public decimal PurchaseTotal { get; set; }
 
-        public static string GeneretaTicketNumber()
+        public static string GenerateRandomCode(CinemaContext db)
         {
             Random random = new Random();
-            return random.Next(100000, 999999).ToString();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string code = "";
+            
+            for (int i = 0; i < 10; i++)
+            {
+                code += chars[random.Next(chars.Length)];
+            }
+            
+            if (db.Ticket.ToList().Any(x => x.TicketNumber == code))
+            {
+                return GenerateRandomCode(db);
+            }
+            return code;
         }
 
         private static List<Ticket> RetrieveTickets(CinemaContext db)

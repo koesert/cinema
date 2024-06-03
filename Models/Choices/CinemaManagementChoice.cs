@@ -20,6 +20,12 @@ namespace Cinema.Models.Choices
         [Display(Name = "Bekijk opbrengsten per periode")]
         ViewStats,
 
+        [Display(Name = "Bioscoop Instellingen")]
+        Settings,
+
+        [Display(Name = "Bekijk nieuwsbrief abbonees")]
+        ViewSubscribers,
+
         [Display(Name = "Terug")]
         Exit
     }
