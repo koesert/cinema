@@ -211,7 +211,7 @@ public class UserExperienceService
       CinemaSeat basepriceseat = db.CinemaSeats.First(x => x.Showtime == showtime && x.Color == "orange" && x.Type == 0);
       if (basepriceseat.Price != 25) Console.WriteLine();
       AnsiConsole.WriteLine();
-      AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
+      AnsiConsole.Markup($"Geselecteerde stoelprijs: {selectedSeatPrice} euro [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
       AnsiConsole.Markup($"Geselecteerde Stoel: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Druk op <Space> om stoelen te reserveren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel

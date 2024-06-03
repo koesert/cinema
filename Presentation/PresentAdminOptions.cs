@@ -828,10 +828,11 @@ namespace Cinema.Services
             DateTimeOffset enddate;
             Console.Clear();
             string firstDate = AnsiConsole.Prompt(
-                            new TextPrompt<string>("Starttijd (DD-MM-JJJJ):")
+                            new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ):")
                                 .PromptStyle("yellow")
                                 .Validate(input =>
                                 {
+                                    if (input.ToLower().Contains("terug")) return ValidationResult.Success();
                                     if (!DateTimeOffset.TryParseExact(
                                         input,
                                         "dd-MM-yyyy",
@@ -843,6 +844,11 @@ namespace Cinema.Services
                                     }
                                     return ValidationResult.Success();
                                 }));
+            if (firstDate.ToLower() == "terug")
+            {
+                Console.Clear();
+                return;
+            }
             startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
             string lastDate = AnsiConsole.Prompt(
@@ -850,6 +856,7 @@ namespace Cinema.Services
                     .PromptStyle("yellow")
                     .Validate(input =>
                     {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
                         if (!DateTimeOffset.TryParseExact(
                             input,
                             "dd-MM-yyyy",
@@ -867,6 +874,11 @@ namespace Cinema.Services
 
                         return ValidationResult.Success();
                     }));
+            if (lastDate.ToLower() == "terug")
+            {
+                Console.Clear();
+                return;
+            }
             enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
             var movieStats = db.Showtimes
                 .Where(x => x.StartTime >= startdate && x.StartTime <= enddate.AddDays(1))
