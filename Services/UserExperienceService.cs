@@ -142,14 +142,17 @@ public class UserExperienceService
 
 			if (showtimesThisWeek.Any())
 			{
-				var selectedShowtime = AnsiConsole.Prompt(
-					new SelectionPrompt<Showtime>()
+				string stringselectedShowtime = AnsiConsole.Prompt(
+					new SelectionPrompt<string>()
 						.Title("Selecteer een voorstellingstijd")
-						.AddChoices(showtimesThisWeek)
-						.UseConverter(showtime => showtime.StartTime.ToString("ddd, MMMM d hh:mm tt"))
-						.PageSize(10)
-				);
-
+						.AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie).Select(x => $"{x}").ToList())
+				));
+				if (stringselectedShowtime == "Terug")
+				{
+					ListMoviesWithShowtimes(loggedInCustomer, db);
+					return;
+				}
+				Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
 				if (selectedMovie.MinAgeRating >= 16)
 				{
 					AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
