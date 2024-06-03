@@ -730,59 +730,59 @@ namespace Cinema.Services
             DateTimeOffset enddate;
             Console.Clear();
             string firstDate = AnsiConsole.Prompt(
-                            new TextPrompt<string>("Starttijd (DD-MM-JJJJ HH:mm):")
+                            new TextPrompt<string>("Starttijd (DD-MM-JJJJ):")
                                 .PromptStyle("yellow")
                                 .Validate(input =>
                                 {
                                     if (!DateTimeOffset.TryParseExact(
                                         input,
-                                        "dd-MM-yyyy HH:mm",
+                                        "dd-MM-yyyy",
                                         CultureInfo.InvariantCulture,
                                         DateTimeStyles.AssumeUniversal,
                                         out DateTimeOffset output))
                                     {
-                                        return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                                        return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ formaat zijn.");
                                     }
                                     return ValidationResult.Success();
                                 }));
-            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
             string lastDate = AnsiConsole.Prompt(
-                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ HH:mm):")
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ):")
                     .PromptStyle("yellow")
                     .Validate(input =>
                     {
                         if (!DateTimeOffset.TryParseExact(
                             input,
-                            "dd-MM-yyyy HH:mm",
+                            "dd-MM-yyyy",
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeUniversal,
                             out DateTimeOffset output))
                         {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ formaat zijn.");
                         }
 
                         if (startdate >= output)
                         {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy HH:mm")}).");
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy")}).");
                         }
 
                         return ValidationResult.Success();
                     }));
-            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
             var movieStats = db.Showtimes
-                .Where(x => x.StartTime >= startdate && x.StartTime <= enddate)
+                .Where(x => x.StartTime >= startdate && x.StartTime <= enddate.AddDays(1))
                 .Select(x => x.Movie)
                 .Distinct()
                 .ToList()
                 .Select(movie => (
                     MovieTitle: movie.Title,
-                    ShowingsCount: db.Showtimes.Count(x => x.Movie == movie && x.StartTime >= startdate && x.StartTime <= enddate),
-                    TotalSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.IsReserved && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate),
-                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
-                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
-                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.IsReserved),
-                    TotalRevenue: db.Tickets.Where(x => x.Showtime.Movie == movie && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate && x.CancelledAt == null).Sum(x => x.PurchaseTotal)
+                    ShowingsCount: db.Showtimes.Count(x => x.Movie == movie && x.StartTime >= startdate && x.StartTime <= enddate.AddDays(1)),
+                    TotalSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.IsReserved && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1)),
+                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    TotalRevenue: db.Tickets.Where(x => x.Showtime.Movie == movie && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.CancelledAt == null).Sum(x => x.PurchaseTotal)
                 ))
                 .ToList();
 
@@ -858,7 +858,6 @@ namespace Cinema.Services
                 PresentAdminOptions.Start(db.Administrators.First(), db);
             }
         }
-
 
         private static void ExportStatsToCsv(List<(string MovieTitle, int ShowingsCount, int TotalSeatsSold, int RegularSeatsSold, int ExtraLegroomSeatsSold, int LoveseatsSold, decimal TotalRevenue)> movieStats, string filePath, int totalShowings, int totalSeatsSold, int totalRegularSeatsSold, int totalExtraLegroomSeatsSold, int totalLoveseatsSold, decimal totalRevenue)
         {
