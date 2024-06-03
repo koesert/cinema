@@ -16,7 +16,7 @@ public class PresentCustomerRegistration
 
         while (!registerSuccesful)
         {
-            var rule = new Rule("[bold blue]Klanten registratie:[/]")
+            var rule = new Rule("[bold blue]Registreren:[/]")
             {
                 Justification = Justify.Left,
                 Style = Style.Parse("blue")
@@ -24,8 +24,20 @@ public class PresentCustomerRegistration
             AnsiConsole.Write(rule);
 
             string username = AskUsername(existingCustomers);
+            if (username.ToLower() == "terug")
+            {
+                return;
+            }
             string email = AskEmail(existingCustomers, existingTicekts);
+            if (email.ToLower() == "terug")
+            {
+                return;
+            }
             string password = AskPassword();
+            if (password.ToLower() == "terug")
+            {
+                return;
+            }
 
             Customer newCustomer = Customer.CreateCustomer(db, username, password, email);
 
@@ -37,7 +49,7 @@ public class PresentCustomerRegistration
                     .Start($"Account voor [bold blue]{username}[/] is succesvol aangemaakt!", ctx =>
                     {
                         registerSuccesful = true;
-                        Task.Delay(3000).Wait();
+                        Task.Delay(2500).Wait();
 
                     });
                 if (newCustomer.Subscribed == false && AnsiConsole.Confirm("Zou u zich willen aanmelden voor onze [blue]nieuwsbrief[/]?"))
@@ -52,13 +64,17 @@ public class PresentCustomerRegistration
     private static string AskUsername(List<Customer> existingCustomers)
     {
         return AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold blue]gebruikersnaam[/] in:")
+            new TextPrompt<string>("[grey]Voer 'terug' in terug te gaan.[/]\nVoer uw [bold blue]gebruikersnaam[/] in:")
                 .PromptStyle("blue")
                 .Validate(username =>
                 {
                     if (string.IsNullOrWhiteSpace(username))
                     {
                         return ValidationResult.Error("[red]Gebruikersnaam mag niet leeg zijn[/]");
+                    }
+                    if (username.ToLower() == "terug")
+                    {
+                        return ValidationResult.Success();
                     }
                     if (!Regex.IsMatch(username, "^[a-zA-Z0-9_]+$"))
                     {
@@ -90,14 +106,20 @@ public class PresentCustomerRegistration
             email = AnsiConsole.Prompt(
                 new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
                     .PromptStyle("blue")
-                    .Validate(input =>
+                    .Validate(email =>
                     {
-                        if (string.IsNullOrWhiteSpace(input))
+                        if (string.IsNullOrWhiteSpace(email))
+                        {
                             return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
-
-                        if (!RegisterValidity.CheckEmail(input))
+                        }
+                        if (email.ToLower() == "terug")
+                        {
+                            return ValidationResult.Success();
+                        }
+                        if (!RegisterValidity.CheckEmail(email))
+                        {
                             return ValidationResult.Error("[red]Email voldoet niet aan de eisen[/]");
-
+                        }
                         return ValidationResult.Success();
                     })
             );
@@ -150,6 +172,10 @@ public class PresentCustomerRegistration
                     if (string.IsNullOrWhiteSpace(password))
                     {
                         return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
+                    }
+                    if (password.ToLower() == "terug")
+                    {
+                        return ValidationResult.Success();
                     }
                     if (password.Length < 6)
                     {

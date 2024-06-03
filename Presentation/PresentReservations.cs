@@ -41,8 +41,8 @@ public class PresentReservations
                 .Select((r, index) => new { Index = index, Option = $"Reservering: [bold]{r.Showtime.Movie.Title} - {r.Showtime.StartTime:g} (Reserveringsnummer: {r.TicketNumber})[/]" })
                 .ToDictionary(x => x.Option, x => x.Index);
 
-            var choices = movieOptions.Keys.ToList();
-            choices.Add("Terug");
+            var choices = new List<string> { "Terug" };
+            choices.AddRange(movieOptions.Keys);
 
             var selectedOption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()

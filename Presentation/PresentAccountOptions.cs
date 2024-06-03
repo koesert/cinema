@@ -4,7 +4,6 @@ using Spectre.Console;
 
 public static class PresentAccountOptions
 {
-    [Obsolete]
     public static void Start(Customer loggedInCustomer, CinemaContext db)
     {
         AnsiConsole.Clear();

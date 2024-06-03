@@ -1447,13 +1447,14 @@ public class CinemaReservationSystem
         Console.ForegroundColor = ConsoleColor.Red;
         Console.Write($"{(basepriceseat.Price+5) * 2},-");
         Console.ResetColor();
+        Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write(" Groen: Gereserveerde Stoelen ");
+        Console.Write("Groen: Gereserveerde Stoelen ");
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.Write(" Grijs: Geselecteerde Stoelen ");
         Console.WriteLine();
         Console.ResetColor();
-        Console.WriteLine($"Zaal {Showtime.RoomId}");
+        Console.Write($"Zaal {Showtime.RoomId}");
 
         // Restore the original cursor position
         Console.SetCursorPosition(originalLeft, originalTop);

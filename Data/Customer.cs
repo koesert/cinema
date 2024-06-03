@@ -25,18 +25,28 @@ namespace Cinema.Data
 			AllCustomers = db.Customers.ToList();
 		}
 
-		public static Customer FindCustomer(CinemaContext db, string email, string password)
+		public static int FindCustomer(CinemaContext db, string email, string password)
 		{
 			RetrieveCustomers(db);
 
 			foreach (Customer existingCustomer in AllCustomers)
 			{
-				if (existingCustomer.Email == email && existingCustomer.Password == password)
+				if (existingCustomer.Email == email.ToLower())
 				{
-					return existingCustomer;
+					if (existingCustomer.Password == password)
+					{
+						// Credentials matched
+						return 1;
+					}
+					else
+					{
+						// Email found but password didn't match
+						return 2;
+					}
 				}
 			}
-			return null;
+			// No account found with the provided email
+			return 0;
 		}
 
 		public static bool CheckEmailCustomer(CinemaContext db, string email)
