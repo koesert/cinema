@@ -180,13 +180,15 @@ namespace Cinema.Services
             DateTimeOffset selectedDate;
             string startTime;
 
+            Console.WriteLine($"Aanbevolen zaal voor film {selectedMovie.Title}: zaal {GetSuggestion(db, selectedMovie)}\n");
+
             // Prompt user to select RoomId
             roomId = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een zaal:")
                     .AddChoices(new[] { "1", "2", "3" })
             );
-
+            Console.Clear();
             // Prompt user to select date
             selectedDate = PromptDateSelection();
 
@@ -249,6 +251,57 @@ namespace Cinema.Services
 
         }
 
+        private static int GetSuggestion(CinemaContext db, Movie film)
+        {
+
+            var month = DateTimeOffset.UtcNow.AddMonths(-1);
+            var week = DateTimeOffset.UtcNow.AddDays(-7);
+
+            int showtimeMaand = db.Showtimes
+                .Where(x => x.Movie.Id == film.Id && x.StartTime > month)
+                .Count();
+
+            int reservedMaand = db.CinemaSeats
+                .Where(x => x.Showtime.Movie.Id == film.Id && x.Showtime.StartTime > month && x.IsReserved)
+                .Count();
+
+            int showtimeWeek = db.Showtimes
+                .Where(x => x.Movie.Id == film.Id && x.StartTime > week)
+                .Count();
+
+            int reservedWeek = db.CinemaSeats
+                .Where(x => x.Showtime.Movie.Id == film.Id && x.Showtime.StartTime > week && x.IsReserved)
+                .Count();
+
+            if (showtimeMaand == 0)
+            {
+                return 1;
+            }
+
+            var monthlyReservationRatio = reservedMaand / (double)showtimeMaand;
+
+            if (showtimeWeek > 0)
+            {
+                var weeklyReservationRatio = reservedWeek / (double)showtimeWeek;
+                if (weeklyReservationRatio > monthlyReservationRatio)
+                {
+                    monthlyReservationRatio = weeklyReservationRatio;
+                }
+            }
+
+            if (monthlyReservationRatio < 60)
+            {
+                return 1;
+            }
+            else if (monthlyReservationRatio >= 60 && monthlyReservationRatio < 180)
+            {
+                return 2;
+            }
+            else
+            {
+                return 3;
+            }
+        }
         private static DateTimeOffset PromptDateSelection()
         {
             var currentDate = DateTimeOffset.UtcNow.Date;
