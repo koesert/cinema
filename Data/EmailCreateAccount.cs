@@ -8,14 +8,16 @@ namespace Cinema.Data
 
     using SmtpClient = System.Net.Mail.SmtpClient;
 
-    public class ConfirmationEmail
+    public class EmailCreateAccount
     {
-       internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
+       internal void SendMessage(string userEmail, string userName)
         {
+            
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587;
             string smtpUsername = "spyrabv@gmail.com";
             string smtpPassword = "ivai afee sfeb xbhe";
+
             using (SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort))
             {
                 smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
@@ -25,31 +27,29 @@ namespace Cinema.Data
                 {
                     mailMessage.From = new MailAddress(smtpUsername);
                     mailMessage.To.Add(userEmail);
-                    mailMessage.Subject = "Reservation Confirmation";
+                    mailMessage.Subject = "Uw account bij Your Eyes is succesvol aangemaakt";
+
 
                     mailMessage.Body = $@"
 Beste {userName},
 
-Ik ben verheugd om uw reservering voor bioscoopstoelen bij Your Eyes te bevestigen. Hieronder vindt u de details van uw reservering:
+Hartelijk dank voor het aanmaken van een account bij Your Eyes. Hieronder vindt u de details van uw nieuwe account:
 
-Ticket: {ticketnumber}
-Filmtitel: {movieTitle}
-Datum: {date}
-Tijd: {time}
-Stoelnummers: {seatNumbers}
-Zaal: {screenNumber}
+Gebruikersnaam: {userName}
+E-mailadres: {userEmail}
 
-Kom alstublieft minstens 15 minuten voor de voorstelling aan om een soepele toegang te garanderen. Toon deze bevestiging aan de kassa om uw tickets te ontvangen.
+Met uw account kunt u eenvoudig bioscoopstoelen reserveren, uw reserveringen beheren en profiteren van exclusieve aanbiedingen en kortingen.
 
-Als u uw reservering wilt annuleren, kunt u dit tot 24 uur voor de voorstelling doen. Mocht u vragen hebben of wijzigingen in uw reservering willen aanbrengen, neem dan gerust contact met ons op via spyrabv@gmail.com.
+Mocht u vragen hebben of hulp nodig hebben bij het gebruik van uw account, aarzel dan niet om contact met ons op te nemen via spyrabv@gmail.com.
 
-Bedankt dat u voor Your Eyes heeft gekozen. We kijken ernaar uit u te verwelkomen.
+Als u zich wilt inschrijven of uitschrijven voor onze nieuwsbrieven, kunt u dit altijd doen in de applicatie in uw account bij de 'Account beheren'.
+
+Bedankt dat u voor Your Eyes heeft gekozen. We kijken ernaar uit u een geweldige bioscoopervaring te bieden.
 
 Met vriendelijke groet,
 Marcel
 Your Eyes Team
-spyrabv@gmail.com
-";
+spyrabv@gmail.com";
 
                     try
                     {
