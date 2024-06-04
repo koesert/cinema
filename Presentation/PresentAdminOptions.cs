@@ -38,6 +38,7 @@ namespace Cinema.Services
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
+        { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
         { CinemaManagementChoice.Settings, "Bioscoop Instellingen"},
         { CinemaManagementChoice.ViewSubscribers, "Bekijk nieuwsbrief abbonees"},
         { CinemaManagementChoice.Exit, "Log Uit" }
@@ -76,6 +77,9 @@ namespace Cinema.Services
                         break;
                     case CinemaManagementChoice.VoucherPanel:
                         Voucherpanel(db);
+                        break;
+                    case CinemaManagementChoice.ViewStats:
+                        ViewStats(db);
                         break;
                     case CinemaManagementChoice.Settings:
                         SettingsPanel(db);
@@ -467,7 +471,7 @@ namespace Cinema.Services
             discountType = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een kortingstype:")
-                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug"})
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug" })
             );
             if (discountType == "Terug")
             {
@@ -478,7 +482,7 @@ namespace Cinema.Services
             random = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer Code Invoer:")
-                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug"})
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug" })
             );
             if (random == "Terug")
             {
@@ -508,7 +512,7 @@ namespace Cinema.Services
             dateoption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer VervalDatum invoer:")
-                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug"})
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug" })
             );
             if (dateoption == "Terug")
             {
@@ -663,7 +667,7 @@ namespace Cinema.Services
                 string random = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer Code Invoer:")
-                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug"})
+                    .AddChoices(new[] { "Genereer code", "Handmatig code aanmaken", "Terug" })
                 );
                 if (random == "Terug")
                 {
@@ -698,7 +702,7 @@ namespace Cinema.Services
                 string discountType = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een kortingstype:")
-                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug"})
+                    .AddChoices(new[] { "% (voor een korting van 5% Bijvoorbeeld)", "- (voor een korting van 5,- Bijvoorbeeld)", "Terug" })
                 );
                 if (discountType == "Terug")
                 {
@@ -728,7 +732,7 @@ namespace Cinema.Services
                 string dateoption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer VervalDatum invoer:")
-                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug"})
+                    .AddChoices(new[] { "Standaard vervaldatum (6 maanden vanaf nu)", "Handmatig vervaldatum aanmaken", "Terug" })
                 );
                 if (dateoption == "Terug")
                 {
@@ -738,27 +742,27 @@ namespace Cinema.Services
                 }
                 if (dateoption.Contains("aanmaken"))
                 {
-                   expDate = AnsiConsole.Prompt(
-                    new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ HH:mm):")
-                    .PromptStyle("yellow")
-                    .Validate(input =>
-                    {
-                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
-                        if (!DateTimeOffset.TryParseExact(
-                            input,
-                            "dd-MM-yyyy HH:mm",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal,
-                            out DateTimeOffset output))
-                        {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
-                        }
-                        if (DateTimeOffset.UtcNow.AddHours(2) > output)
-                        {
-                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
-                        }
-                        return ValidationResult.Success();
-                    }));
+                    expDate = AnsiConsole.Prompt(
+                     new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ HH:mm):")
+                     .PromptStyle("yellow")
+                     .Validate(input =>
+                     {
+                         if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                         if (!DateTimeOffset.TryParseExact(
+                             input,
+                             "dd-MM-yyyy HH:mm",
+                             CultureInfo.InvariantCulture,
+                             DateTimeStyles.AssumeUniversal,
+                             out DateTimeOffset output))
+                         {
+                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ HH:mm formaat zijn.");
+                         }
+                         if (DateTimeOffset.UtcNow.AddHours(2) > output)
+                         {
+                             return ValidationResult.Error($"\"{input}\" is geen geldige datum. Mag niet in het verleden zijn");
+                         }
+                         return ValidationResult.Success();
+                     }));
                 }
                 if (expDate.ToLower().Contains("terug"))
                 {
@@ -815,6 +819,168 @@ namespace Cinema.Services
                 db.Vouchers.Add(percentVoucher);
             }
             db.SaveChanges();
+        }
+
+        public static void ViewStats(CinemaContext db)
+        {
+
+            DateTimeOffset startdate;
+            DateTimeOffset enddate;
+            Console.Clear();
+            string firstDate = AnsiConsole.Prompt(
+                            new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nStarttijd (DD-MM-JJJJ):")
+                                .PromptStyle("yellow")
+                                .Validate(input =>
+                                {
+                                    if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                                    if (!DateTimeOffset.TryParseExact(
+                                        input,
+                                        "dd-MM-yyyy",
+                                        CultureInfo.InvariantCulture,
+                                        DateTimeStyles.AssumeUniversal,
+                                        out DateTimeOffset output))
+                                    {
+                                        return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ formaat zijn.");
+                                    }
+                                    return ValidationResult.Success();
+                                }));
+            if (firstDate.ToLower() == "terug")
+            {
+                Console.Clear();
+                return;
+            }
+            startdate = DateTimeOffset.ParseExact(firstDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+
+            string lastDate = AnsiConsole.Prompt(
+                new TextPrompt<string>("Eindtijd (DD-MM-JJJJ):")
+                    .PromptStyle("yellow")
+                    .Validate(input =>
+                    {
+                        if (input.ToLower().Contains("terug")) return ValidationResult.Success();
+                        if (!DateTimeOffset.TryParseExact(
+                            input,
+                            "dd-MM-yyyy",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal,
+                            out DateTimeOffset output))
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Moet in DD-MM-JJJJ formaat zijn.");
+                        }
+
+                        if (startdate >= output)
+                        {
+                            return ValidationResult.Error($"\"{input}\" is geen geldige datum. Einddatum kan niet eerder zijn dan het startdatum ({startdate.ToString("dd-MM-yyyy")}).");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+            if (lastDate.ToLower() == "terug")
+            {
+                Console.Clear();
+                return;
+            }
+            enddate = DateTimeOffset.ParseExact(lastDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+            var movieStats = db.Showtimes
+                .Where(x => x.StartTime >= startdate && x.StartTime <= enddate.AddDays(1))
+                .Select(x => x.Movie)
+                .Distinct()
+                .ToList()
+                .Select(movie => (
+                    MovieTitle: movie.Title,
+                    ShowingsCount: db.Showtimes.Count(x => x.Movie == movie && x.StartTime >= startdate && x.StartTime <= enddate.AddDays(1)),
+                    TotalSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.IsReserved && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1)),
+                    RegularSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 0 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    ExtraLegroomSeatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 1 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    LoveseatsSold: db.CinemaSeats.Count(x => x.Showtime.Movie == movie && x.Type == 2 && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.IsReserved),
+                    TotalRevenue: db.Tickets.Where(x => x.Showtime.Movie == movie && x.Showtime.StartTime >= startdate && x.Showtime.StartTime <= enddate.AddDays(1) && x.CancelledAt == null).Sum(x => x.PurchaseTotal)
+                ))
+                .ToList();
+
+            var totalShowings = movieStats.Sum(x => x.ShowingsCount);
+            var totalSeatsSold = movieStats.Sum(x => x.TotalSeatsSold);
+            var totalRegularSeatsSold = movieStats.Sum(x => x.RegularSeatsSold);
+            var totalExtraLegroomSeatsSold = movieStats.Sum(x => x.ExtraLegroomSeatsSold);
+            var totalLoveseatsSold = movieStats.Sum(x => x.LoveseatsSold);
+            var totalRevenue = movieStats.Sum(x => x.TotalRevenue);
+
+            var table = new Table().Border(TableBorder.Rounded);
+            table.AddColumn(new TableColumn("[yellow]Film[/]").Centered());
+            table.AddColumn(new TableColumn("[green]Aantal vertoningen[/]").Centered());
+            table.AddColumn(new TableColumn("[cyan]Aantal stoelen totaal verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[magenta]Aantal reguliere stoelen verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[blue]Aantal stoelen met extra beenruimte verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[red]Aantal loveseats verkocht[/]").Centered());
+            table.AddColumn(new TableColumn("[purple]Totale omzet[/]").Centered());
+
+            foreach (var stat in movieStats)
+            {
+                table.AddRow(
+                    stat.MovieTitle,
+                    stat.ShowingsCount.ToString(),
+                    stat.TotalSeatsSold.ToString(),
+                    stat.RegularSeatsSold.ToString(),
+                    stat.ExtraLegroomSeatsSold.ToString(),
+                    stat.LoveseatsSold.ToString(),
+                    $"${stat.TotalRevenue:N2}"
+                );
+            }
+
+            var summaryTable = new Table().Border(TableBorder.Rounded);
+            summaryTable.AddColumn(new TableColumn("[green]Totale vertoningen[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[cyan]Totaal aantal stoelen verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[magenta]Totaal aantal reguliere stoelen verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[blue]Totaal aantal stoelen met extra beenruimte verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[red]Totaal aantal loveseats verkocht[/]").Centered());
+            summaryTable.AddColumn(new TableColumn("[purple]Totale omzet[/]").Centered());
+
+            summaryTable.AddRow(
+                totalShowings.ToString(),
+                totalSeatsSold.ToString(),
+                totalRegularSeatsSold.ToString(),
+                totalExtraLegroomSeatsSold.ToString(),
+                totalLoveseatsSold.ToString(),
+                $"${totalRevenue:N2}"
+            );
+
+            AnsiConsole.Write(table);
+            AnsiConsole.Write(summaryTable);
+
+            var option = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Selecteer een optie:")
+                    .AddChoices(new[] { "Exporteer naar apart bestand", "Terug" })
+            );
+            if (option == "Exporteer naar apart bestand")
+            {
+                {
+                    string formattedStartDate = startdate.ToString("yyyyMMdd");
+                    string formattedEndDate = enddate.ToString("yyyyMMdd");
+                    string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
+                    ExportStatsToCsv(movieStats, filePath, totalShowings, totalSeatsSold, totalRegularSeatsSold, totalExtraLegroomSeatsSold, totalLoveseatsSold, totalRevenue);
+                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
+                    EmailCSVFile sender = new EmailCSVFile();
+                    sender.SendCSVFile("Guest", filePath);
+                    Console.ReadKey();
+                }
+            }
+            else if (option == "Terug")
+            {
+                PresentAdminOptions.Start(db.Administrators.First(), db);
+            }
+        }
+
+        private static void ExportStatsToCsv(List<(string MovieTitle, int ShowingsCount, int TotalSeatsSold, int RegularSeatsSold, int ExtraLegroomSeatsSold, int LoveseatsSold, decimal TotalRevenue)> movieStats, string filePath, int totalShowings, int totalSeatsSold, int totalRegularSeatsSold, int totalExtraLegroomSeatsSold, int totalLoveseatsSold, decimal totalRevenue)
+        {
+            using (var writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine("Film, Aantal vertoningen, Totaal verkochte stoelen, Reguliere stoelen, Extra beenruimte stoelen, Loveseats, Totale omzet");
+                foreach (var stat in movieStats)
+                {
+                    writer.WriteLine($"\"{stat.MovieTitle}\", {stat.ShowingsCount}, {stat.TotalSeatsSold}, {stat.RegularSeatsSold}, {stat.ExtraLegroomSeatsSold}, {stat.LoveseatsSold}, \"{stat.TotalRevenue:N2}\"");
+                }
+                writer.WriteLine("\nTotals, Totale vertoningen, Totaal aantal stoelen verkocht, Totaal aantal reguliere stoelen verkocht, Totaal aantal stoelen met extra beenruimte verkocht, Totaal aantal loveseats verkocht, Totale omzet");
+                writer.WriteLine($"\"All Films\", {totalShowings}, {totalSeatsSold}, {totalRegularSeatsSold}, {totalExtraLegroomSeatsSold}, {totalLoveseatsSold}, \"{totalRevenue:N2}\"");
+            }
         }
         public static void SettingsPanel(CinemaContext db)
         {

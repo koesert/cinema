@@ -10,7 +10,7 @@ namespace Cinema.Data
 
     public class CancellationEmails
     {
-       internal void SendMessageCancel(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
+        internal void SendMessageCancel(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
         {
             // SMTP server settings for Mail.ru
             string smtpServer = "smtp.gmail.com";
@@ -53,16 +53,16 @@ Your Eyes Team
 spyrabv@gmail.com
 ";
 
-                try
-                {
-                    // Send the email
-                    smtpClient.Send(mailMessage);
-                    Console.WriteLine("Email sent successfully!");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to send email: {ex.Message}");
-                }
+                    try
+                    {
+                        // Send the email
+                        smtpClient.Send(mailMessage);
+                        Console.WriteLine("Email sent successfully!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to send email: {ex.Message}");
+                    }
                 }
             }
         }

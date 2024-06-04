@@ -5,7 +5,7 @@ using System.Globalization;
 
 public class LogicLayerVoucher
 {
-    public static string CodeCheck(CinemaContext db ,string code)
+    public static string CodeCheck(CinemaContext db, string code)
     {
         List<Voucher> vouchers = db.Vouchers.ToList();
         bool check = false;
@@ -26,7 +26,7 @@ public class LogicLayerVoucher
             }
             else
             {
-                Console.WriteLine("Code does not appear to match the given restrictions. Please try again:");
+                Console.WriteLine("Code lijkt niet te voldoen aan de gegeven beperkingen. Probeer het opnieuw:");
                 code = Console.ReadLine();
             }
         }
@@ -41,7 +41,7 @@ public class LogicLayerVoucher
             {
                 return discountType;
             }
-            Console.WriteLine("Invalid choice. Please try again:");
+            Console.WriteLine("Ongeldige keuze. Probeer het opnieuw:");
             discountType = Console.ReadLine();
         }
         return "";
@@ -56,11 +56,12 @@ public class LogicLayerVoucher
             {
                 return indextoremove;
             }
-            Console.WriteLine("Invalid option. That was not a spot on the list. Please try again:");
+            Console.WriteLine("Ongeldige optie. Dat was geen plek op de lijst. Probeer het opnieuw:");
             indextoremove = Convert.ToInt32(Console.ReadLine());
         }
         return 1;
     }
+
     public static double CheckDiscount(string input)
     {
         bool check = false;
@@ -106,12 +107,12 @@ public class LogicLayerVoucher
         Random random = new Random();
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         string code = "";
-        
+
         for (int i = 0; i < 10; i++)
         {
             code += chars[random.Next(chars.Length)];
         }
-        
+
         if (db.Vouchers.ToList().Any(x => x.Code == code))
         {
             return GenerateRandomCode(db);
