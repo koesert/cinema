@@ -1511,7 +1511,7 @@ public class CinemaReservationSystem
         }
     }
 
-public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
+    public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, CinemaContext db)
     {
         var seatCheck = db.CinemaSeats
             .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == row && s.SeatNumber == seatNumber);
@@ -1530,7 +1530,7 @@ public static CinemaSeat FindSeat(char row, int seatNumber, Showtime showtime, C
 
         if (seatToReserve.IsReserved)
         {
-            Console.WriteLine($"Seat {row}{seatNumber} is already reserved.");
+            Console.WriteLine($"Stoel {row}{seatNumber} is al gereserveerd.");
             return false;
         }
 

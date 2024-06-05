@@ -45,12 +45,12 @@ public static class PresentCustomerReservationProgress
         double amount = db.Tickets.Where(x => x.CustomerEmail == customer.Email && x.PurchasedAt <= enddate && x.PurchasedAt >= startdate && (x.CancelledAt == null || x.CancelledAt == DateTimeOffset.MinValue)).Count();
         if (amount == 0)
         {
-           Voucher vouchersWithReward = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
-           if (vouchersWithReward != null)
-           {
+            Voucher vouchersWithReward = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+            if (vouchersWithReward != null)
+            {
                 vouchersWithReward.IsReward = "false";
                 db.SaveChanges();
-           }
+            }
 
         }
         double max = 10;
@@ -125,13 +125,13 @@ public static class PresentCustomerReservationProgress
         double amount = db.Tickets.Where(x => x.CustomerEmail == customer.Email && x.PurchasedAt <= enddate && x.PurchasedAt >= startdate && (x.CancelledAt == null || x.CancelledAt == DateTimeOffset.MinValue)).Count();
         if (amount == 0)
         {
-           Voucher vouchersWithReward = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
-           if (vouchersWithReward != null)
-           {
+            Voucher vouchersWithReward = db.Vouchers.FirstOrDefault(v => v.IsReward == "true" && v.CustomerEmail == customer.Email);
+            if (vouchersWithReward != null)
+            {
                 vouchersWithReward.IsReward = "false";
                 vouchersWithReward.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
                 db.SaveChanges();
-           }
+            }
 
         }
         double max = 10;

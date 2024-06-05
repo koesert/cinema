@@ -10,7 +10,7 @@ namespace Cinema.Data
 
     public class ConfirmationEmail
     {
-       internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
+        internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
         {
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587;
@@ -24,8 +24,8 @@ namespace Cinema.Data
                 using (MailMessage mailMessage = new MailMessage())
                 {
                     mailMessage.From = new MailAddress(smtpUsername);
-                    mailMessage.To.Add(userEmail);
-                    mailMessage.Subject = "Reservation Confirmation";
+                    mailMessage.To.Add(userEmail); // Specify the recipient's email address
+                    mailMessage.Subject = "Bevestiging van Reservering";
 
                     mailMessage.Body = $@"
 Beste {userName},
@@ -54,17 +54,16 @@ spyrabv@gmail.com
                     try
                     {
                         smtpClient.Send(mailMessage);
-                        Console.WriteLine("Email sent successfully!");
+                        Console.WriteLine("E-mail succesvol verzonden!");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Failed to send email: {ex.Message}");
-               
+                        Console.WriteLine($"E-mail verzenden mislukt: {ex.Message}");
                     }
                 }
             }
         }
 
-    
+
     }
 }
