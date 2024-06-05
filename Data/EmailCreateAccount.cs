@@ -8,10 +8,11 @@ namespace Cinema.Data
 
     using SmtpClient = System.Net.Mail.SmtpClient;
 
-    public class CancellationEmails
+    public class EmailCreateAccount
     {
-        internal void SendMessageCancel(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
+       internal void SendMessage(string userEmail, string userName)
         {
+            
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587;
             string smtpUsername = "spyrabv@gmail.com";
@@ -26,44 +27,44 @@ namespace Cinema.Data
                 {
                     mailMessage.From = new MailAddress(smtpUsername);
                     mailMessage.To.Add(userEmail);
-                    mailMessage.Subject = "Reservering annuleren";
+                    mailMessage.Subject = "Uw account bij Your Eyes is succesvol aangemaakt";
+
 
                     mailMessage.Body = $@"
 Beste {userName},
 
-Uw annulering van de reservering voor bioscoopstoelen bij Your Eyes is succesvol verwerkt. Hieronder vindt u de details van uw geannuleerde reservering:
+Hartelijk dank voor het aanmaken van een account bij Your Eyes. Hieronder vindt u de details van uw nieuwe account:
 
-Ticket: {ticketnumber}
-Filmtitel: {movieTitle}
-Datum: {date}
-Tijd: {time}
-Stoelnummers: {seatNumbers}
-Zaal: {screenNumber}
+Gebruikersnaam: {userName}
+E-mailadres: {userEmail}
 
-We hopen u in de toekomst weer te mogen verwelkomen bij Your Eyes. Mocht u vragen hebben of een nieuwe reservering willen maken, neem dan gerust contact met ons op via spyrabv@gmail.com.
+Met uw account kunt u eenvoudig bioscoopstoelen reserveren, uw reserveringen beheren en profiteren van exclusieve aanbiedingen en kortingen.
 
-Bedankt voor uw begrip.
+Mocht u vragen hebben of hulp nodig hebben bij het gebruik van uw account, aarzel dan niet om contact met ons op te nemen via spyrabv@gmail.com.
+
+Als u zich wilt inschrijven of uitschrijven voor onze nieuwsbrieven, kunt u dit altijd doen in de applicatie in uw account bij de 'Account beheren'.
+
+Bedankt dat u voor Your Eyes heeft gekozen. We kijken ernaar uit u een geweldige bioscoopervaring te bieden.
 
 Met vriendelijke groet,
 Marcel
 Your Eyes Team
-spyrabv@gmail.com
-";
+spyrabv@gmail.com";
 
                     try
                     {
-                        // Send the email
                         smtpClient.Send(mailMessage);
                         Console.WriteLine("Email sent successfully!");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Failed to send email: {ex.Message}");
+               
                     }
                 }
             }
         }
 
-
+    
     }
 }

@@ -12,16 +12,12 @@ namespace Cinema.Data
     {
         internal void SendMessage(string userEmail, string userName, string movieTitle, string date, string time, string seatNumbers, string screenNumber, string ticketnumber)
         {
-            // SMTP server settings for Mail.ru
             string smtpServer = "smtp.gmail.com";
-            int smtpPort = 587; // Commonly used port for TLS
+            int smtpPort = 587;
             string smtpUsername = "spyrabv@gmail.com";
-            string smtpPassword = "ivai afee sfeb xbhe"; // Application-specific password
-
-            // Create an SMTP client object
+            string smtpPassword = "ivai afee sfeb xbhe";
             using (SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort))
             {
-                // SMTP authentication settings
                 smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
                 smtpClient.EnableSsl = true;
 

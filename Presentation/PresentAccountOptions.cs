@@ -236,6 +236,8 @@ public static class PresentAccountOptions
                             Thread.Sleep(2500);
                         });
                         AnsiConsole.MarkupLine("[hotpink2]Voorkeur opgeslagen![/]");
+                        NewsletterSubscription senders = new NewsletterSubscription();
+                        senders.SendMessageCancelNewsletter(loggedInCustomer.Email, loggedInCustomer.Username);
                         Thread.Sleep(2500);
                     }
                 }
@@ -252,6 +254,8 @@ public static class PresentAccountOptions
                             Thread.Sleep(2500);
                         });
                         AnsiConsole.MarkupLine("[hotpink2]Voorkeur opgeslagen![/]");
+                        NewsletterSubscription senders = new NewsletterSubscription();
+                        senders.SendMessageSubscribeNewsletter(loggedInCustomer.Email, loggedInCustomer.Username);
                         Thread.Sleep(2500);
                     }
                 }

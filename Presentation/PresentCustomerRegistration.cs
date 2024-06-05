@@ -52,10 +52,13 @@ public class PresentCustomerRegistration
                         Task.Delay(2500).Wait();
 
                     });
+
                 if (newCustomer.Subscribed == false && AnsiConsole.Confirm("Zou u zich willen aanmelden voor onze [blue]nieuwsbrief[/]?"))
                 {
                     Customer.UpdatePreference(newCustomer, db);
                 }
+                EmailCreateAccount sender = new EmailCreateAccount();
+                sender.SendMessage(email, username);
                 PresentCustomerOptions.Start(newCustomer, db);
             }
         }
