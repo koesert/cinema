@@ -186,12 +186,24 @@ namespace Cinema.Services
             roomId = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een zaal:")
-                    .AddChoices(new[] { "1", "2", "3" })
+                    .AddChoices(new[] { "1", "2", "3", "Terug"})
             );
+            if (roomId == "Terug")
+            {
+                Console.Clear();
+                ListMovies(db);
+                return;
+            }
             Console.Clear();
             // Prompt user to select date
-            selectedDate = PromptDateSelection();
-
+            string selectedDateString = PromptDateSelection(db);
+            if (selectedDateString == "Terug")
+            {
+                Console.Clear();
+                ListMovies(db);
+                return;
+            }
+            selectedDate = DateTimeOffset.ParseExact(selectedDateString, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             var formattedDate = selectedDate.ToString("dd-MM-yyyy");
 
             var availableHours = GetAvailableHours(db, roomId, formattedDate, selectedMovie.Duration);
@@ -202,8 +214,15 @@ namespace Cinema.Services
                 startTime = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("Selecteer een starttijd:")
-                        .AddChoices(availableHours)
+                        .AddChoices(new List<string> { "Terug" }.Concat(availableHours))
                 );
+
+                if (startTime == "Terug")
+                {
+                    Console.Clear();
+                    ListMovies(db);
+                    return;
+                }
 
                 if (!AnsiConsole.Confirm("Weet je zeker dat je deze film wilt toevoegen?"))
                 {
@@ -302,7 +321,7 @@ namespace Cinema.Services
                 return 3;
             }
         }
-        private static DateTimeOffset PromptDateSelection()
+        private static string PromptDateSelection(CinemaContext db)
         {
             var currentDate = DateTimeOffset.UtcNow.Date;
             var dates = Enumerable.Range(0, 28)
@@ -312,10 +331,10 @@ namespace Cinema.Services
             var selectedDateString = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een datum:")
-                    .AddChoices(dates.Select(date => date.ToString("dd-MM-yyyy")))
+                    .AddChoices(new List<string> { "Terug" }.Concat(dates.Select(date => date.ToString("dd-MM-yyyy"))))
             );
 
-            return DateTimeOffset.ParseExact(selectedDateString, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            return selectedDateString;
         }
 
         private static bool TryParseAndValidateDateTime(string input, out DateTimeOffset result)
