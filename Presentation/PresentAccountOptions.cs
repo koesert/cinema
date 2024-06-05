@@ -196,7 +196,7 @@ public static class PresentAccountOptions
                                 return ValidationResult.Error("[red]Wachtwoord moet minimaal 6 tekens lang zijn[/]");
                             }
                             if (!password.Any(char.IsDigit))
-                            {`
+                            {
                                 return ValidationResult.Error("[red]Wachtwoord moet minimaal één cijfer bevatten[/]");
                             }
                             if (!password.All(char.IsLetterOrDigit))
