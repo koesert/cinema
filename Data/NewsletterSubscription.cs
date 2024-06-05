@@ -48,7 +48,7 @@ spyrabv@gmail.com";
                 {
                     // Send the email
                     smtpClient.Send(mailMessage);
-                    Console.WriteLine("Email sent successfully!");
+                    Console.WriteLine("Email verzonden!");
                 }
                 catch (Exception ex)
                 {
@@ -75,7 +75,7 @@ spyrabv@gmail.com";
                 {
                     mailMessage.From = new MailAddress(smtpUsername);
                     mailMessage.To.Add(userEmail);
-                    mailMessage.Subject = "Bevestiging van Annulering Nieuwsbrief";
+                    mailMessage.Subject = "Bevestiging van annulering nieuwsbrief";
 
                     mailMessage.Body = $@"
 Beste {userName},
@@ -94,11 +94,11 @@ spyrabv@gmail.com";
                 try
                 {
                     smtpClient.Send(mailMessage);
-                    Console.WriteLine("Email sent successfully!");
+                    Console.WriteLine("Email verzonden!");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to send email: {ex.Message}");
+                    Console.WriteLine($"Kon email niet verzenden: {ex.Message}");
                 }
                 }
             }

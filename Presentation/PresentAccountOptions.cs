@@ -36,13 +36,17 @@ public static class PresentAccountOptions
 
                 string newEmail = AnsiConsole.Prompt
                     (
-                        new TextPrompt<string>("Wat word uw nieuwe [blue]email[/]?")
+                        new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nWat word uw nieuwe [blue]email[/]?")
                             .PromptStyle("blue")
                             .Validate(email =>
                             {
                                 if (string.IsNullOrEmpty(email))
                                 {
                                     return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
+                                }
+                                if (email.ToLower() == "terug")
+                                {
+                                    return ValidationResult.Success();
                                 }
                                 foreach (Customer existingCustomer in existingCustomers)
                                 {
@@ -58,6 +62,10 @@ public static class PresentAccountOptions
                                 return ValidationResult.Success();
                             })
                     );
+                if (newEmail.ToLower() == "terug")
+                {
+                    Start(loggedInCustomer, db);
+                }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u '[blue]{newEmail}[/]' als email wilt gebruiken?"))
                 {
                     AnsiConsole.Status()
@@ -95,13 +103,17 @@ public static class PresentAccountOptions
                 AnsiConsole.Write(usernameRule);
 
                 string newUsername = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Wat word uw nieuwe [blue]gebruikersnaam[/]?")
+                    new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nWat word uw nieuwe [blue]gebruikersnaam[/]?")
                         .PromptStyle("blue")
                         .Validate(username =>
                         {
                             if (string.IsNullOrWhiteSpace(username))
                             {
                                 return ValidationResult.Error("[red]Gebruikersnaam mag niet leeg zijn[/]");
+                            }
+                            if (username.ToLower() == "terug")
+                            {
+                                return ValidationResult.Success();
                             }
                             if (!Regex.IsMatch(username, "^[a-zA-Z0-9_]+$"))
                             {
@@ -121,6 +133,10 @@ public static class PresentAccountOptions
                             return ValidationResult.Success();
                         })
                 );
+                if (newUsername.ToLower() == "terug")
+                {
+                    Start(loggedInCustomer, db);
+                }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u '[blue]{newUsername}[/]' als gebruikersnaam wilt gebruiken?"))
                 {
                     AnsiConsole.Status()
@@ -158,7 +174,7 @@ public static class PresentAccountOptions
                 AnsiConsole.Write(passwordRule);
 
                 string newPassword = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Wat word uw nieuwe [bold blue]wachtwoord[/]?")
+                    new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nWat word uw nieuwe [bold blue]wachtwoord[/]?")
                         .PromptStyle("blue")
                         .Secret()
                         .Validate(password =>
@@ -171,12 +187,16 @@ public static class PresentAccountOptions
                             {
                                 return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
                             }
+                            if (password.ToLower() == "terug")
+                            {
+                                return ValidationResult.Success();
+                            }
                             if (password.Length < 6)
                             {
                                 return ValidationResult.Error("[red]Wachtwoord moet minimaal 6 tekens lang zijn[/]");
                             }
                             if (!password.Any(char.IsDigit))
-                            {
+                            {`
                                 return ValidationResult.Error("[red]Wachtwoord moet minimaal één cijfer bevatten[/]");
                             }
                             if (!password.All(char.IsLetterOrDigit))
@@ -186,7 +206,10 @@ public static class PresentAccountOptions
                             return ValidationResult.Success();
                         })
                 );
-
+                if (newPassword.ToLower() == "terug")
+                {
+                    Start(loggedInCustomer, db);
+                }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u uw [blue]wachtwoord[/] wilt aanpassen?"))
                 {
                     AnsiConsole.Status()

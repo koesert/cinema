@@ -25,16 +25,19 @@ public class EmailCSVFile
             {
                 mailMessage.From = new MailAddress(smtpUsername);
                 mailMessage.To.Add(""); // Specify the recipient's email address (Hier komt waarschijnlijk de email van Marcel te staan)
-                mailMessage.Subject = "CSVFileSender";
+                mailMessage.Subject = "Uw CSV data betand";
 
                 // Create the body of the email
                 mailMessage.Body = $@"
-Dear {userName},
+Beste {userName},
 
 Please find attached the CSV file with the data.
+Zie hier het CSV betand met de data in de bijlagen.
 
-Best regards,
-Spyra B.V.
+Met vriendelijke groet,
+Marcel
+Your Eyes Team
+spyrabv@gmail.com
 ";
 
                 // Create the attachment
@@ -45,11 +48,11 @@ Spyra B.V.
                 {
                     // Send the email
                     smtpClient.Send(mailMessage);
-                    Console.WriteLine("Email sent successfully!");
+                    Console.WriteLine("Email verzonden!");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to send email: {ex.Message}");
+                    Console.WriteLine($"Kon email niet verzenden: {ex.Message}");
                 }
             }
         }

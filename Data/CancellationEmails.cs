@@ -54,11 +54,11 @@ spyrabv@gmail.com
                     {
                         // Send the email
                         smtpClient.Send(mailMessage);
-                        Console.WriteLine("Email sent successfully!");
+                        Console.WriteLine("Email verzonden!");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Failed to send email: {ex.Message}");
+                        Console.WriteLine($"Kon email niet verzenden: {ex.Message}");
                     }
                 }
             }
