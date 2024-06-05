@@ -305,7 +305,7 @@ public static class PresentAccountOptions
                     AnsiConsole.MarkupLine("[red]Account verwijderd. Tot ziens![/]");
                     Thread.Sleep(2500);
                     AnsiConsole.Clear();
-                    break;
+                    return;
                 }
                 else
                 {
