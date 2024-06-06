@@ -368,6 +368,7 @@ public class UserExperienceService
         db.SaveChanges();
       }
       AnsiConsole.MarkupLine("[green]Stoelen succesvol gereserveerd.[/]");
+      AnsiConsole.MarkupLine($"De film zal vertoond worden in [purple]Zaal {showtime.RoomId}[/] op locatie [blue]Witte de Withstraat 20, 3067AX Rotterdam.[/]");
       Console.WriteLine("Druk op een willekeurige toets om terug te keren naar het begin.");
       if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       PresentAdminOptions.UpdateVouchers(db);

@@ -39,6 +39,8 @@ Tijd: {time}
 Stoelnummers: {seatNumbers}
 Zaal: {screenNumber}
 
+De film zal vertoond worden in Zaal {screenNumber} op locatie Witte de Withstraat 20, 3067AX Rotterdam.
+
 Kom alstublieft minstens 15 minuten voor de voorstelling aan om een soepele toegang te garanderen. Toon deze bevestiging aan de kassa om uw tickets te ontvangen.
 
 Als u uw reservering wilt annuleren, kunt u dit tot 24 uur voor de voorstelling doen. Mocht u vragen hebben of wijzigingen in uw reservering willen aanbrengen, neem dan gerust contact met ons op via spyrabv@gmail.com.

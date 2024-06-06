@@ -21,6 +21,9 @@ namespace Cinema.Models.Choices
         [Description("Gast-reservering bekijken")]
         reservering,
 
+        [Description("Bioscoop informatie")]
+        Information,
+
         [Description("Afsluiten")]
         Exit
     }
