@@ -39,7 +39,7 @@ Tijd: {time}
 Stoelnummers: {seatNumbers}
 Zaal: {screenNumber}
 
-De film zal vertoond worden in Zaal {screenNumber} op locatie Witte de Withstraat 20, 3067AX Rotterdam.
+De film zal vertoond worden op locatie Witte de Withstraat 20, 3067AX Rotterdam.
 
 Kom alstublieft minstens 15 minuten voor de voorstelling aan om een soepele toegang te garanderen. Toon deze bevestiging aan de kassa om uw tickets te ontvangen.
 
