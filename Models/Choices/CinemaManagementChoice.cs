@@ -12,6 +12,9 @@ namespace Cinema.Models.Choices
         [Display(Name = "Lijst met momenteel beschikbare films")]
         ListMovies,
 
+        [Display(Name = "Film agenda")]
+        OverviewMovies,
+
         [Display(Name = "Voeg een film toe")]
         AddMovie,
 
