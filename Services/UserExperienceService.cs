@@ -4,7 +4,7 @@ using Cinema.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
-
+using Cinema.Logic;
 public class UserExperienceService
 {
 

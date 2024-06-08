@@ -186,7 +186,7 @@ namespace Cinema.Services
             roomId = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een zaal:")
-                    .AddChoices(new[] { "1", "2", "3", "Terug"})
+                    .AddChoices(new[] { "1", "2", "3", "Terug" })
             );
             if (roomId == "Terug")
             {
