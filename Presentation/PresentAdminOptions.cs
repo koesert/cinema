@@ -215,12 +215,13 @@ namespace Cinema.Services
             AnsiConsole.Write(new Rule());
 
             DateTime startDate = GetFirstDateOfWeek(DateTime.Now.Year, weekNumber);
-            DateTime endDate = startDate.AddDays(6);
+            DateTime endDate = startDate.AddDays(7).AddDays(-1);
 
             var showtimesForWeek = db.Showtimes
                 .Where(s => s.StartTime.DateTime.Date >= startDate.Date && s.StartTime.DateTime.Date <= endDate.Date)
                 .Include(s => s.Movie)
-                .OrderBy(s => s.StartTime.DateTime);
+                .OrderBy(s => s.StartTime.DateTime)
+                .ToList();
 
             if (!showtimesForWeek.Any())
             {
@@ -228,39 +229,41 @@ namespace Cinema.Services
             }
             else
             {
-                var table = new Table().BorderColor(Color.Grey).Collapse().RoundedBorder();
+                var table = new Table().BorderColor(Color.Grey).RoundedBorder();
 
                 string[] dagen = { "Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo" };
-                for (int i = 0; i < 7; i++)
+                table.AddColumn(new TableColumn("Tijd").Centered());
+
+                foreach (var day in dagen)
                 {
-                    table.AddColumn(new TableColumn($"[bold]{dagen[i]}[/]").Centered());
+                    table.AddColumn(new TableColumn(day).Centered());
                 }
 
-                var showtimesByDate = showtimesForWeek.GroupBy(s => s.StartTime.DateTime.Date);
-
-                var rows = new List<string>[7];
-                for (int i = 0; i < 7; i++)
+                var timeSlots = new Dictionary<(int, int), List<string>>();
+                for (int i = 12; i <= 22; i++)
                 {
-                    rows[i] = new List<string>();
-                }
-
-                foreach (var dateGroup in showtimesByDate)
-                {
-                    var dayIndex = (int)dateGroup.Key.DayOfWeek;
-                    foreach (var showtime in dateGroup)
-                    {
-                        rows[dayIndex].Add($"{showtime.StartTime.DateTime:HH:mm} - {showtime.Movie.Title} (Zaal {showtime.RoomId})");
-                    }
-                }
-
-                for (int i = 0; i < 5; i++)
-                {
-                    var row = new List<string>();
                     for (int j = 0; j < 7; j++)
                     {
-                        if (i < rows[j].Count)
+                        timeSlots[(i, j)] = new List<string>();
+                    }
+                }
+                foreach (var showtime in showtimesForWeek)
+                {
+                    int hourOfDay = showtime.StartTime.Hour;
+                    int dayIndex = ((int)showtime.StartTime.DayOfWeek + 6) % 7;
+                    string movieInfo = $"{showtime.StartTime.ToString("HH:mm")} - {showtime.Movie.Title} (Zaal {showtime.RoomId})";
+                    timeSlots[(hourOfDay, dayIndex)].Add(movieInfo);
+                }
+
+                for (int i = 12; i <= 22; i++)
+                {
+                    var row = new List<string> { $"{i:00}:00" };
+                    for (int j = 0; j < 7; j++)
+                    {
+                        if (timeSlots.ContainsKey((i, j)))
                         {
-                            row.Add($"[green]{rows[j][i]}[/]");
+                            string movies = string.Join("\n", timeSlots[(i, j)]);
+                            row.Add($"[green]{movies}[/]");
                         }
                         else
                         {
@@ -275,6 +278,13 @@ namespace Cinema.Services
 
             AnsiConsole.Write(new Rule());
         }
+
+        private static Color GetColor(int dayIndex)
+        {
+            Color[] colors = { Color.Red, Color.Orange1, Color.Yellow, Color.Green, Color.Blue, Color.Aquamarine1, Color.Violet };
+            return colors[dayIndex];
+        }
+
 
         private static DateTime GetFirstDateOfWeek(int year, int weekNumber)
         {
