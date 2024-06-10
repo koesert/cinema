@@ -77,14 +77,13 @@ public class UserExperienceService
         .OrderBy(x => x.Title)
         .ToList();
 
-      var options = new List<string> { "Filter door films" };
+      var options = new List<string> { "Terug" , "Filter door films" };
 
       options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
       AnsiConsole.MarkupLine("");
       AnsiConsole.MarkupLine(filterDescription); // Display active filters
       if (currentWeek < 3) options.Add("Volgende week");
       if (currentWeek > 0) options.Add("Vorige week");
-      options.Add("Terug");
 
       var selectedOption = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
