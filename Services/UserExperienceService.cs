@@ -319,12 +319,12 @@ public class UserExperienceService
     decimal totalSeatPrice = 0;
     foreach (var seat in selectedSeats)
     {
-      table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"${seat.Price}");
+      table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"{seat.Price} Euro");
       totalSeatPrice += seat.Price;
     }
     AnsiConsole.Write(table);
 
-    Console.WriteLine($"Totaal Prijs: ${totalSeatPrice}");
+    Console.WriteLine($"Totaal Prijs: {totalSeatPrice} Euro");
     if (!(loggedInCustomer is null))
     {
       v = UseVoucher(db, loggedInCustomer);
@@ -333,10 +333,10 @@ public class UserExperienceService
         Console.Clear();
         AnsiConsole.Write(table);
 
-        Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
+        Console.WriteLine($"Oude Totaal Prijs: {totalSeatPrice} Euro");
         Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
 
-        Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
+        Console.WriteLine($"Nieuwe Totaal Prijs: {v.ApplyDiscount((double)totalSeatPrice)} Euro");
       }
     }
 
