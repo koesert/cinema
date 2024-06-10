@@ -545,6 +545,7 @@ public class UserExperienceService
         CinemaFilterChoice.Genres,
         CinemaFilterChoice.Directeuren,
         CinemaFilterChoice.Acteurs,
+        CinemaFilterChoice.Leeftijdsclassificatie,
         CinemaFilterChoice.Terug
         })
     );
@@ -597,6 +598,24 @@ public class UserExperienceService
           movie.Directors.Intersect(selectedDirectors).Any())
           .AsQueryable();
         activeFilters += "Directeuren: " + string.Join(", ", selectedDirectors);
+        break;
+
+      case CinemaFilterChoice.Leeftijdsclassificatie:
+        var ageRatingChoice = AnsiConsole.Prompt(
+          new SelectionPrompt<string>()
+            .Title("Selecteer een leeftijdsclassificatie om films te filteren")
+            .AddChoices(new[] { "16+", "Onder 16" })
+        );
+        if (ageRatingChoice == "16+")
+        {
+          moviesQuery = allMovies.Where(movie => movie.MinAgeRating >= 16).AsQueryable();
+          activeFilters += "Leeftijdsclassificatie: 16+";
+        }
+        else if (ageRatingChoice == "Onder 16")
+        {
+          moviesQuery = allMovies.Where(movie => movie.MinAgeRating < 16).AsQueryable();
+          activeFilters += "Leeftijdsclassificatie: Onder 16";
+        }
         break;
 
       default:

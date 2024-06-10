@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     [DbContext(typeof(CinemaContext))]
-    [Migration("20240507215821_PurchaseTotaltoTicketTable")]
-    partial class PurchaseTotaltoTicketTable
+    [Migration("20240610083939_ResetCodeColumn")]
+    partial class ResetCodeColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,15 @@ namespace cinema.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("PriceEndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PriceStartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("TempPrice")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Username")
                         .HasColumnType("text");
 
@@ -58,6 +67,9 @@ namespace cinema.Migrations
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
+
+                    b.Property<bool>("Subscribed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Username")
                         .HasColumnType("text");
@@ -139,7 +151,7 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("CancelledAt")
+                    b.Property<DateTimeOffset?>("CancelledAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerEmail")
@@ -201,6 +213,9 @@ namespace cinema.Migrations
                     b.Property<int?>("TicketId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ShowtimeId");
@@ -218,13 +233,25 @@ namespace cinema.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerEmail")
                         .HasColumnType("text");
 
                     b.Property<double>("Discount")
                         .HasColumnType("double precision");
 
                     b.Property<string>("DiscountType")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IsReward")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
