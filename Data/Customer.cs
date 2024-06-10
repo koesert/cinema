@@ -65,7 +65,7 @@ namespace Cinema.Data
 		}
 		public static Customer CreateCustomer(CinemaContext db, string username, string password, string email)
 		{
-			Customer newCustomer = new Customer(username, password, email);
+			Customer newCustomer = new Customer(username, password, email.ToLower());
 			db.Customers.Add(newCustomer);
 			db.SaveChanges();
 
