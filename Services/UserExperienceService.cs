@@ -2,6 +2,7 @@ using Cinema.Data;
 using Cinema.Models.Choices;
 using Cinema.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
@@ -384,108 +385,150 @@ public class UserExperienceService
 	private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
 	{
 		ConfirmationEmail sender = new ConfirmationEmail();
-		if (loggedInCustomer != null)
+		bool reservationSuccesful = false;
+		while (!reservationSuccesful)
 		{
-			CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
-			sender.SendMessage(loggedInCustomer.Email, loggedInCustomer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
-		}
-		else
-		{
-			if (AnsiConsole.Confirm("Wilt u [green]inloggen[/] met een [blue]bestaand account[/]?"))
+			if (loggedInCustomer != null)
 			{
-				bool loginSuccessful = false;
-				while (!loginSuccessful)
-				{
-					string userEmail = AnsiConsole.Prompt(
-					  new TextPrompt<string>("Voer uw [bold blue]email[/] in:")
-						  .PromptStyle("blue")
-						  .Validate(email =>
-						  {
-							  if (string.IsNullOrWhiteSpace(email))
-							  {
-								  return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
-							  }
-							  return ValidationResult.Success();
-						  })
-				  	);
-					string userPassword = AnsiConsole.Prompt(
-						new TextPrompt<string>("Voer uw [bold blue]wachtwoord[/] in:")
-							.PromptStyle("blue")
-							.Secret()
-							.Validate(password =>
-							{
-								if (string.IsNullOrWhiteSpace(password))
-								{
-									return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
-								}
-								return ValidationResult.Success();
-							})
-					);
-					int result = Customer.FindCustomer(db, userEmail, userPassword);
-
-					if (result == 1)
-					{
-						// Credentials matched, proceed with login
-						Customer customer = db.Customers.FirstOrDefault(x => x.Email == userEmail && x.Password == userPassword);
-						AnsiConsole.Status()
-							.Spinner(Spinner.Known.Aesthetic)
-							.SpinnerStyle(Style.Parse("blue"))
-							.Start($"[blue]Inloggen succesvol! Welkom [bold grey93]{customer.Username}[/]![/]", ctx =>
-							{
-								loginSuccessful = true;
-								Task.Delay(2500).Wait();
-							});
-						CreateTicket(db, customer, showtime, selectedSeats, ticketNumber, customer.Email, voucherused);
-						sender.SendMessage(customer.Email, customer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
-
-						break;
-					}
-					else if (result == 2)
-					{
-						// Email found but password didn't match
-						AnsiConsole.MarkupLine("[red]Wachtwoord komt niet overeen met deze email. Probeer het opnieuw.[/]");
-					}
-					else
-					{
-						// No account found with the provided email
-						AnsiConsole.MarkupLine("[red]Geen account gevonden met deze inloggegevens. Probeer het opnieuw.[/]");
-					}
-				}
+				reservationSuccesful = true;
+				CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
+				sender.SendMessage(loggedInCustomer.Email, loggedInCustomer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
 			}
 			else
 			{
-				bool validEmail = false;
-				string guestEmail = "";
-				while (!validEmail)
+				var choice = AnsiConsole.Prompt(
+					new SelectionPrompt<string>()
+						.Title("Wilt u [blue]reserveren[/] met een [green]bestaand[/] account?")
+						.PageSize(5)
+						.AddChoices(new[] { "Ja", "Nee", "[blueviolet]Terug[/]" })
+				);
+				switch (choice)
 				{
-					guestEmail = AnsiConsole.Prompt(
-					  new TextPrompt<string>("Om verder te kunnen als [blue]gast[/], voer uw [bold blue]email[/] in:")
-						  .PromptStyle("blue")
-						  .Validate(email =>
-						  {
-							  if (string.IsNullOrWhiteSpace(email))
-							  {
-								  return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
-							  }
-							  if (!RegisterValidity.CheckEmail(email))
-							  {
-								  return ValidationResult.Error("[red]Email voldoet niet aan de eisen[/]");
-							  }
-							  if (db.Customers.Any(x => x.Email == email))
-							  {
-								  return ValidationResult.Error("[red]Email is al in gebruik[/]");
-							  }
-							  validEmail = true;
-							  return ValidationResult.Success();
-						  })
-				  		);
-					break;
+					case "Ja":
+						bool loginSuccessful = false;
+						while (!loginSuccessful)
+						{
+							string email = AnsiConsole.Prompt(
+							new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nVoer uw [bold blue]email[/] in:")
+								.PromptStyle("blue")
+								.Validate(email =>
+								{
+									if (string.IsNullOrWhiteSpace(email))
+									{
+										return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
+									}
+									if (email.ToLower() == "terug")
+									{
+										return ValidationResult.Success();
+									}
+									return ValidationResult.Success();
+								})
+							);
+							if (email.ToLower() == "terug")
+							{
+								break;
+							}
+							string password = AnsiConsole.Prompt(
+								new TextPrompt<string>("Voer uw [bold blue]wachtwoord[/] in:")
+									.PromptStyle("blue")
+									.Secret()
+									.Validate(password =>
+									{
+										if (string.IsNullOrWhiteSpace(password))
+										{
+											return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
+										}
+										if (email.ToLower() == "terug")
+										{
+											return ValidationResult.Success();
+										}
+										return ValidationResult.Success();
+									})
+							);
+							if (password.ToLower() == "terug")
+							{
+								break;
+							}
+							int result = Customer.FindCustomer(db, email.ToLower(), password);
+
+							if (result == 1)
+							{
+								// Credentials matched, proceed with login
+								Customer customer = db.Customers.FirstOrDefault(x => x.Email == email && x.Password == password);
+								AnsiConsole.Status()
+									.Spinner(Spinner.Known.Aesthetic)
+									.SpinnerStyle(Style.Parse("white"))
+									.Start($"[green]Inloggen succesvol![/] [white]Ga verder met de [blue]reservering[/] voor: [bold grey93]{showtime.Movie.Title}[/]![/]", ctx =>
+									{
+										loginSuccessful = true;
+										Task.Delay(3000).Wait();
+									});
+								reservationSuccesful = true;
+								CreateTicket(db, customer, showtime, selectedSeats, ticketNumber, customer.Email, voucherused);
+								sender.SendMessage(customer.Email, customer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
+								return;
+							}
+							else if (result == 2)
+							{
+								// Email found but password didn't match
+								AnsiConsole.MarkupLine("[red]Wachtwoord komt niet overeen met deze email. Probeer het opnieuw.[/]");
+							}
+							else
+							{
+								// No account found with the provided email
+								AnsiConsole.MarkupLine("[red]Geen account gevonden met deze inloggegevens. Probeer het opnieuw.[/]");
+							}
+						}
+						break;
+					case "Nee":
+						bool validEmail = false;
+						string guestEmail = "";
+						while (!validEmail)
+						{
+							guestEmail = AnsiConsole.Prompt(
+							new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nOm verder te kunnen als [blue]gast[/],voer uw [bold blue]email[/] in:")
+								.PromptStyle("blue")
+								.Validate(email =>
+								{
+									if (string.IsNullOrWhiteSpace(email))
+									{
+										return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
+									}
+									if (email.ToLower() == "terug")
+									{
+										return ValidationResult.Success();
+									}
+									if (!RegisterValidity.CheckEmail(email))
+									{
+										return ValidationResult.Error("[red]Email voldoet niet aan de eisen[/]");
+									}
+									if (db.Customers.Any(x => x.Email == email))
+									{
+										return ValidationResult.Error("[red]Email is verbonden aan een account[/]");
+									}
+									validEmail = true;
+									return ValidationResult.Success();
+								})
+								);
+							if (guestEmail.ToLower() == "terug")
+							{
+								break;
+							}
+							else
+							{
+								reservationSuccesful = true;
+								CreateTicket(db, showtime, selectedSeats, ticketNumber, guestEmail);
+								sender.SendMessage(guestEmail, "Guest", showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
+							}
+						}
+						break;
+					case "[blueviolet]Terug[/]":
+						HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
+						break;
 				}
-				CreateTicket(db, showtime, selectedSeats, ticketNumber, guestEmail);
-				sender.SendMessage(guestEmail, "Guest", showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
 			}
+			db.SaveChanges();
 		}
-		db.SaveChanges();
 	}
 
 
