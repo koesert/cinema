@@ -161,7 +161,7 @@ namespace Cinema.Services
             if (showtimes.Any())
             {
                 var table = new Table().Border(TableBorder.Rounded);
-                table.AddColumn(new TableColumn("[yellow]Zaal ID[/]").Centered());
+                table.AddColumn(new TableColumn("[yellow]Zaal[/]").Centered());
                 table.AddColumn(new TableColumn("[green]Starttijd[/]").Centered());
 
                 foreach (var showtime in showtimes)
