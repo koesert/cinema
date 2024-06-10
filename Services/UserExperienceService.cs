@@ -368,6 +368,8 @@ public class UserExperienceService
         db.SaveChanges();
       }
       AnsiConsole.MarkupLine("[green]Stoelen succesvol gereserveerd.[/]");
+      AnsiConsole.MarkupLine($"De film zal vertoond worden in [purple]Zaal {showtime.RoomId}[/].");
+      AnsiConsole.MarkupLine($"Locatie vestiging: [blue]Witte de Withstraat 20, 3067AX Rotterdam[/].");
       Console.WriteLine("Druk op een willekeurige toets om terug te keren naar het begin.");
       if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
       PresentAdminOptions.UpdateVouchers(db);
@@ -684,15 +686,18 @@ public class UserExperienceService
         .FirstOrDefault(s => s.Showtime.Id == showtime.Id && s.Row == (char)('A' + currentRow) && s.SeatNumber == currentSeatNumber + 1)?.Price ?? 0;
 
       // Combineer en ruim de uitvoer op met AnsiConsole
-      AnsiConsole.Markup($"Geselecteerde stoelprijs: €{selectedSeatPrice} [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
+      CinemaSeat basepriceseat = db.CinemaSeats.First(x => x.Showtime == showtime && x.Color == "orange" && x.Type == 0);
+      if (basepriceseat.Price != 25) Console.WriteLine();
+      AnsiConsole.WriteLine();
+      AnsiConsole.Markup($"Geselecteerde stoelprijs: {selectedSeatPrice} euro [grey]{new string(' ', 50)}(Druk op <Enter> om stoelen te selecteren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
       AnsiConsole.Markup($"Geselecteerde Stoel: {(char)('A' + currentRow)}{(currentSeatNumber + 1).ToString().PadLeft(2, '0')} [grey]{new string(' ', 50)}      (Druk op <Space> om stoelen te reserveren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
       AnsiConsole.Markup($"[grey]{new string(' ', 50)}                         (Druk op <Escape> om terug te keren)[/]");
       AnsiConsole.WriteLine(); // Zorgt voor een nieuwe regel
 
-
       CinemaReservationSystem.DrawPlan(db, showtime, (char)('A' + currentRow), currentSeatNumber + 1);
+      if (basepriceseat.Price != 25) Console.WriteLine();
 
       ConsoleKeyInfo keyInfo = Console.ReadKey(true);
       if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.W)
