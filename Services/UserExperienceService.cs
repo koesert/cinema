@@ -146,7 +146,7 @@ public class UserExperienceService
         string stringselectedShowtime = AnsiConsole.Prompt(
           new SelectionPrompt<string>()
             .Title("Selecteer een voorstellingstijd")
-            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie).Select(x => $"{x}").ToList())
+            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)).Select(x => $"{x}").ToList())
         ));
         if (stringselectedShowtime == "Terug")
         {
