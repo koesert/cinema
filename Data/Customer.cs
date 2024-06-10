@@ -90,7 +90,10 @@ namespace Cinema.Data
 			if (customer.Subscribed == false)
 			{
 				customer.Subscribed = true;
-				customer.SubscribedSince = DateTime.UtcNow.AddHours(2);
+				DateTime newDateTime = DateTime.UtcNow.AddHours(2);
+				DateTimeOffset dateTimeOffset = new DateTimeOffset(newDateTime);
+				DateTimeOffset dateOnly = new DateTimeOffset(dateTimeOffset.Year, dateTimeOffset.Month, dateTimeOffset.Day, 0, 0, 0, dateTimeOffset.Offset);
+				customer.SubscribedSince = dateOnly;
 				db.Customers.Update(customer);
 				db.SaveChanges();
 				return true;

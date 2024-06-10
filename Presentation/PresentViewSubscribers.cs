@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Cinema.Data;
 using Spectre.Console;
 
@@ -40,6 +41,6 @@ public class PresentViewSubscribers
 
     private static List<Customer> FetchSubscribers(CinemaContext db)
     {
-        return db.Customers.Where(c => c.Subscribed).OrderBy(c => c.SubscribedSince).ToList();
+        return db.Customers.Where(c => c.Subscribed).OrderBy(c => c.SubscribedSince).ThenBy(c => c.Email).ToList();
     }
 }
