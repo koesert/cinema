@@ -18,6 +18,7 @@ namespace Cinema
             { InitialStateChoice.Login, "Inloggen" },
             { InitialStateChoice.Register, "Registreren" },
             { InitialStateChoice.reservering, "Gast-reservering bekijken" },
+            { InitialStateChoice.Information, "Bioscoop informatie" },
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
@@ -80,6 +81,9 @@ namespace Cinema
                         break;
                     case InitialStateChoice.Register:
                         PresentCustomerRegistration.Start(db);
+                        break;
+                    case InitialStateChoice.Information:
+                        PresentCinemaInformation.Start(db);
                         break;
                 }
             }

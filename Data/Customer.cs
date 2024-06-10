@@ -7,6 +7,7 @@ namespace Cinema.Data
 		public string Password { get; set; }
 		public string Email { get; set; }
 		public bool Subscribed { get; set; }
+		public DateTimeOffset? SubscribedSince { get; set; }
 		public static List<Customer> AllCustomers = new List<Customer>();
 
 		private Customer(string username, string password, string email)
@@ -64,7 +65,7 @@ namespace Cinema.Data
 		}
 		public static Customer CreateCustomer(CinemaContext db, string username, string password, string email)
 		{
-			Customer newCustomer = new Customer(username, password, email);
+			Customer newCustomer = new Customer(username, password, email.ToLower());
 			db.Customers.Add(newCustomer);
 			db.SaveChanges();
 
@@ -89,6 +90,10 @@ namespace Cinema.Data
 			if (customer.Subscribed == false)
 			{
 				customer.Subscribed = true;
+				DateTime newDateTime = DateTime.UtcNow.AddHours(2);
+				DateTimeOffset dateTimeOffset = new DateTimeOffset(newDateTime);
+				DateTimeOffset dateOnly = new DateTimeOffset(dateTimeOffset.Year, dateTimeOffset.Month, dateTimeOffset.Day, 0, 0, 0, dateTimeOffset.Offset);
+				customer.SubscribedSince = dateOnly;
 				db.Customers.Update(customer);
 				db.SaveChanges();
 				return true;
@@ -96,6 +101,7 @@ namespace Cinema.Data
 			else
 			{
 				customer.Subscribed = false;
+				customer.SubscribedSince = null;
 				db.Customers.Update(customer);
 				db.SaveChanges();
 				return false;
