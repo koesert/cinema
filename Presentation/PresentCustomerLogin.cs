@@ -86,7 +86,7 @@ public class PresentCustomerLogin
     while (true)
     {
         string password = AnsiConsole.Prompt(
-            new TextPrompt<string>("Voer uw [bold blue]wachtwoord[/] in:")
+            new TextPrompt<string>("[grey]Voer 'vergeten' in om een nieuw wachtwoord in te stellen.[/]\n Voer uw [bold blue]wachtwoord[/] in:")
               .PromptStyle("blue")
               .Secret()
               .Validate(passwordInput =>

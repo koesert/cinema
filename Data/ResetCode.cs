@@ -94,10 +94,6 @@ spyrabv@gmail.com";
             customer.ResetCode = resetCode;
             db.SaveChanges();
         }
-        else
-        {
-            Console.WriteLine("Gebruiker niet gevonden.");
-        }
     }
     public static string AskNewPassword()
 {
@@ -146,6 +142,7 @@ spyrabv@gmail.com";
 
             AnsiConsole.MarkupLine("[blue]Wachtwoord[/] geüpdatet!");
             Thread.Sleep(2500);
+            PresentCustomerLogin.Start(db);
         }
 }
 }
