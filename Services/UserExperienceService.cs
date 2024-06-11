@@ -73,7 +73,7 @@ public class UserExperienceService
 
       var moviesWithUpcomingShowtimes = moviesQuery
         .Where(m => m.Showtimes != null && m.Showtimes
-        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
+        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)))
         .OrderBy(x => x.Title)
         .ToList();
 
