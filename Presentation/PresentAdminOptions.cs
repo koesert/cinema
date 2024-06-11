@@ -188,7 +188,7 @@ namespace Cinema.Services
             {
                 var choice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                        .Title("[bold green]Selecteer een optie:[/]")
+                        .Title("Selecteer een optie:")
                         .AddChoices("Vorige Week", "Volgende Week", "Terug"));
 
                 switch (choice)
@@ -263,7 +263,7 @@ namespace Cinema.Services
                         if (timeSlots.ContainsKey((i, j)))
                         {
                             string movies = string.Join("\n", timeSlots[(i, j)]);
-                            row.Add($"[green]{movies}[/]");
+                            row.Add($"[{GetColor(j)}]{movies}[/]");
                         }
                         else
                         {
@@ -271,6 +271,17 @@ namespace Cinema.Services
                         }
                     }
                     table.AddRow(row.ToArray());
+
+                    /////////
+                    if (i < 22)
+                    {
+                        var separatorRow = new List<string> { "" };
+                        for (int j = 0; j < 7; j++)
+                        {
+                            separatorRow.Add("----------");
+                        }
+                        table.AddRow(separatorRow.ToArray());
+                    }
                 }
 
                 AnsiConsole.Render(table);
