@@ -15,10 +15,8 @@ namespace Cinema.Models.Choices
         Register,
         reservering,
 
-        [Description("Bioscoop informatie")]
         Information,
 
-        [Description("Afsluiten")]
         Exit
     }
 }
