@@ -319,12 +319,12 @@ public class UserExperienceService
 		decimal totalSeatPrice = 0;
 		foreach (var seat in selectedSeats)
 		{
-			table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"${seat.Price}");
+			table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"{seat.Price} Euro");
 			totalSeatPrice += seat.Price;
 		}
 		AnsiConsole.Write(table);
 
-		Console.WriteLine($"Totaal Prijs: ${totalSeatPrice}");
+		Console.WriteLine($"Totaal Prijs: {totalSeatPrice} Euro");
 		if (!(loggedInCustomer is null))
 		{
 			v = UseVoucher(db, loggedInCustomer);
@@ -333,10 +333,9 @@ public class UserExperienceService
 				Console.Clear();
 				AnsiConsole.Write(table);
 
-				Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
+				Console.WriteLine($"Oude Totaal Prijs: {totalSeatPrice} Euro");
 				Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
-
-				Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
+				Console.WriteLine($"Nieuwe Totaal Prijs: {v.ApplyDiscount((double)totalSeatPrice)} Euro");
 			}
 		}
 
@@ -366,10 +365,7 @@ public class UserExperienceService
 				v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
 				db.SaveChanges();
 			}
-			AnsiConsole.MarkupLine("[green]Stoelen succesvol gereserveerd.[/]");
-			AnsiConsole.MarkupLine($"De film zal vertoond worden in [purple]Zaal {showtime.RoomId}[/].");
-			AnsiConsole.MarkupLine($"Locatie vestiging: [blue]Witte de Withstraat 20, 3067AX Rotterdam[/].");
-			Console.WriteLine("Druk op een willekeurige toets om terug te keren naar het begin.");
+			DisplayReservationConfirmation(db, showtime, selectedSeats, ticketNumber);
 			if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
 			PresentAdminOptions.UpdateVouchers(db);
 			Console.ReadKey(true);
@@ -381,6 +377,79 @@ public class UserExperienceService
 			ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
 		}
 	}
+
+	private static void DisplayReservationConfirmation(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+	{
+		var table = new Table().Border(TableBorder.Rounded);
+		table.AddColumn(new TableColumn("Rij").Centered());
+		table.AddColumn(new TableColumn("Stoelnummer").Centered());
+		table.AddColumn(new TableColumn("Prijs").Centered());
+
+		decimal totalSeatPrice = 0;
+		foreach (var seat in selectedSeats)
+		{
+			table.AddRow(
+				new Markup($"[green]{seat.Row}[/]"),
+				new Markup($"[green]{seat.SeatNumber}[/]"),
+				new Markup($"[green]{seat.Price} Euro[/]")
+			);
+			totalSeatPrice += seat.Price;
+		}
+
+		var panel = new Panel(new Rows(
+			new Markup($"[bold yellow]Ticketnummer:[/] [white]{ticketNumber}[/]"),
+			new Markup(""),
+			new Markup("[bold yellow]Geselecteerde Stoelen:[/]"),
+			table,
+			new Markup(""),
+			new Markup($"[bold yellow]Totaalprijs:[/] [white]{totalSeatPrice} Euro[/]"),
+			new Markup(""),
+			new Markup($"[bold yellow]Film:[/] [white]{showtime.Movie.Title}[/]"),
+			new Markup($"[bold yellow]Tijdstip:[/] [white]{showtime.StartTime:ddd, MMMM d hh:mm tt}[/]"),
+			new Markup($"[bold yellow]Zaal:[/] [white]{showtime.RoomId}[/]"),
+			new Markup("[bold yellow]Locatie:[/] [white]Witte de Withstraat 20, 3067AX Rotterdam[/]"),
+			new Markup("\n"),
+			new Markup("[bold aqua]Bedankt voor uw reservering bij Your Eyes![/]")
+		))
+		{
+			Header = new PanelHeader("[bold blue] Reserveringsbevestiging [/]"),
+			Border = BoxBorder.Rounded,
+			Padding = new Padding(1, 1, 1, 1)
+		};
+
+		AnsiConsole.Write(panel);
+
+		var choices = new[]
+		{
+			"Films bekijken",
+			"Reserveringen bekijken",
+			"Account beheren",
+			"Terug"
+		};
+
+		var selectedChoice = AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("[bold blue]Wat wilt u nu doen?[/]")
+				.PageSize(4)
+				.AddChoices(choices)
+		);
+
+		switch (selectedChoice)
+		{
+			case "Films bekijken":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Reserveringen bekijken":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Account beheren":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Terug":
+				break;
+		}
+	}
+
 
 	private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
 	{
@@ -400,7 +469,7 @@ public class UserExperienceService
 					new SelectionPrompt<string>()
 						.Title("Wilt u [blue]reserveren[/] met een [green]bestaand[/] account?")
 						.PageSize(5)
-						.AddChoices(new[] { "Ja", "Nee", "[blueviolet]Terug[/]" })
+						.AddChoices(new[] { "Ja", "Nee", "Terug" })
 				);
 				switch (choice)
 				{
@@ -522,7 +591,7 @@ public class UserExperienceService
 							}
 						}
 						break;
-					case "[blueviolet]Terug[/]":
+					case "Terug":
 						HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
 						break;
 				}
