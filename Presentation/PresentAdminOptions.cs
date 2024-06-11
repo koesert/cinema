@@ -1013,10 +1013,18 @@ namespace Cinema.Services
         }
         public static void ConvertPercentVouchers(CinemaContext db)
         {
-            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%").ToList();
+            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%" && v.IsReward == "false").ToList();
             foreach (var voucher in percentVouchers)
             {
                 var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                percentVoucher.Id = voucher.Id;
+                db.Vouchers.Remove(voucher);
+                db.Vouchers.Add(percentVoucher);
+            }
+            var rewardVouchers = db.Vouchers.Where(v => v.DiscountType == "%" && v.IsReward == "true").ToList();
+            foreach (var voucher in rewardVouchers)
+            {
+                var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail, "true");
                 percentVoucher.Id = voucher.Id;
                 db.Vouchers.Remove(voucher);
                 db.Vouchers.Add(percentVoucher);

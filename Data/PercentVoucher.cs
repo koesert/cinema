@@ -1,4 +1,4 @@
-class PercentVoucher : Voucher
+public class PercentVoucher : Voucher
 {
     public PercentVoucher(string code, double discount, DateTimeOffset expDate, string customerEmail) : base(code, discount, expDate, customerEmail) 
     { 

@@ -8,23 +8,23 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace cinema.Migrations
 {
     /// <inheritdoc />
-    public partial class PurchaseTotaltoTicketTable : Migration
+    public partial class ResetCodeColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "PurchaseTotal",
-                table: "Ticket",
+            migrationBuilder.AddColumn<string>(
+                name: "ResetCode",
+                table: "Customers",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: "");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PurchaseTotal",
-                table: "Ticket");
+                name: "ResetCode",
+                table: "Customers");
         }
     }
 }
