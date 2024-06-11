@@ -86,7 +86,7 @@ spyrabv@gmail.com";
         return code;
     }
 
-    private void UpdateResetCodeInDatabase(CinemaContext db, string userEmail, string resetCode)
+    public void UpdateResetCodeInDatabase(CinemaContext db, string userEmail, string resetCode)
     {
         var customer = db.Customers.FirstOrDefault(c => c.Email == userEmail);
         if (customer != null)
@@ -99,6 +99,53 @@ spyrabv@gmail.com";
             Console.WriteLine("Gebruiker niet gevonden.");
         }
     }
+    public static string AskNewPassword()
+{
+    string newPassword = AnsiConsole.Prompt(
+        new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nWat word uw nieuwe [bold blue]wachtwoord[/]?")
+            .PromptStyle("blue")
+            .Secret()
+            .Validate(password =>
+            {
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    return ValidationResult.Error("[red]Wachtwoord mag niet leeg zijn[/]");
+                }
+                if (password.ToLower() == "terug")
+                {
+                    return ValidationResult.Success();
+                }
+                if (password.Length < 6)
+                {
+                    return ValidationResult.Error("[red]Wachtwoord moet minimaal 6 tekens lang zijn[/]");
+                }
+                if (!password.Any(char.IsDigit))
+                {
+                    return ValidationResult.Error("[red]Wachtwoord moet minimaal één cijfer bevatten[/]");
+                }
+                if (!password.All(char.IsLetterOrDigit))
+                {
+                    return ValidationResult.Error("[red]Wachtwoord mag alleen letters (hoofdletters en kleine letters) en cijfers bevatten[/]");
+                }
+                return ValidationResult.Success();
+            })
+    );
+    return newPassword;
+}
+        public void UpdatePassword(CinemaContext db, Customer customer, string newPassword)
+        {
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Aesthetic)
+            .SpinnerStyle(Style.Parse("blue"))
+            .Start("[blue]Wachtwoord[/] updaten...", ctx =>
+                {
+                    customer.Password = newPassword;
+                    Customer.UpdateCustomer(db, customer);
+                    Thread.Sleep(2500);
+                });
 
+            AnsiConsole.MarkupLine("[blue]Wachtwoord[/] geüpdatet!");
+            Thread.Sleep(2500);
+        }
 }
 }

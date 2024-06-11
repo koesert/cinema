@@ -115,6 +115,10 @@ public class PresentCustomerLogin
                 ResetCode rc = new ResetCode(db);
                 rc.SendMessageResetCode(email);
                 string resetCode = AskResetCode();
+                string newPassword = ResetCode.AskNewPassword();;
+                rc.UpdateResetCodeInDatabase(db,newPassword, resetCode);
+                Customer customer = db.Customers.FirstOrDefault(x => x.Email == email);
+                rc.UpdatePassword(db, customer, newPassword);
                 AnsiConsole.MarkupLine("[green]Wachtwoord succesvol gereset![/]");
                 return string.Empty;
             }
@@ -137,7 +141,6 @@ private static string AskEmailForReset(CinemaContext db)
                {
                    return ValidationResult.Error("[red]Email mag niet leeg zijn[/]");
                }
-               // Check if the email exists in the database
                if (!db.Customers.Any(x => x.Email == email))
                {
                    return ValidationResult.Error("[red]Geen account gevonden met deze email[/]");
@@ -158,7 +161,6 @@ private static string AskResetCode()
                {
                    return ValidationResult.Error("[red]Resetcode mag niet leeg zijn[/]");
                }
-               // TODO: Implement reset code validation logic
                return ValidationResult.Success();
            })
     );
