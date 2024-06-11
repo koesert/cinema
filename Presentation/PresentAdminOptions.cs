@@ -88,7 +88,7 @@ namespace Cinema.Services
                         PresentViewSubscribers.Start(db, admin);
                         break;
                     default:
-                        break;
+                        return;
                 }
             }
         }
@@ -172,7 +172,7 @@ namespace Cinema.Services
                     );
                 }
 
-                AnsiConsole.Render(table);
+                AnsiConsole.Write(table);
             }
             else
             {
