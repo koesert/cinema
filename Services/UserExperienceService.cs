@@ -888,6 +888,10 @@ public class UserExperienceService
 			}
 			else if (keyInfo.Key == ConsoleKey.Escape)
 			{
+        foreach (var seat in selectedSeats)
+				{
+					seat.IsSelected = false;
+				}
 				Console.Clear();
 				break;
 			}
