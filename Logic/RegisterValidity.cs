@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 
+namespace Cinema.Logic;
 public static class RegisterValidity
 {
     public static bool CheckEmail(string email)
