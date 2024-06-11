@@ -2,7 +2,6 @@ using Cinema.Data;
 using Cinema.Models.Choices;
 using Cinema.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Cinema.Logic;

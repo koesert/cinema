@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 public class Voucher
 {
     public int Id { get; set; }
