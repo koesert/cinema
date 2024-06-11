@@ -7,7 +7,9 @@ namespace Cinema.Data
 		public string Password { get; set; }
 		public string Email { get; set; }
 		public bool Subscribed { get; set; }
-		public static List<Customer> AllCustomers = new List<Customer>();
+        public string ResetCode { get; internal set; }
+
+        public static List<Customer> AllCustomers = new List<Customer>();
 
 		private Customer(string username, string password, string email)
 		{
