@@ -368,7 +368,6 @@ public class UserExperienceService
 			DisplayReservationConfirmation(db, showtime, selectedSeats, ticketNumber);
 			if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
 			PresentAdminOptions.UpdateVouchers(db);
-			Console.ReadKey(true);
 			Console.Clear();
 		}
 		else
@@ -380,6 +379,7 @@ public class UserExperienceService
 
 	private static void DisplayReservationConfirmation(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
 	{
+		AnsiConsole.Clear();
 		var table = new Table().Border(TableBorder.Rounded);
 		table.AddColumn(new TableColumn("Rij").Centered());
 		table.AddColumn(new TableColumn("Stoelnummer").Centered());
@@ -408,7 +408,7 @@ public class UserExperienceService
 			new Markup($"[bold yellow]Tijdstip:[/] [white]{showtime.StartTime:ddd, MMMM d hh:mm tt}[/]"),
 			new Markup($"[bold yellow]Zaal:[/] [white]{showtime.RoomId}[/]"),
 			new Markup("[bold yellow]Locatie:[/] [white]Witte de Withstraat 20, 3067AX Rotterdam[/]"),
-			new Markup("\n"),
+			new Markup("\n[bold aqua]Bevestiging van uw reservering bevind zich in uw email[/]"),
 			new Markup("[bold aqua]Bedankt voor uw reservering bij Your Eyes![/]")
 		))
 		{
@@ -446,7 +446,7 @@ public class UserExperienceService
 				PresentCustomerLogin.Start(db);
 				break;
 			case "Terug":
-				break;
+				return;
 		}
 	}
 
@@ -527,7 +527,7 @@ public class UserExperienceService
 								AnsiConsole.Status()
 									.Spinner(Spinner.Known.Aesthetic)
 									.SpinnerStyle(Style.Parse("white"))
-									.Start($"[green]Inloggen succesvol![/] [white]Ga verder met de [blue]reservering[/] voor: [bold grey93]{showtime.Movie.Title}[/]![/]", ctx =>
+									.Start($"[green]Inloggen succesvol![/] [white]Ga verder met de [blue]reservering[/] voor: [bold grey93]{showtime.Movie.Title}[/][/]", ctx =>
 									{
 										loginSuccessful = true;
 										Task.Delay(3000).Wait();
