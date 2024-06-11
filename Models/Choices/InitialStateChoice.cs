@@ -10,16 +10,13 @@ namespace Cinema.Models.Choices
 {
     public enum InitialStateChoice
     {
-        [Description("Bladeren door films")]
         ListMovies,
-        [Description("Inloggen")]
         Login,
-
-        [Description("Registreren")]
         Register,
-
-        [Description("Gast-reservering bekijken")]
         reservering,
+
+        [Description("Bioscoop informatie")]
+        Information,
 
         [Description("Afsluiten")]
         Exit

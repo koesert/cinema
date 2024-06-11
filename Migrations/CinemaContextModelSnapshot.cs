@@ -65,6 +65,9 @@ namespace cinema.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
+                    b.Property<bool>("Subscribed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Username")
                         .HasColumnType("text");
 

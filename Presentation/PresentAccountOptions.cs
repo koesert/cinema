@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Cinema.Data;
+using Cinema.Logic;
 using Spectre.Console;
 
 public static class PresentAccountOptions
