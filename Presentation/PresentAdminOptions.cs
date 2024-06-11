@@ -1017,7 +1017,7 @@ namespace Cinema.Services
                     stat.RegularSeatsSold.ToString(),
                     stat.ExtraLegroomSeatsSold.ToString(),
                     stat.LoveseatsSold.ToString(),
-                    $"${stat.TotalRevenue:N2}"
+                    $"{stat.TotalRevenue:N2} Euro"
                 );
             }
 
@@ -1035,7 +1035,7 @@ namespace Cinema.Services
                 totalRegularSeatsSold.ToString(),
                 totalExtraLegroomSeatsSold.ToString(),
                 totalLoveseatsSold.ToString(),
-                $"${totalRevenue:N2}"
+                $"{totalRevenue:N2} Euro"
             );
 
             AnsiConsole.Write(table);
@@ -1053,9 +1053,9 @@ namespace Cinema.Services
                     string formattedEndDate = enddate.ToString("yyyyMMdd");
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
                     ExportStatsToCsv(movieStats, filePath, totalShowings, totalSeatsSold, totalRegularSeatsSold, totalExtraLegroomSeatsSold, totalLoveseatsSold, totalRevenue);
-                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     EmailCSVFile sender = new EmailCSVFile();
-                    sender.SendCSVFile("Guest", filePath);
+                    sender.SendCSVFile("Admin", filePath);
+                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     Console.ReadKey();
                 }
             }

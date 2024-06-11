@@ -31,7 +31,6 @@ public class EmailCSVFile
                 mailMessage.Body = $@"
 Beste {userName},
 
-Please find attached the CSV file with the data.
 Zie hier het CSV betand met de data in de bijlagen.
 
 Met vriendelijke groet,
