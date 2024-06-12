@@ -1,13 +1,9 @@
-
- using System;
-using MailKit;
-using MimeKit;
 using System.Net.Mail;
 using System.Net;
 namespace Cinema.Data
 {
 
-    using SmtpClient = System.Net.Mail.SmtpClient;
+    using SmtpClient = SmtpClient;
 
     public class NewsletterSubscription
     {
