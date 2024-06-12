@@ -1,5 +1,4 @@
 using Cinema.Data;
-using Cinema.Services;
 using Spectre.Console;
 
 public class PresentViewSubscribers
@@ -12,13 +11,17 @@ public class PresentViewSubscribers
         var table = new Table();
         table.AddColumn(new TableColumn("[blue]Gebruikersnaam[/]").LeftAligned());
         table.AddColumn(new TableColumn("[blue]E-mailadres[/]").LeftAligned());
+        table.AddColumn(new TableColumn("[blue]Geabboneerd sinds[/]").LeftAligned());
         table.Title = new TableTitle("[blue]Nieuwsbrief abonnees[/]", new Style(decoration: Decoration.Bold));
 
         int rowIndex = 0;
         foreach (Customer customer in subscribedCustomers)
         {
+            DateTimeOffset subscribedSince = (DateTimeOffset)customer.SubscribedSince;
+
             table.AddRow(new Markup(customer.Username, rowIndex % 2 == 0 ? null : new Style(foreground: Color.Grey)),
-                         new Markup(customer.Email, rowIndex % 2 == 0 ? null : new Style(foreground: Color.Grey)));
+                         new Markup(customer.Email, rowIndex % 2 == 0 ? null : new Style(foreground: Color.Grey)),
+                         new Markup(subscribedSince.ToString("dd-MM-yyyy"), rowIndex % 2 == 0 ? null : new Style(foreground: Color.Grey)));
             rowIndex++;
         }
 
@@ -37,6 +40,6 @@ public class PresentViewSubscribers
 
     private static List<Customer> FetchSubscribers(CinemaContext db)
     {
-        return db.Customers.Where(c => c.Subscribed).ToList();
+        return db.Customers.Where(c => c.Subscribed).OrderBy(c => c.SubscribedSince).ThenBy(c => c.Email).ToList();
     }
 }

@@ -1,9 +1,5 @@
-using System;
-using System.IO;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using Cinema.Services;
 public class EmailCSVFile
 {
     public void SendCSVFile(string userName, string filePath)
@@ -31,7 +27,6 @@ public class EmailCSVFile
                 mailMessage.Body = $@"
 Beste {userName},
 
-Please find attached the CSV file with the data.
 Zie hier het CSV betand met de data in de bijlagen.
 
 Met vriendelijke groet,

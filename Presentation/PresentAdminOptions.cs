@@ -3,15 +3,10 @@ using Cinema.Models.Choices;
 using Cinema.Models.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Asn1;
 using Sharprompt;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cinema.Services
 {
@@ -36,6 +31,7 @@ namespace Cinema.Services
         private static readonly Dictionary<CinemaManagementChoice, string> ManagementChoiceDescriptions = new Dictionary<CinemaManagementChoice, string>
     {
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
+        { CinemaManagementChoice.OverviewMovies, "Agenda" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
@@ -72,6 +68,9 @@ namespace Cinema.Services
                     case CinemaManagementChoice.ListMovies:
                         ListMovies(db);
                         break;
+                    case CinemaManagementChoice.OverviewMovies:
+                        OverviewMovies(db);
+                        break;
                     case CinemaManagementChoice.AddMovie:
                         AddMovieChoice(db);
                         break;
@@ -88,7 +87,7 @@ namespace Cinema.Services
                         PresentViewSubscribers.Start(db, admin);
                         break;
                     default:
-                        break;
+                        return;
                 }
             }
         }
@@ -152,15 +151,27 @@ namespace Cinema.Services
             Console.Clear();
             Console.WriteLine($"Vertoningen voor {selectedMovie.Title}:");
 
-            var showtimes = db.Showtimes.Where(s => s.Movie.Id == selectedMovie.Id).ToList();
+            var now = DateTime.UtcNow.AddHours(2);
+            var showtimes = db.Showtimes
+                .Where(s => s.Movie.Id == selectedMovie.Id && s.StartTime >= now)
+                .OrderBy(s => s.StartTime)
+                .ToList();
 
             if (showtimes.Any())
             {
+                var table = new Table().Border(TableBorder.Rounded);
+                table.AddColumn(new TableColumn("[yellow]Zaal[/]").Centered());
+                table.AddColumn(new TableColumn("[green]Starttijd[/]").Centered());
+
                 foreach (var showtime in showtimes)
                 {
-                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime:dd-MM-yyyy HH:mm}");
-
+                    table.AddRow(
+                        showtime.RoomId.ToString(),
+                        $"{showtime.StartTime:dd-MM-yyyy HH:mm}"
+                    );
                 }
+
+                AnsiConsole.Write(table);
             }
             else
             {
@@ -171,6 +182,142 @@ namespace Cinema.Services
             Console.ReadKey();
         }
 
+        private static void OverviewMovies(CinemaContext db)
+        {
+            int currentWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+
+            DisplayWeek(currentWeek, db);
+
+            bool running = true;
+            while (running)
+            {
+                var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Selecteer een optie:")
+                        .AddChoices("Vorige Week", "Volgende Week", "Terug"));
+
+                switch (choice)
+                {
+                    case "Vorige Week":
+                        currentWeek--;
+                        DisplayWeek(currentWeek, db);
+                        break;
+                    case "Volgende Week":
+                        currentWeek++;
+                        DisplayWeek(currentWeek, db);
+                        break;
+                    case "Terug":
+                        running = false;
+                        break;
+                }
+            }
+        }
+
+        private static void DisplayWeek(int weekNumber, CinemaContext db)
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.Markup($"[bold underline yellow]Week {weekNumber}[/]\n");
+            AnsiConsole.Write(new Rule());
+
+            DateTime startDate = GetFirstDateOfWeek(DateTime.Now.Year, weekNumber);
+            DateTime endDate = startDate.AddDays(7).AddDays(-1);
+
+            var showtimesForWeek = db.Showtimes
+                .Where(s => s.StartTime.DateTime.Date >= startDate.Date && s.StartTime.DateTime.Date <= endDate.Date)
+                .Include(s => s.Movie)
+                .OrderBy(s => s.StartTime.DateTime)
+                .ToList();
+
+            if (!showtimesForWeek.Any())
+            {
+                AnsiConsole.Markup("[red]Geen voorstellingen voor de geselecteerde week.[/]\n");
+            }
+            else
+            {
+                var table = new Table().BorderColor(Color.Grey).RoundedBorder();
+
+                string[] dagen = { "Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo" };
+                table.AddColumn(new TableColumn("Tijd").Centered());
+
+                foreach (var day in dagen)
+                {
+                    table.AddColumn(new TableColumn(day).Centered());
+                }
+
+                var timeSlots = new Dictionary<(int, int), List<string>>();
+                for (int i = 12; i <= 22; i++)
+                {
+                    for (int j = 0; j < 7; j++)
+                    {
+                        timeSlots[(i, j)] = new List<string>();
+                    }
+                }
+                foreach (var showtime in showtimesForWeek)
+                {
+                    int hourOfDay = showtime.StartTime.Hour;
+                    int dayIndex = ((int)showtime.StartTime.DayOfWeek + 6) % 7;
+                    string movieInfo = $"{showtime.StartTime.ToString("HH:mm")} - {showtime.Movie.Title} (Zaal {showtime.RoomId})";
+                    timeSlots[(hourOfDay, dayIndex)].Add(movieInfo);
+                }
+
+                for (int i = 12; i <= 22; i++)
+                {
+                    var row = new List<string> { $"{i:00}:00" };
+                    for (int j = 0; j < 7; j++)
+                    {
+                        if (timeSlots.ContainsKey((i, j)))
+                        {
+                            string movies = string.Join("\n", timeSlots[(i, j)]);
+                            row.Add($"[{GetColor(j)}]{movies}[/]");
+                        }
+                        else
+                        {
+                            row.Add("");
+                        }
+                    }
+                    table.AddRow(row.ToArray());
+
+                    /////////
+                    if (i < 22)
+                    {
+                        var separatorRow = new List<string> { "" };
+                        for (int j = 0; j < 7; j++)
+                        {
+                            separatorRow.Add("----------");
+                        }
+                        table.AddRow(separatorRow.ToArray());
+                    }
+                }
+
+                AnsiConsole.Render(table);
+            }
+
+            AnsiConsole.Write(new Rule());
+        }
+
+        private static Color GetColor(int dayIndex)
+        {
+            Color[] colors = { Color.Red, Color.Orange1, Color.Yellow, Color.Green, Color.Blue, Color.Aquamarine1, Color.Violet };
+            return colors[dayIndex];
+        }
+
+
+        private static DateTime GetFirstDateOfWeek(int year, int weekNumber)
+        {
+            DateTime jan1 = new DateTime(year, 1, 1);
+            int daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
+            DateTime firstMonday = jan1.AddDays(daysOffset);
+            var cal = CultureInfo.CurrentCulture.Calendar;
+            int firstWeek = cal.GetWeekOfYear(firstMonday, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+
+            if (firstWeek <= 1)
+            {
+                weekNumber -= 1;
+            }
+
+            DateTime firstDayOfWeek = firstMonday.AddDays(weekNumber * 7);
+            return firstDayOfWeek;
+        }
 
         private static void AddShowtime(CinemaContext db, Movie selectedMovie)
         {
@@ -186,7 +333,7 @@ namespace Cinema.Services
             roomId = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een zaal:")
-                    .AddChoices(new[] { "1", "2", "3", "Terug"})
+                    .AddChoices(new[] { "Terug", "1", "2", "3" })
             );
             if (roomId == "Terug")
             {
@@ -365,6 +512,9 @@ namespace Cinema.Services
 
             var availableHours = new List<string>();
             var currentTime = utcStartTime;
+
+            var now = DateTimeOffset.UtcNow.AddHours(2);
+
             while (currentTime <= utcEndTime)
             {
                 // Check if the movie fits starting from the current hour
@@ -374,7 +524,7 @@ namespace Cinema.Services
                     return !bookedShowtimes.Any(s => currentOffset >= s.StartTime && currentOffset < s.EndTime);
                 });
 
-                if (isMovieFit)
+                if (isMovieFit && currentTime > now.AddMinutes(5))
                 {
                     availableHours.Add(currentTime.ToString("HH:mm"));
                 }
@@ -882,10 +1032,18 @@ namespace Cinema.Services
         }
         public static void ConvertPercentVouchers(CinemaContext db)
         {
-            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%").ToList();
+            var percentVouchers = db.Vouchers.Where(v => v.DiscountType == "%" && v.IsReward == "false").ToList();
             foreach (var voucher in percentVouchers)
             {
                 var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail);
+                percentVoucher.Id = voucher.Id;
+                db.Vouchers.Remove(voucher);
+                db.Vouchers.Add(percentVoucher);
+            }
+            var rewardVouchers = db.Vouchers.Where(v => v.DiscountType == "%" && v.IsReward == "true").ToList();
+            foreach (var voucher in rewardVouchers)
+            {
+                var percentVoucher = new PercentVoucher(voucher.Code, voucher.Discount, voucher.ExpirationDate, voucher.CustomerEmail, "true");
                 percentVoucher.Id = voucher.Id;
                 db.Vouchers.Remove(voucher);
                 db.Vouchers.Add(percentVoucher);
@@ -993,7 +1151,7 @@ namespace Cinema.Services
                     stat.RegularSeatsSold.ToString(),
                     stat.ExtraLegroomSeatsSold.ToString(),
                     stat.LoveseatsSold.ToString(),
-                    $"${stat.TotalRevenue:N2}"
+                    $"{stat.TotalRevenue:N2} Euro"
                 );
             }
 
@@ -1011,7 +1169,7 @@ namespace Cinema.Services
                 totalRegularSeatsSold.ToString(),
                 totalExtraLegroomSeatsSold.ToString(),
                 totalLoveseatsSold.ToString(),
-                $"${totalRevenue:N2}"
+                $"{totalRevenue:N2} Euro"
             );
 
             AnsiConsole.Write(table);
@@ -1029,9 +1187,9 @@ namespace Cinema.Services
                     string formattedEndDate = enddate.ToString("yyyyMMdd");
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
                     ExportStatsToCsv(movieStats, filePath, totalShowings, totalSeatsSold, totalRegularSeatsSold, totalExtraLegroomSeatsSold, totalLoveseatsSold, totalRevenue);
-                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     EmailCSVFile sender = new EmailCSVFile();
-                    sender.SendCSVFile("Guest", filePath);
+                    sender.SendCSVFile("Admin", filePath);
+                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     Console.ReadKey();
                 }
             }

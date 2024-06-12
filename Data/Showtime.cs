@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
+
 
 namespace Cinema.Data
 {
@@ -11,6 +12,11 @@ namespace Cinema.Data
         public double Prices { get; set; }
         public virtual ICollection<CinemaSeat> CinemaSeats { get; set; }
 
-        public override string ToString() => $"Zaal: {RoomId}, Starttijd: {StartTime.ToString("ddd, MMMM d hh:mm tt")}";
+        public override string ToString()
+        {
+            CultureInfo nl = new CultureInfo("nl-NL");
+            return $"Zaal: {RoomId}, Begintijd: {StartTime.ToString("ddd, d MMMM HH:mm", nl)}";
+        }
+
     }
 }
