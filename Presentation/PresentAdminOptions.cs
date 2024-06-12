@@ -3,6 +3,7 @@ using Cinema.Models.Choices;
 using Cinema.Models.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Asn1;
 using Sharprompt;
 using Spectre.Console;
 using System.Globalization;
@@ -30,6 +31,7 @@ namespace Cinema.Services
         private static readonly Dictionary<CinemaManagementChoice, string> ManagementChoiceDescriptions = new Dictionary<CinemaManagementChoice, string>
     {
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
+        { CinemaManagementChoice.OverviewMovies, "Agenda" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
@@ -65,6 +67,9 @@ namespace Cinema.Services
                 {
                     case CinemaManagementChoice.ListMovies:
                         ListMovies(db);
+                        break;
+                    case CinemaManagementChoice.OverviewMovies:
+                        OverviewMovies(db);
                         break;
                     case CinemaManagementChoice.AddMovie:
                         AddMovieChoice(db);
@@ -177,7 +182,142 @@ namespace Cinema.Services
             Console.ReadKey();
         }
 
+        private static void OverviewMovies(CinemaContext db)
+        {
+            int currentWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
+            DisplayWeek(currentWeek, db);
+
+            bool running = true;
+            while (running)
+            {
+                var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Selecteer een optie:")
+                        .AddChoices("Vorige Week", "Volgende Week", "Terug"));
+
+                switch (choice)
+                {
+                    case "Vorige Week":
+                        currentWeek--;
+                        DisplayWeek(currentWeek, db);
+                        break;
+                    case "Volgende Week":
+                        currentWeek++;
+                        DisplayWeek(currentWeek, db);
+                        break;
+                    case "Terug":
+                        running = false;
+                        break;
+                }
+            }
+        }
+
+        private static void DisplayWeek(int weekNumber, CinemaContext db)
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.Markup($"[bold underline yellow]Week {weekNumber}[/]\n");
+            AnsiConsole.Write(new Rule());
+
+            DateTime startDate = GetFirstDateOfWeek(DateTime.Now.Year, weekNumber);
+            DateTime endDate = startDate.AddDays(7).AddDays(-1);
+
+            var showtimesForWeek = db.Showtimes
+                .Where(s => s.StartTime.DateTime.Date >= startDate.Date && s.StartTime.DateTime.Date <= endDate.Date)
+                .Include(s => s.Movie)
+                .OrderBy(s => s.StartTime.DateTime)
+                .ToList();
+
+            if (!showtimesForWeek.Any())
+            {
+                AnsiConsole.Markup("[red]Geen voorstellingen voor de geselecteerde week.[/]\n");
+            }
+            else
+            {
+                var table = new Table().BorderColor(Color.Grey).RoundedBorder();
+
+                string[] dagen = { "Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo" };
+                table.AddColumn(new TableColumn("Tijd").Centered());
+
+                foreach (var day in dagen)
+                {
+                    table.AddColumn(new TableColumn(day).Centered());
+                }
+
+                var timeSlots = new Dictionary<(int, int), List<string>>();
+                for (int i = 12; i <= 22; i++)
+                {
+                    for (int j = 0; j < 7; j++)
+                    {
+                        timeSlots[(i, j)] = new List<string>();
+                    }
+                }
+                foreach (var showtime in showtimesForWeek)
+                {
+                    int hourOfDay = showtime.StartTime.Hour;
+                    int dayIndex = ((int)showtime.StartTime.DayOfWeek + 6) % 7;
+                    string movieInfo = $"{showtime.StartTime.ToString("HH:mm")} - {showtime.Movie.Title} (Zaal {showtime.RoomId})";
+                    timeSlots[(hourOfDay, dayIndex)].Add(movieInfo);
+                }
+
+                for (int i = 12; i <= 22; i++)
+                {
+                    var row = new List<string> { $"{i:00}:00" };
+                    for (int j = 0; j < 7; j++)
+                    {
+                        if (timeSlots.ContainsKey((i, j)))
+                        {
+                            string movies = string.Join("\n", timeSlots[(i, j)]);
+                            row.Add($"[{GetColor(j)}]{movies}[/]");
+                        }
+                        else
+                        {
+                            row.Add("");
+                        }
+                    }
+                    table.AddRow(row.ToArray());
+
+                    /////////
+                    if (i < 22)
+                    {
+                        var separatorRow = new List<string> { "" };
+                        for (int j = 0; j < 7; j++)
+                        {
+                            separatorRow.Add("----------");
+                        }
+                        table.AddRow(separatorRow.ToArray());
+                    }
+                }
+
+                AnsiConsole.Render(table);
+            }
+
+            AnsiConsole.Write(new Rule());
+        }
+
+        private static Color GetColor(int dayIndex)
+        {
+            Color[] colors = { Color.Red, Color.Orange1, Color.Yellow, Color.Green, Color.Blue, Color.Aquamarine1, Color.Violet };
+            return colors[dayIndex];
+        }
+
+
+        private static DateTime GetFirstDateOfWeek(int year, int weekNumber)
+        {
+            DateTime jan1 = new DateTime(year, 1, 1);
+            int daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
+            DateTime firstMonday = jan1.AddDays(daysOffset);
+            var cal = CultureInfo.CurrentCulture.Calendar;
+            int firstWeek = cal.GetWeekOfYear(firstMonday, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+
+            if (firstWeek <= 1)
+            {
+                weekNumber -= 1;
+            }
+
+            DateTime firstDayOfWeek = firstMonday.AddDays(weekNumber * 7);
+            return firstDayOfWeek;
+        }
 
         private static void AddShowtime(CinemaContext db, Movie selectedMovie)
         {
