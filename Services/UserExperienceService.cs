@@ -2,7 +2,6 @@ using Cinema.Data;
 using Cinema.Models.Choices;
 using Cinema.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Cinema.Logic;
@@ -71,20 +70,19 @@ public class UserExperienceService
 			DateTime startOfWeek = today.AddDays(7 * currentWeek);
 			DateTime endOfWeek = startOfWeek.AddDays(8).Date;
 
-			var moviesWithUpcomingShowtimes = moviesQuery
-			  .Where(m => m.Showtimes != null && m.Showtimes
-			  .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
-			  .OrderBy(x => x.Title)
-			  .ToList();
+      var moviesWithUpcomingShowtimes = moviesQuery
+        .Where(m => m.Showtimes != null && m.Showtimes
+        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)))
+        .OrderBy(x => x.Title)
+        .ToList();
 
-			var options = new List<string> { "Filter door films" };
+      var options = new List<string> { "Terug" , "Filter door films" };
 
-			options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
-			AnsiConsole.MarkupLine("");
-			AnsiConsole.MarkupLine(filterDescription); // Display active filters
-			if (currentWeek < 3) options.Add("Volgende week");
-			if (currentWeek > 0) options.Add("Vorige week");
-			options.Add("Terug");
+      options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
+      AnsiConsole.MarkupLine("");
+      AnsiConsole.MarkupLine(filterDescription); // Display active filters
+      if (currentWeek < 3) options.Add("Volgende week");
+      if (currentWeek > 0) options.Add("Vorige week");
 
 			var selectedOption = AnsiConsole.Prompt(
 			  new SelectionPrompt<string>()
@@ -141,23 +139,23 @@ public class UserExperienceService
 			  .OrderBy(s => s.StartTime)
 			  .ToList();
 
-			if (showtimesThisWeek.Any())
-			{
-				string stringselectedShowtime = AnsiConsole.Prompt(
-				  new SelectionPrompt<string>()
-					.Title("Selecteer een voorstellingstijd")
-					.AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie).Select(x => $"{x}").ToList())
-				));
-				if (stringselectedShowtime == "Terug")
-				{
-					ListMoviesWithShowtimes(loggedInCustomer, db);
-					return;
-				}
-				Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
-				if (selectedMovie.MinAgeRating >= 16)
-				{
-					AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
-					AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
+      if (showtimesThisWeek.Any())
+      {
+        string stringselectedShowtime = AnsiConsole.Prompt(
+          new SelectionPrompt<string>()
+            .Title("Selecteer een voorstellingstijd")
+            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)).Select(x => $"{x}").ToList())
+        ));
+        if (stringselectedShowtime == "Terug")
+        {
+          ListMoviesWithShowtimes(loggedInCustomer, db);
+          return;
+        }
+        Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
+        if (selectedMovie.MinAgeRating >= 16)
+        {
+          AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
+          AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
 
 					var confirmation = AnsiConsole.Prompt(
 					  new SelectionPrompt<string>()
@@ -316,15 +314,16 @@ public class UserExperienceService
 		table.AddColumn("Stoelnummer");
 		table.AddColumn("Prijs");
 
+
 		decimal totalSeatPrice = 0;
 		foreach (var seat in selectedSeats)
 		{
-			table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"${seat.Price}");
+			table.AddRow(seat.Row.ToString(), seat.SeatNumber.ToString(), $"{seat.Price} Euro");
 			totalSeatPrice += seat.Price;
 		}
 		AnsiConsole.Write(table);
 
-		Console.WriteLine($"Totaal Prijs: ${totalSeatPrice}");
+		Console.WriteLine($"Totaal Prijs: {totalSeatPrice} Euro");
 		if (!(loggedInCustomer is null))
 		{
 			v = UseVoucher(db, loggedInCustomer);
@@ -333,10 +332,9 @@ public class UserExperienceService
 				Console.Clear();
 				AnsiConsole.Write(table);
 
-				Console.WriteLine($"Oude Totaal Prijs: ${totalSeatPrice}");
+				Console.WriteLine($"Oude Totaal Prijs: {totalSeatPrice} Euro");
 				Console.WriteLine($"Voucher gebruikt: '{v.Code}' voor {v.Discount}{v.DiscountType} korting");
-
-				Console.WriteLine($"Nieuwe Totaal Prijs: ${v.ApplyDiscount((double)totalSeatPrice)}");
+				Console.WriteLine($"Nieuwe Totaal Prijs: {v.ApplyDiscount((double)totalSeatPrice)} Euro");
 			}
 		}
 
@@ -366,13 +364,9 @@ public class UserExperienceService
 				v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
 				db.SaveChanges();
 			}
-			AnsiConsole.MarkupLine("[green]Stoelen succesvol gereserveerd.[/]");
-			AnsiConsole.MarkupLine($"De film zal vertoond worden in [purple]Zaal {showtime.RoomId}[/].");
-			AnsiConsole.MarkupLine($"Locatie vestiging: [blue]Witte de Withstraat 20, 3067AX Rotterdam[/].");
-			Console.WriteLine("Druk op een willekeurige toets om terug te keren naar het begin.");
+			DisplayReservationConfirmation(db, showtime, selectedSeats, ticketNumber);
 			if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
 			PresentAdminOptions.UpdateVouchers(db);
-			Console.ReadKey(true);
 			Console.Clear();
 		}
 		else
@@ -381,6 +375,80 @@ public class UserExperienceService
 			ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
 		}
 	}
+
+	private static void DisplayReservationConfirmation(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+	{
+		AnsiConsole.Clear();
+		var table = new Table().Border(TableBorder.Rounded);
+		table.AddColumn(new TableColumn("Rij").Centered());
+		table.AddColumn(new TableColumn("Stoelnummer").Centered());
+		table.AddColumn(new TableColumn("Prijs").Centered());
+
+		decimal totalSeatPrice = 0;
+		foreach (var seat in selectedSeats)
+		{
+			table.AddRow(
+				new Markup($"[green]{seat.Row}[/]"),
+				new Markup($"[green]{seat.SeatNumber}[/]"),
+				new Markup($"[green]{seat.Price} Euro[/]")
+			);
+			totalSeatPrice += seat.Price;
+		}
+
+		var panel = new Panel(new Rows(
+			new Markup($"[bold yellow]Ticketnummer:[/] [white]{ticketNumber}[/]"),
+			new Markup(""),
+			new Markup("[bold yellow]Geselecteerde Stoelen:[/]"),
+			table,
+			new Markup(""),
+			new Markup($"[bold yellow]Totaalprijs:[/] [white]{totalSeatPrice} Euro[/]"),
+			new Markup(""),
+			new Markup($"[bold yellow]Film:[/] [white]{showtime.Movie.Title}[/]"),
+			new Markup($"[bold yellow]Tijdstip:[/] [white]{showtime.StartTime:ddd, MMMM d hh:mm tt}[/]"),
+			new Markup($"[bold yellow]Zaal:[/] [white]{showtime.RoomId}[/]"),
+			new Markup("[bold yellow]Locatie:[/] [white]Witte de Withstraat 20, 3067AX Rotterdam[/]"),
+			new Markup("\n[bold aqua]Bevestiging van uw reservering bevind zich in uw email[/]"),
+			new Markup("[bold aqua]Bedankt voor uw reservering bij Your Eyes![/]")
+		))
+		{
+			Header = new PanelHeader("[bold blue] Reserveringsbevestiging [/]"),
+			Border = BoxBorder.Rounded,
+			Padding = new Padding(1, 1, 1, 1)
+		};
+
+		AnsiConsole.Write(panel);
+
+		var choices = new[]
+		{
+			"Films bekijken",
+			"Reserveringen bekijken",
+			"Account beheren",
+			"Terug"
+		};
+
+		var selectedChoice = AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("[bold blue]Wat wilt u nu doen?[/]")
+				.PageSize(4)
+				.AddChoices(choices)
+		);
+
+		switch (selectedChoice)
+		{
+			case "Films bekijken":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Reserveringen bekijken":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Account beheren":
+				PresentCustomerLogin.Start(db);
+				break;
+			case "Terug":
+				return;
+		}
+	}
+
 
 	private void ReserveSeats(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber, Voucher voucherused = null)
 	{
@@ -400,7 +468,7 @@ public class UserExperienceService
 					new SelectionPrompt<string>()
 						.Title("Wilt u [blue]reserveren[/] met een [green]bestaand[/] account?")
 						.PageSize(5)
-						.AddChoices(new[] { "Ja", "Nee", "[blueviolet]Terug[/]" })
+						.AddChoices(new[] { "Ja", "Nee", "Terug" })
 				);
 				switch (choice)
 				{
@@ -458,7 +526,7 @@ public class UserExperienceService
 								AnsiConsole.Status()
 									.Spinner(Spinner.Known.Aesthetic)
 									.SpinnerStyle(Style.Parse("white"))
-									.Start($"[green]Inloggen succesvol![/] [white]Ga verder met de [blue]reservering[/] voor: [bold grey93]{showtime.Movie.Title}[/]![/]", ctx =>
+									.Start($"[green]Inloggen succesvol![/] [white]Ga verder met de [blue]reservering[/] voor: [bold grey93]{showtime.Movie.Title}[/][/]", ctx =>
 									{
 										loginSuccessful = true;
 										Task.Delay(3000).Wait();
@@ -522,7 +590,7 @@ public class UserExperienceService
 							}
 						}
 						break;
-					case "[blueviolet]Terug[/]":
+					case "Terug":
 						HandleReservation(loggedInCustomer, db, showtime, selectedSeats, ticketNumber);
 						break;
 				}
@@ -889,6 +957,10 @@ public class UserExperienceService
 			}
 			else if (keyInfo.Key == ConsoleKey.Escape)
 			{
+        foreach (var seat in selectedSeats)
+				{
+					seat.IsSelected = false;
+				}
 				Console.Clear();
 				break;
 			}

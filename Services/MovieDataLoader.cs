@@ -1,8 +1,6 @@
 using Cinema.Data;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 
 namespace Cinema.Services
 {

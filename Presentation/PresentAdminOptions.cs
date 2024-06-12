@@ -6,14 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Org.BouncyCastle.Asn1;
 using Sharprompt;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.Common;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cinema.Services
 {
@@ -94,7 +87,7 @@ namespace Cinema.Services
                         PresentViewSubscribers.Start(db, admin);
                         break;
                     default:
-                        break;
+                        return;
                 }
             }
         }
@@ -158,15 +151,27 @@ namespace Cinema.Services
             Console.Clear();
             Console.WriteLine($"Vertoningen voor {selectedMovie.Title}:");
 
-            var showtimes = db.Showtimes.Where(s => s.Movie.Id == selectedMovie.Id).ToList();
+            var now = DateTime.UtcNow.AddHours(2);
+            var showtimes = db.Showtimes
+                .Where(s => s.Movie.Id == selectedMovie.Id && s.StartTime >= now)
+                .OrderBy(s => s.StartTime)
+                .ToList();
 
             if (showtimes.Any())
             {
+                var table = new Table().Border(TableBorder.Rounded);
+                table.AddColumn(new TableColumn("[yellow]Zaal[/]").Centered());
+                table.AddColumn(new TableColumn("[green]Starttijd[/]").Centered());
+
                 foreach (var showtime in showtimes)
                 {
-                    Console.WriteLine($"- Zaal ID: {showtime.RoomId}, Starttijd: {showtime.StartTime:dd-MM-yyyy HH:mm}");
-
+                    table.AddRow(
+                        showtime.RoomId.ToString(),
+                        $"{showtime.StartTime:dd-MM-yyyy HH:mm}"
+                    );
                 }
+
+                AnsiConsole.Write(table);
             }
             else
             {
@@ -328,7 +333,7 @@ namespace Cinema.Services
             roomId = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Selecteer een zaal:")
-                    .AddChoices(new[] { "1", "2", "3", "Terug" })
+                    .AddChoices(new[] { "Terug", "1", "2", "3" })
             );
             if (roomId == "Terug")
             {
@@ -507,6 +512,9 @@ namespace Cinema.Services
 
             var availableHours = new List<string>();
             var currentTime = utcStartTime;
+
+            var now = DateTimeOffset.UtcNow.AddHours(2);
+
             while (currentTime <= utcEndTime)
             {
                 // Check if the movie fits starting from the current hour
@@ -516,7 +524,7 @@ namespace Cinema.Services
                     return !bookedShowtimes.Any(s => currentOffset >= s.StartTime && currentOffset < s.EndTime);
                 });
 
-                if (isMovieFit)
+                if (isMovieFit && currentTime > now.AddMinutes(5))
                 {
                     availableHours.Add(currentTime.ToString("HH:mm"));
                 }
@@ -1143,7 +1151,7 @@ namespace Cinema.Services
                     stat.RegularSeatsSold.ToString(),
                     stat.ExtraLegroomSeatsSold.ToString(),
                     stat.LoveseatsSold.ToString(),
-                    $"${stat.TotalRevenue:N2}"
+                    $"{stat.TotalRevenue:N2} Euro"
                 );
             }
 
@@ -1161,7 +1169,7 @@ namespace Cinema.Services
                 totalRegularSeatsSold.ToString(),
                 totalExtraLegroomSeatsSold.ToString(),
                 totalLoveseatsSold.ToString(),
-                $"${totalRevenue:N2}"
+                $"{totalRevenue:N2} Euro"
             );
 
             AnsiConsole.Write(table);
@@ -1179,9 +1187,9 @@ namespace Cinema.Services
                     string formattedEndDate = enddate.ToString("yyyyMMdd");
                     string filePath = $@"../../../movie_stats_{formattedStartDate}_to_{formattedEndDate}.csv";
                     ExportStatsToCsv(movieStats, filePath, totalShowings, totalSeatsSold, totalRegularSeatsSold, totalExtraLegroomSeatsSold, totalLoveseatsSold, totalRevenue);
-                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     EmailCSVFile sender = new EmailCSVFile();
-                    sender.SendCSVFile("Guest", filePath);
+                    sender.SendCSVFile("Admin", filePath);
+                    AnsiConsole.MarkupLine("[green]Druk op een willekeurige toets om terug te keren...[/]");
                     Console.ReadKey();
                 }
             }

@@ -1,7 +1,5 @@
 using Cinema.Data;
 using Spectre.Console;
-using Microsoft.EntityFrameworkCore;
-
 
 public static class PresentGuestReservationOptions
 {
@@ -68,7 +66,7 @@ public static class PresentGuestReservationOptions
 
         if (!ticket.CancelledAt.HasValue && now < halfHourBeforeShowtime)
         {
-            choices.Add("Cancel ticket");
+            choices.Add("Annuleer ticket");
         }
 
         choices.Add("Terug");
@@ -81,7 +79,7 @@ public static class PresentGuestReservationOptions
         );
         switch (optionChoice)
         {
-            case "Cancel ticket":
+            case "Annuleer ticket":
                 AnsiConsole.Clear();
                 var deleteTicketRule = new Rule("[red]Ticket annuleren[/]")
                 {

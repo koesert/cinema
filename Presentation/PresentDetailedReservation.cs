@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Cinema.Data;
 using Spectre.Console;
 
@@ -54,7 +53,7 @@ public class PresentDetailedReservation
 
         if (!reservation.CancelledAt.HasValue && now < halfHourBeforeShowtime)
         {
-            choices.Add("Cancel ticket");
+            choices.Add("Annuleer ticket");
         }
 
         choices.Add("Terug");
@@ -67,7 +66,7 @@ public class PresentDetailedReservation
         );
         switch (optionChoice)
         {
-            case "Cancel ticket":
+            case "Annuleer ticket":
                 AnsiConsole.Clear();
                 var deleteTicketRule = new Rule("[red]Ticket annuleren[/]")
                 {
