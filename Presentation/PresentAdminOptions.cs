@@ -38,7 +38,7 @@ namespace Cinema.Services
         private static readonly Dictionary<CinemaManagementChoice, string> ManagementChoiceDescriptions = new Dictionary<CinemaManagementChoice, string>
     {
         { CinemaManagementChoice.ListMovies, "Lijst met momenteel beschikbare films" },
-        { CinemaManagementChoice.OverviewMovies, "Film agenda" },
+        { CinemaManagementChoice.OverviewMovies, "Agenda" },
         { CinemaManagementChoice.AddMovie, "Voeg een film toe" },
         { CinemaManagementChoice.VoucherPanel, "Beheer Vouchers"},
         { CinemaManagementChoice.ViewStats, "Bekijk opbrengsten per periode"},
