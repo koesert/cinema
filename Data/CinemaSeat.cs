@@ -11,7 +11,7 @@ public class CinemaSeat
     public decimal Price { get; set; }
     public Showtime Showtime { get; set; }
     public int? TicketId { get; set; }
-    public Ticket? Ticket { get; set; }
+    public Ticket Ticket { get; set; }
     public bool IsSelected { get; set; } = false;
     public int Type { get; set; } = 0;
     public CinemaSeat() { }

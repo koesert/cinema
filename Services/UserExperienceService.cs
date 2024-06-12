@@ -70,20 +70,19 @@ public class UserExperienceService
 			DateTime startOfWeek = today.AddDays(7 * currentWeek);
 			DateTime endOfWeek = startOfWeek.AddDays(8).Date;
 
-			var moviesWithUpcomingShowtimes = moviesQuery
-			  .Where(m => m.Showtimes != null && m.Showtimes
-			  .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2)))
-			  .OrderBy(x => x.Title)
-			  .ToList();
+      var moviesWithUpcomingShowtimes = moviesQuery
+        .Where(m => m.Showtimes != null && m.Showtimes
+        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)))
+        .OrderBy(x => x.Title)
+        .ToList();
 
-			var options = new List<string> { "Filter door films" };
+      var options = new List<string> { "Terug" , "Filter door films" };
 
-			options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
-			AnsiConsole.MarkupLine("");
-			AnsiConsole.MarkupLine(filterDescription); // Display active filters
-			if (currentWeek < 3) options.Add("Volgende week");
-			if (currentWeek > 0) options.Add("Vorige week");
-			options.Add("Terug");
+      options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
+      AnsiConsole.MarkupLine("");
+      AnsiConsole.MarkupLine(filterDescription); // Display active filters
+      if (currentWeek < 3) options.Add("Volgende week");
+      if (currentWeek > 0) options.Add("Vorige week");
 
 			var selectedOption = AnsiConsole.Prompt(
 			  new SelectionPrompt<string>()
@@ -140,23 +139,23 @@ public class UserExperienceService
 			  .OrderBy(s => s.StartTime)
 			  .ToList();
 
-			if (showtimesThisWeek.Any())
-			{
-				string stringselectedShowtime = AnsiConsole.Prompt(
-				  new SelectionPrompt<string>()
-					.Title("Selecteer een voorstellingstijd")
-					.AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie).Select(x => $"{x}").ToList())
-				));
-				if (stringselectedShowtime == "Terug")
-				{
-					ListMoviesWithShowtimes(loggedInCustomer, db);
-					return;
-				}
-				Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
-				if (selectedMovie.MinAgeRating >= 16)
-				{
-					AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
-					AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
+      if (showtimesThisWeek.Any())
+      {
+        string stringselectedShowtime = AnsiConsole.Prompt(
+          new SelectionPrompt<string>()
+            .Title("Selecteer een voorstellingstijd")
+            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)).Select(x => $"{x}").ToList())
+        ));
+        if (stringselectedShowtime == "Terug")
+        {
+          ListMoviesWithShowtimes(loggedInCustomer, db);
+          return;
+        }
+        Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
+        if (selectedMovie.MinAgeRating >= 16)
+        {
+          AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
+          AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
 
 					var confirmation = AnsiConsole.Prompt(
 					  new SelectionPrompt<string>()
@@ -314,6 +313,7 @@ public class UserExperienceService
 		table.AddColumn("Rij");
 		table.AddColumn("Stoelnummer");
 		table.AddColumn("Prijs");
+
 
 		decimal totalSeatPrice = 0;
 		foreach (var seat in selectedSeats)
@@ -957,6 +957,10 @@ public class UserExperienceService
 			}
 			else if (keyInfo.Key == ConsoleKey.Escape)
 			{
+        foreach (var seat in selectedSeats)
+				{
+					seat.IsSelected = false;
+				}
 				Console.Clear();
 				break;
 			}

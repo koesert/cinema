@@ -66,6 +66,7 @@ public static class PresentAccountOptions
                 if (newEmail.ToLower() == "terug")
                 {
                     Start(loggedInCustomer, db);
+                    return;
                 }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u '[blue]{newEmail}[/]' als email wilt gebruiken?"))
                 {
@@ -137,6 +138,7 @@ public static class PresentAccountOptions
                 if (newUsername.ToLower() == "terug")
                 {
                     Start(loggedInCustomer, db);
+                    return;
                 }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u '[blue]{newUsername}[/]' als gebruikersnaam wilt gebruiken?"))
                 {
@@ -210,6 +212,7 @@ public static class PresentAccountOptions
                 if (newPassword.ToLower() == "terug")
                 {
                     Start(loggedInCustomer, db);
+                    return;
                 }
                 if (AnsiConsole.Confirm($"Weet u zeker dat u uw [blue]wachtwoord[/] wilt aanpassen?"))
                 {
