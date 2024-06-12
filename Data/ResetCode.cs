@@ -95,8 +95,8 @@ spyrabv@gmail.com";
             db.SaveChanges();
         }
     }
-    public static string AskNewPassword()
-{
+    public static string AskNewPassword(CinemaContext db, string userEmail)
+{   string oldPassword = db.Customers.FirstOrDefault(c => c.Email == userEmail)?.Password;
     string newPassword = AnsiConsole.Prompt(
         new TextPrompt<string>("[grey]Voer 'terug' in om terug te gaan.[/]\nWat word uw nieuwe [bold blue]wachtwoord[/]?")
             .PromptStyle("blue")
@@ -122,6 +122,10 @@ spyrabv@gmail.com";
                 if (!password.All(char.IsLetterOrDigit))
                 {
                     return ValidationResult.Error("[red]Wachtwoord mag alleen letters (hoofdletters en kleine letters) en cijfers bevatten[/]");
+                }
+                if (password == oldPassword)
+                {
+                    return ValidationResult.Error("[red]Nieuw wachtwoord kan niet hetzelfde zijn als het oude wachtwoord[/]");
                 }
                 return ValidationResult.Success();
             })

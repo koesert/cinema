@@ -115,7 +115,7 @@ public class PresentCustomerLogin
                 ResetCode rc = new ResetCode(db);
                 rc.SendMessageResetCode(email);
                 string resetCode = AskResetCode();
-                string newPassword = ResetCode.AskNewPassword();;
+                string newPassword = ResetCode.AskNewPassword(db, email);;
                 rc.UpdateResetCodeInDatabase(db,newPassword, resetCode);
                 Customer customer = db.Customers.FirstOrDefault(x => x.Email == email);
                 rc.UpdatePassword(db, customer, newPassword);
