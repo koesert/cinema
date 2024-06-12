@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-
-namespace Cinema.Data
+﻿namespace Cinema.Data
 {
     public class Ticket
     {
@@ -71,7 +66,4 @@ namespace Cinema.Data
             db.SaveChanges();
         }
     }
-
-
-
 }

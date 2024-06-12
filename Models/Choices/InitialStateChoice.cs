@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Cinema.Models.Choices
+﻿namespace Cinema.Models.Choices
 {
     public enum InitialStateChoice
     {
@@ -14,9 +6,7 @@ namespace Cinema.Models.Choices
         Login,
         Register,
         reservering,
-
         Information,
-
         Exit
     }
 }

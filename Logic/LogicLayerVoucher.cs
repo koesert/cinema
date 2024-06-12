@@ -1,7 +1,5 @@
-using System.Data.Common;
 using Cinema.Data;
 using Spectre.Console;
-using System.Globalization;
 
 public class LogicLayerVoucher
 {

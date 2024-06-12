@@ -1,7 +1,5 @@
 using Cinema.Data;
 using Spectre.Console;
-using Microsoft.EntityFrameworkCore;
-
 
 public static class PresentGuestReservationOptions
 {
