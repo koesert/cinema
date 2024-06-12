@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Cinema.Data;
 using Spectre.Console;
 
