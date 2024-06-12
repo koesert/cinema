@@ -16,10 +16,10 @@ namespace Cinema.Data
         _db = db;
     }
 
-    public void SendMessageResetCode(string email)
+    public void SendMessageResetCode(string email, string code)
     {
         string userName = _db.Customers.FirstOrDefault(c => c.Email == email)?.Username;
-        string userResetCode = GenerateRandomCode(_db);
+        string userResetCode = code;
 
         using (SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587))
         {
@@ -30,7 +30,7 @@ namespace Cinema.Data
             {
                 mailMessage.From = new MailAddress("spyrabv@gmail.com");
                 mailMessage.To.Add(email);
-                mailMessage.Subject = "Uw account bij Your Eyes is succesvol aangemaakt";
+                mailMessage.Subject = "Uw code om uw wachtwoord te resetten";
 
                 mailMessage.Body = $@"
 Beste {userName},
@@ -56,7 +56,7 @@ spyrabv@gmail.com";
                 try
                 {
                     smtpClient.Send(mailMessage);
-                    Console.WriteLine("Email verzonden");
+                    AnsiConsole.MarkupLine("[green]Reset code is naar uw email verstuurd![/]");
                 }
                 catch (SmtpException ex)
                 {
@@ -68,23 +68,7 @@ spyrabv@gmail.com";
         UpdateResetCodeInDatabase(_db, email, userResetCode);
     }
 
-    private string GenerateRandomCode(CinemaContext db)
-    {
-        var random = new Random();
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        string code = string.Empty;
-
-        for (int i = 0; i < 10; i++)
-        {
-            code += chars[random.Next(chars.Length)];
-        }
-
-        if (db.Customers.Any(x => x.ResetCode == code))
-        {
-            return GenerateRandomCode(db);
-        }
-        return code;
-    }
+    
 
     public void UpdateResetCodeInDatabase(CinemaContext db, string userEmail, string resetCode)
     {
@@ -131,22 +115,22 @@ spyrabv@gmail.com";
             })
     );
     return newPassword;
-}
-        public void UpdatePassword(CinemaContext db, Customer customer, string newPassword)
-        {
-            AnsiConsole.Status()
-            .Spinner(Spinner.Known.Aesthetic)
-            .SpinnerStyle(Style.Parse("blue"))
-            .Start("[blue]Wachtwoord[/] updaten...", ctx =>
-                {
-                    customer.Password = newPassword;
-                    Customer.UpdateCustomer(db, customer);
-                    Thread.Sleep(2500);
-                });
+    }
+            public void UpdatePassword(CinemaContext db, Customer customer, string newPassword)
+            {
+                AnsiConsole.Status()
+                .Spinner(Spinner.Known.Aesthetic)
+                .SpinnerStyle(Style.Parse("blue"))
+                .Start("[blue]Wachtwoord[/] updaten...", ctx =>
+                    {
+                        customer.Password = newPassword;
+                        Customer.UpdateCustomer(db, customer);
+                        Thread.Sleep(2500);
+                    });
 
-            AnsiConsole.MarkupLine("[blue]Wachtwoord[/] geüpdatet!");
-            Thread.Sleep(2500);
-            PresentCustomerLogin.Start(db);
-        }
-}
+                AnsiConsole.MarkupLine("[blue]Wachtwoord[/] geüpdatet!");
+                Thread.Sleep(2500);
+                PresentCustomerOptions.Start(customer, db);
+            }
+    }
 }
