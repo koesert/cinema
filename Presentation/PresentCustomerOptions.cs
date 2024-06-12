@@ -1,3 +1,4 @@
+using Cinema;
 using Cinema.Data;
 using Cinema.Services;
 using Spectre.Console;
@@ -39,7 +40,7 @@ public static class PresentCustomerOptions
                 PresentAccountOptions.Start(loggedInCustomer, db);
                 break;
             case "Uitloggen":
-                AnsiConsole.Clear();
+                Program.Main();
                 break;
         }
     }

@@ -22,7 +22,7 @@ namespace Cinema
             { InitialStateChoice.Exit, "Afsluiten" }
         };
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")

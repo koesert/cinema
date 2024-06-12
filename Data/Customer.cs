@@ -7,6 +7,7 @@ namespace Cinema.Data
 		public string Password { get; set; }
 		public string Email { get; set; }
 		public bool Subscribed { get; set; }
+    public string ResetCode { get; internal set; }
 		public DateTimeOffset? SubscribedSince { get; set; }
 		public static List<Customer> AllCustomers = new List<Customer>();
 
