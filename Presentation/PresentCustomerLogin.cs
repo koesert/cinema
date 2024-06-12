@@ -2,6 +2,7 @@
 using System.Data.Common;
 using Cinema.Data;
 using Microsoft.EntityFrameworkCore.Query;
+using Org.BouncyCastle.Security;
 using Spectre.Console;
 
 public class PresentCustomerLogin
@@ -81,7 +82,8 @@ public class PresentCustomerLogin
 
     private static string AskPassword(CinemaContext db, string email)
     {
-        while (true)
+        bool askPasswordSuccesfull = false;
+        while (!askPasswordSuccesfull)
         {
             string password = AnsiConsole.Prompt(
                 new TextPrompt<string>("[grey]Voer 'vergeten' in om een nieuw wachtwoord in te stellen.[/]\n Voer uw [bold blue]wachtwoord[/] in:")
@@ -128,6 +130,7 @@ public class PresentCustomerLogin
                         rc.UpdatePassword(db, customer, newPassword);
                         resetSuccesful = true;
                         AnsiConsole.MarkupLine("[green]Wachtwoord succesvol gereset![/]");
+                        askPasswordSuccesfull = true;
                         return newPassword;
                     }
                     else
@@ -136,11 +139,9 @@ public class PresentCustomerLogin
                     }
                 }       
             }
-            else
-            {
-                return password;
-            }
+            return password;
         }
+        return "";
     }
 
     private static string AskResetCode()
