@@ -289,7 +289,7 @@ namespace Cinema.Services
                     }
                 }
 
-                AnsiConsole.Render(table);
+                AnsiConsole.Write(table);
             }
 
             AnsiConsole.Write(new Rule());

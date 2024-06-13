@@ -364,19 +364,21 @@ public class UserExperienceService
 				v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
 				db.SaveChanges();
 			}
-			DisplayReservationConfirmation(db, showtime, selectedSeats, ticketNumber);
+			DisplayReservationConfirmation(db, loggedInCustomer, showtime, selectedSeats, ticketNumber);
 			if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
 			PresentAdminOptions.UpdateVouchers(db);
 			Console.Clear();
+			return;
 		}
 		else
 		{
 			Console.Clear();
 			ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
+			return;
 		}
 	}
 
-	private static void DisplayReservationConfirmation(CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+	private void DisplayReservationConfirmation(CinemaContext db, Customer customer,Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
 	{
 		AnsiConsole.Clear();
 		var table = new Table().Border(TableBorder.Rounded);
@@ -421,8 +423,7 @@ public class UserExperienceService
 		var choices = new[]
 		{
 			"Films bekijken",
-			"Reserveringen bekijken",
-			"Account beheren",
+			"Inloggen",
 			"Terug"
 		};
 
@@ -436,12 +437,9 @@ public class UserExperienceService
 		switch (selectedChoice)
 		{
 			case "Films bekijken":
-				PresentCustomerLogin.Start(db);
+				ListMoviesWithShowtimes(customer, db);
 				break;
-			case "Reserveringen bekijken":
-				PresentCustomerLogin.Start(db);
-				break;
-			case "Account beheren":
+			case "Inloggen":
 				PresentCustomerLogin.Start(db);
 				break;
 			case "Terug":
