@@ -303,7 +303,6 @@ public class UserExperienceService
 	private void HandleReservation(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
 	{
 		Voucher v = null;
-		bool result = false;
 		if (selectedSeats.Count == 0)
 		{
 			AnsiConsole.MarkupLine("[red]Geen stoelen geselecteerd.[/]");
@@ -467,6 +466,8 @@ public class UserExperienceService
 				reservationSuccesful = true;
 				CreateTicket(db, loggedInCustomer, showtime, selectedSeats, ticketNumber, loggedInCustomer.Email, voucherused);
 				sender.SendMessage(loggedInCustomer.Email, loggedInCustomer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
+				DisplayReservationConfirmation(db, loggedInCustomer, showtime, selectedSeats, ticketNumber);
+
 			}
 			else
 			{
