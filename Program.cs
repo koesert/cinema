@@ -87,6 +87,7 @@ namespace Cinema
                         break;
                 }
             }
+            Environment.Exit(0);
         }
     }
 }

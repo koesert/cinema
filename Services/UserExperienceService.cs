@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Cinema.Logic;
+using System;
+using Cinema;
 public class UserExperienceService
 {
 
@@ -113,6 +115,7 @@ public class UserExperienceService
 				else
 				{
 					Console.Clear();
+					Program.Main();
 					break;
 				}
 			}
@@ -289,6 +292,7 @@ public class UserExperienceService
 				{
 					seat.IsSelected = false;
 				}
+				ListMoviesWithShowtimes(loggedInCustomer, db);
 				Console.Clear();
 				break;
 			}
@@ -299,6 +303,7 @@ public class UserExperienceService
 	private void HandleReservation(Customer loggedInCustomer, CinemaContext db, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
 	{
 		Voucher v = null;
+		bool result = false;
 		if (selectedSeats.Count == 0)
 		{
 			AnsiConsole.MarkupLine("[red]Geen stoelen geselecteerd.[/]");
@@ -364,7 +369,6 @@ public class UserExperienceService
 				v.ExpirationDate = DateTimeOffset.UtcNow.AddHours(1);
 				db.SaveChanges();
 			}
-			DisplayReservationConfirmation(db, loggedInCustomer, showtime, selectedSeats, ticketNumber);
 			if (loggedInCustomer != null) PresentCustomerReservationProgress.UpdateTrueProgress(loggedInCustomer, db);
 			PresentAdminOptions.UpdateVouchers(db);
 			Console.Clear();
@@ -536,6 +540,7 @@ public class UserExperienceService
 								reservationSuccesful = true;
 								CreateTicket(db, customer, showtime, selectedSeats, ticketNumber, customer.Email, voucherused);
 								sender.SendMessage(customer.Email, customer.Username, showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
+								DisplayReservationConfirmation(db, loggedInCustomer, showtime, selectedSeats, ticketNumber);
 								return;
 							}
 							else if (result == 2)
@@ -589,6 +594,7 @@ public class UserExperienceService
 								reservationSuccesful = true;
 								CreateTicket(db, showtime, selectedSeats, ticketNumber, guestEmail);
 								sender.SendMessage(guestEmail, "Guest", showtime.Movie.Title, showtime.StartTime.ToString("dd-MM-yyyy"), showtime.StartTime.ToString("HH:mm"), string.Join(", ", selectedSeats.Select(x => $"{x.Row}{x.SeatNumber}")), showtime.RoomId, ticketNumber);
+								DisplayReservationConfirmation(db, loggedInCustomer, showtime, selectedSeats, ticketNumber);
 							}
 						}
 						break;
@@ -964,6 +970,7 @@ public class UserExperienceService
 					seat.IsSelected = false;
 				}
 				Console.Clear();
+				ListMoviesWithShowtimes(loggedInCustomer, db);
 				break;
 			}
 		}
