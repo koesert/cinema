@@ -373,6 +373,10 @@ public class UserExperienceService
 		else
 		{
 			Console.Clear();
+			foreach (var seat in selectedSeats)
+			{
+				seat.IsReserved = false;
+			}
 			ShowCinemaHall(loggedInCustomer, db, showtime, selectedSeats);
 			return;
 		}
