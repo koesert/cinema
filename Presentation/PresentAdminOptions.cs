@@ -17,7 +17,7 @@ namespace Cinema.Services
         private static readonly Dictionary<CinemaManagementMovieChoice, string> Descriptions = new Dictionary<CinemaManagementMovieChoice, string>
         {
             { CinemaManagementMovieChoice.ListShowtimes, "Lijst met aankomende vertoningen voor deze film" },
-            { CinemaManagementMovieChoice.DeleteMovie, "Verwijder deze film" },
+            { CinemaManagementMovieChoice.DeleteMovie, "Deactiveer deze film" },
             { CinemaManagementMovieChoice.AddShowtime, "Voeg een vertoningstijd toe voor deze film" },
             { CinemaManagementMovieChoice.Exit, "Terug" }
         };
@@ -98,7 +98,7 @@ namespace Cinema.Services
             var movies = db.Movies.ToList();
 
             var choices = new List<string> { "Terug" };
-            choices.AddRange(movies.Select(movie => movie.Title).OrderBy(x => x));
+            choices.AddRange(movies.Where(x => x.Available).Select(movie => movie.Title).OrderBy(x => x));
 
             var selectedOption = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -614,19 +614,20 @@ namespace Cinema.Services
         private static void DeleteMovie(CinemaContext db, Movie selectedMovie)
         {
             Console.Clear();
-
-            var confirmDelete = AnsiConsole.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt verwijderen?");
+            AnsiConsole.MarkupLine($"[blue]Gekozen film: {selectedMovie.Title}[/]");
+            AnsiConsole.MarkupLine($"[purple]Door de film te deactiveren kunnen hier geen vertoningen meer mee gemaakt worden. De bestaande vertoningen zullen nog wel uitgespeeld worden voor de klanten en de statistieken blijven aanwezig.[/][red]\nDit optie valt ook niet terug te draaien[/]");
+            var confirmDelete = AnsiConsole.Confirm($"Weet je zeker dat je \"{selectedMovie.Title}\" wilt deactiveren?");
 
             if (confirmDelete)
             {
-                db.Movies.Remove(selectedMovie);
+                selectedMovie.Available = false;
                 db.SaveChanges();
 
-                AnsiConsole.MarkupLine($"[green]\"{selectedMovie.Title}\" is succesvol verwijderd.[/]");
+                AnsiConsole.MarkupLine($"[green]\"{selectedMovie.Title}\" is succesvol gedeactiveerd.[/]");
             }
             else
             {
-                AnsiConsole.MarkupLine("[yellow]Verwijdering geannuleerd.[/]");
+                AnsiConsole.MarkupLine("[yellow]Deactivering geannuleerd.[/]");
             }
 
             AnsiConsole.MarkupLine("Druk op een toets om terug te gaan....");

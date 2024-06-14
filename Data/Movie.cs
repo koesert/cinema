@@ -16,6 +16,7 @@ namespace Cinema.Data
         public string Description { get; set; }
         public DateTimeOffset ReleaseDate { get; set; }
         public int MinAgeRating { get; set; }
+        public bool Available { get; set; } = true;
 
         [Column(TypeName = "jsonb")]
         public List<string> Genres { get; set; }
