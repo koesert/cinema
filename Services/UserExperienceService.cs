@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Cinema.Logic;
+using System.Globalization;
 using System;
 using Cinema;
 public class UserExperienceService
@@ -72,19 +73,19 @@ public class UserExperienceService
 			DateTime startOfWeek = today.AddDays(7 * currentWeek);
 			DateTime endOfWeek = startOfWeek.AddDays(8).Date;
 
-      var moviesWithUpcomingShowtimes = moviesQuery
-        .Where(m => m.Showtimes != null && m.Showtimes
-        .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)))
-        .OrderBy(x => x.Title)
-        .ToList();
+			var moviesWithUpcomingShowtimes = moviesQuery
+			  .Where(m => m.Showtimes != null && m.Showtimes
+			  .Any(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)))
+			  .OrderBy(x => x.Title)
+			  .ToList();
 
-      var options = new List<string> { "Terug" , "Filter door films" };
+			var options = new List<string> { "Terug", "Filter door films" };
 
-      options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
-      AnsiConsole.MarkupLine("");
-      AnsiConsole.MarkupLine(filterDescription); // Display active filters
-      if (currentWeek < 3) options.Add("Volgende week");
-      if (currentWeek > 0) options.Add("Vorige week");
+			options.AddRange(moviesWithUpcomingShowtimes.Select(m => m.Title));
+			AnsiConsole.MarkupLine("");
+			AnsiConsole.MarkupLine(filterDescription); // Display active filters
+			if (currentWeek < 3) options.Add("Volgende week");
+			if (currentWeek > 0) options.Add("Vorige week");
 
 			var selectedOption = AnsiConsole.Prompt(
 			  new SelectionPrompt<string>()
@@ -142,23 +143,23 @@ public class UserExperienceService
 			  .OrderBy(s => s.StartTime)
 			  .ToList();
 
-      if (showtimesThisWeek.Any())
-      {
-        string stringselectedShowtime = AnsiConsole.Prompt(
-          new SelectionPrompt<string>()
-            .Title("Selecteer een voorstellingstijd")
-            .AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)).Select(x => $"{x}").ToList())
-        ));
-        if (stringselectedShowtime == "Terug")
-        {
-          ListMoviesWithShowtimes(loggedInCustomer, db);
-          return;
-        }
-        Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
-        if (selectedMovie.MinAgeRating >= 16)
-        {
-          AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
-          AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
+			if (showtimesThisWeek.Any())
+			{
+				string stringselectedShowtime = AnsiConsole.Prompt(
+				  new SelectionPrompt<string>()
+					.Title("Selecteer een voorstellingstijd")
+					.AddChoices(new List<string> { "Terug" }.Concat(db.Showtimes.Where(s => s.StartTime >= DateTime.UtcNow && s.StartTime >= startOfWeek && s.StartTime < endOfWeek && s.StartTime >= DateTime.UtcNow + TimeSpan.FromHours(2) && s.Movie == selectedMovie && s.CinemaSeats.Any(y => y.IsReserved == false && y.SeatNumber != 99 && y.SeatNumber != 0)).Select(x => $"{x}").ToList())
+				));
+				if (stringselectedShowtime == "Terug")
+				{
+					ListMoviesWithShowtimes(loggedInCustomer, db);
+					return;
+				}
+				Showtime selectedShowtime = db.Showtimes.AsEnumerable().FirstOrDefault(x => x.Movie == selectedMovie && x.ToString() == stringselectedShowtime);
+				if (selectedMovie.MinAgeRating >= 16)
+				{
+					AnsiConsole.MarkupLine("[red]Let op: Deze film heeft een minimum leeftijd van 16 jaar of ouder.[/]");
+					AnsiConsole.MarkupLine("Wil je doorgaan? (Ja/Nee)");
 
 					var confirmation = AnsiConsole.Prompt(
 					  new SelectionPrompt<string>()
@@ -385,9 +386,11 @@ public class UserExperienceService
 		}
 	}
 
-	private void DisplayReservationConfirmation(CinemaContext db, Customer customer,Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
+	private void DisplayReservationConfirmation(CinemaContext db, Customer customer, Showtime showtime, List<CinemaSeat> selectedSeats, string ticketNumber)
 	{
 		AnsiConsole.Clear();
+		var NL = new CultureInfo("nl-NL");
+		string date = showtime.StartTime.ToString("dddd, d MMMM HH:mm", NL);
 		var table = new Table().Border(TableBorder.Rounded);
 		table.AddColumn(new TableColumn("Rij").Centered());
 		table.AddColumn(new TableColumn("Stoelnummer").Centered());
@@ -413,7 +416,7 @@ public class UserExperienceService
 			new Markup($"[bold yellow]Totaalprijs:[/] [white]{totalSeatPrice} Euro[/]"),
 			new Markup(""),
 			new Markup($"[bold yellow]Film:[/] [white]{showtime.Movie.Title}[/]"),
-			new Markup($"[bold yellow]Tijdstip:[/] [white]{showtime.StartTime:ddd, MMMM d hh:mm tt}[/]"),
+			new Markup($"[bold yellow]Tijdstip:[/] [white]{date}[/]"),
 			new Markup($"[bold yellow]Zaal:[/] [white]{showtime.RoomId}[/]"),
 			new Markup("[bold yellow]Locatie:[/] [white]Witte de Withstraat 20, 3067AX Rotterdam[/]"),
 			new Markup("\n[bold aqua]Bevestiging van uw reservering bevind zich in uw email[/]"),
@@ -721,19 +724,19 @@ public class UserExperienceService
 		var moviesQuery = allMovies.AsQueryable();
 		string activeFilters = "Actieve Filters: ";
 
-    var filterOption = AnsiConsole.Prompt(
-      new SelectionPrompt<CinemaFilterChoice>()
-        .Title("Selecteer een optie om films te filteren")
-        .PageSize(4)
-        .AddChoices(new[]
-        {
-        CinemaFilterChoice.Genres,
-        CinemaFilterChoice.Directeuren,
-        CinemaFilterChoice.Acteurs,
-        CinemaFilterChoice.Leeftijdsclassificatie,
-        CinemaFilterChoice.Terug
-        })
-    );
+		var filterOption = AnsiConsole.Prompt(
+		  new SelectionPrompt<CinemaFilterChoice>()
+			.Title("Selecteer een optie om films te filteren")
+			.PageSize(4)
+			.AddChoices(new[]
+			{
+		CinemaFilterChoice.Genres,
+		CinemaFilterChoice.Directeuren,
+		CinemaFilterChoice.Acteurs,
+		CinemaFilterChoice.Leeftijdsclassificatie,
+		CinemaFilterChoice.Terug
+			})
+		);
 
 		switch (filterOption)
 		{
@@ -785,27 +788,27 @@ public class UserExperienceService
 				activeFilters += "Directeuren: " + string.Join(", ", selectedDirectors);
 				break;
 
-      case CinemaFilterChoice.Leeftijdsclassificatie:
-        var ageRatingChoice = AnsiConsole.Prompt(
-          new SelectionPrompt<string>()
-            .Title("Selecteer een leeftijdsclassificatie om films te filteren")
-            .AddChoices(new[] { "16+", "Onder 16" })
-        );
-        if (ageRatingChoice == "16+")
-        {
-          moviesQuery = allMovies.Where(movie => movie.MinAgeRating >= 16).AsQueryable();
-          activeFilters += "Leeftijdsclassificatie: 16+";
-        }
-        else if (ageRatingChoice == "Onder 16")
-        {
-          moviesQuery = allMovies.Where(movie => movie.MinAgeRating < 16).AsQueryable();
-          activeFilters += "Leeftijdsclassificatie: Onder 16";
-        }
-        break;
+			case CinemaFilterChoice.Leeftijdsclassificatie:
+				var ageRatingChoice = AnsiConsole.Prompt(
+				  new SelectionPrompt<string>()
+					.Title("Selecteer een leeftijdsclassificatie om films te filteren")
+					.AddChoices(new[] { "16+", "Onder 16" })
+				);
+				if (ageRatingChoice == "16+")
+				{
+					moviesQuery = allMovies.Where(movie => movie.MinAgeRating >= 16).AsQueryable();
+					activeFilters += "Leeftijdsclassificatie: 16+";
+				}
+				else if (ageRatingChoice == "Onder 16")
+				{
+					moviesQuery = allMovies.Where(movie => movie.MinAgeRating < 16).AsQueryable();
+					activeFilters += "Leeftijdsclassificatie: Onder 16";
+				}
+				break;
 
-      default:
-        return (null, null);
-    }
+			default:
+				return (null, null);
+		}
 
 		return (moviesQuery, activeFilters);
 	}
@@ -966,7 +969,7 @@ public class UserExperienceService
 			}
 			else if (keyInfo.Key == ConsoleKey.Escape)
 			{
-        foreach (var seat in selectedSeats)
+				foreach (var seat in selectedSeats)
 				{
 					seat.IsSelected = false;
 				}
