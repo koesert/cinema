@@ -453,6 +453,7 @@ public class UserExperienceService
 				PresentCustomerLogin.Start(db);
 				break;
 			case "Terug":
+				Program.Main();
 				return;
 		}
 	}
